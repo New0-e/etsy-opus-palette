@@ -32,9 +32,9 @@ export function AppSidebar() {
       <SidebarContent className="pt-4">
         <div className="px-4 pb-4 flex items-center gap-2">
           <SidebarTrigger />
-          <span className="font-display font-bold text-lg text-foreground group-data-[collapsible=icon]:hidden">
+          <NavLink to="/" className="font-display font-bold text-lg text-foreground hover:text-primary transition-colors group-data-[collapsible=icon]:hidden">
             Etsy Tools
-          </span>
+          </NavLink>
         </div>
 
         <SidebarGroup>
