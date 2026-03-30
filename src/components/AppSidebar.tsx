@@ -1,6 +1,6 @@
 import {
   FileText, ImageDown, Camera, Tags, BarChart3, UserSearch,
-  ExternalLink, FolderOpen, Home
+  ExternalLink, FolderOpen
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 
 const mainTools = [
-  { title: "Accueil", url: "/", icon: Home },
   { title: "Création Fiche", url: "/creation-fiche", icon: FileText },
   { title: "Téléchargement Images", url: "/download-images", icon: ImageDown },
   { title: "Génération Images", url: "/generation-photos", icon: Camera },
@@ -33,9 +32,9 @@ export function AppSidebar() {
       <SidebarContent className="pt-4">
         <div className="px-4 pb-4 flex items-center gap-2">
           <SidebarTrigger />
-          <span className="font-display font-bold text-lg text-foreground group-data-[collapsible=icon]:hidden">
+          <NavLink to="/" className="font-display font-bold text-lg text-foreground hover:text-primary transition-colors group-data-[collapsible=icon]:hidden">
             Etsy Tools
-          </span>
+          </NavLink>
         </div>
 
         <SidebarGroup>
