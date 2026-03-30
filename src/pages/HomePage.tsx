@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 const tools = [
   { title: "Création Fiche Produit", desc: "Créer une nouvelle fiche produit Etsy", icon: FileText, url: "/creation-fiche", color: "text-primary" },
   { title: "Téléchargement Images", desc: "Télécharger les images scrapées", icon: ImageDown, url: "/download-images", color: "text-success" },
-  { title: "Génération Photos", desc: "Générer des photos produit avec IA", icon: Camera, url: "/generation-photos", color: "text-warning" },
+  { title: "Génération Images", desc: "Générer des images produit avec IA", icon: Camera, url: "/generation-photos", color: "text-warning" },
 ];
 
 const sheets = [

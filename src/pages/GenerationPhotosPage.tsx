@@ -151,7 +151,7 @@ export default function GenerationPhotosPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="font-display text-2xl font-bold mb-6">Génération Photos Produit</h1>
+      <h1 className="font-display text-2xl font-bold mb-6">Génération Images Produit</h1>
       <div className="tool-card space-y-6">
         {/* Mode Toggle */}
         <div className="flex items-center gap-3">
@@ -167,17 +167,19 @@ export default function GenerationPhotosPage() {
         <DropZone label="Image modèle (optionnel)" files={modelImages} onFiles={setModelImages} />
 
         {mode === "manuel" && (
-          <div className="space-y-2">
-            <Label>Catégorie</Label>
-            <Input value={categorie} onChange={(e) => setCategorie(e.target.value)} placeholder="Ex: Bijoux, Décoration..." />
-          </div>
-        )}
+          <>
+            <div className="space-y-2">
+              <Label>Catégorie</Label>
+              <Input value={categorie} onChange={(e) => setCategorie(e.target.value)} placeholder="Ex: Bijoux, Décoration..." />
+            </div>
 
-        {/* Selections */}
-        <MultiSelect label="Environnement" options={environments} selected={selectedEnv} onChange={setSelectedEnv} customValue={customEnv} onCustomChange={setCustomEnv} />
-        <MultiSelect label="Éclairage" options={eclairages} selected={selectedEcl} onChange={setSelectedEcl} customValue={customEcl} onCustomChange={setCustomEcl} />
-        <MultiSelect label="Angle de vue" options={angles} selected={selectedAngle} onChange={setSelectedAngle} customValue={customAngle} onCustomChange={setCustomAngle} />
-        <MultiSelect label="Accessoires" options={accessoires} selected={selectedAcc} onChange={setSelectedAcc} customValue={customAcc} onCustomChange={setCustomAcc} />
+            {/* Selections */}
+            <MultiSelect label="Environnement" options={environments} selected={selectedEnv} onChange={setSelectedEnv} customValue={customEnv} onCustomChange={setCustomEnv} />
+            <MultiSelect label="Éclairage" options={eclairages} selected={selectedEcl} onChange={setSelectedEcl} customValue={customEcl} onCustomChange={setCustomEcl} />
+            <MultiSelect label="Angle de vue" options={angles} selected={selectedAngle} onChange={setSelectedAngle} customValue={customAngle} onCustomChange={setCustomAngle} />
+            <MultiSelect label="Accessoires" options={accessoires} selected={selectedAcc} onChange={setSelectedAcc} customValue={customAcc} onCustomChange={setCustomAcc} />
+          </>
+        )}
 
         {/* Instructions */}
         <div className="space-y-2">
