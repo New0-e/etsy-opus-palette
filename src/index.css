@@ -79,7 +79,7 @@
     @apply border-primary bg-primary/10;
   }
   .glow-primary {
-    box-shadow: 0 0 20px hsl(28 100% 55% / 0.15);
+    box-shadow: 0 0 20px hsl(262 83% 58% / 0.15);
   }
 }
 
