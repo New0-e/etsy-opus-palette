@@ -64,6 +64,8 @@ function shortUrl(val: string): string {
   }
 }
 
+// ── Cell components ───────────────────────────────────────────────────────────
+
 function UrlCell({ val }: { val: string }) {
   const [expanded, setExpanded] = useState(false);
   return (
@@ -103,26 +105,70 @@ function UrlCell({ val }: { val: string }) {
   );
 }
 
-async function fetchSheetName(spreadsheetId: string, gid: string, token: string): Promise<string | null> {
+function TextCell({
+  val,
+  canEdit,
+  onBlur,
+  saving,
+}: {
+  val: string;
+  canEdit: boolean;
+  onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
+  saving: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="flex items-center gap-1 min-w-0">
+      <div
+        contentEditable={canEdit}
+        suppressContentEditableWarning
+        onBlur={onBlur}
+        className={`outline-none flex-1 text-xs text-foreground ${expanded ? "break-words whitespace-pre-wrap" : "truncate"} ${canEdit ? "cursor-text" : ""}`}
+        title={!expanded ? val : undefined}
+      >
+        {val}
+      </div>
+      <div className="flex items-center gap-0.5 flex-shrink-0">
+        {val && (
+          <button
+            onClick={() => setExpanded(v => !v)}
+            className="text-muted-foreground hover:text-foreground p-0.5 rounded"
+            title={expanded ? "Réduire" : "Voir complet"}
+          >
+            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </button>
+        )}
+        {saving && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+      </div>
+    </div>
+  );
+}
+
+async function fetchSheetName(
+  spreadsheetId: string,
+  gid: string,
+  token: string
+): Promise<{ name: string | null; forbidden: boolean }> {
   try {
     const res = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets(properties(sheetId,title))`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    if (!res.ok) return null;
+    if (res.status === 403 || res.status === 401) return { name: null, forbidden: true };
+    if (!res.ok) return { name: null, forbidden: false };
     const data = await res.json();
     const sheet = data.sheets?.find((s: any) => String(s.properties.sheetId) === gid);
-    return sheet?.properties?.title ?? data.sheets?.[0]?.properties?.title ?? null;
+    const name = sheet?.properties?.title ?? data.sheets?.[0]?.properties?.title ?? null;
+    return { name, forbidden: false };
   } catch {
-    return null;
+    return { name: null, forbidden: false };
   }
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 const MIN_COL = 60;
-const DEFAULT_COL = 150;
-const URL_COL = 200;
+const DEFAULT_COL = 140;
 
 export function SheetsViewer({ url }: { url: string }) {
   const [rows, setRows] = useState<string[][] | null>(null);
@@ -131,8 +177,9 @@ export function SheetsViewer({ url }: { url: string }) {
   const [sheetName, setSheetName] = useState<string | null>(null);
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(null);
   const [canEdit, setCanEdit] = useState(false);
+  const [scopeError, setScopeError] = useState(false);
   const [colWidths, setColWidths] = useState<number[]>([]);
-  const [saving, setSaving] = useState<string | null>(null); // "row-col" key
+  const [saving, setSaving] = useState<string | null>(null);
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
 
   useEffect(() => {
@@ -143,7 +190,6 @@ export function SheetsViewer({ url }: { url: string }) {
     if (!sid) { setError("URL invalide"); setLoading(false); return; }
     setSpreadsheetId(sid);
 
-    // Fetch CSV + sheet metadata in parallel
     Promise.allSettled([
       fetch(
         `https://docs.google.com/spreadsheets/d/${sid}/export?format=csv&gid=${gid}`,
@@ -154,29 +200,30 @@ export function SheetsViewer({ url }: { url: string }) {
       if (csvResult.status === "fulfilled") {
         const parsed = parseCSV(csvResult.value);
         setRows(parsed);
-        // Auto column widths based on header length + content
         if (parsed[0]) {
-          const widths = parsed[0].map((h, i) => {
-            // Check if any cell in this col looks like a URL
-            const hasUrl = parsed.slice(1).some(r => isUrl(r[i] ?? ""));
-            if (hasUrl) return URL_COL;
-            return Math.max(MIN_COL, Math.min(300, (h.length + 4) * 8));
-          });
+          const widths = parsed[0].map((h) =>
+            Math.max(MIN_COL, Math.min(240, (h.length + 4) * 8))
+          );
           setColWidths(widths);
         }
       } else {
         setError(`Erreur ${csvResult.reason?.message ?? ""}`);
       }
-      if (metaResult.status === "fulfilled" && metaResult.value) {
-        setSheetName(metaResult.value);
-        setCanEdit(true);
+      if (metaResult.status === "fulfilled") {
+        const { name, forbidden } = metaResult.value;
+        if (name) {
+          setSheetName(name);
+          setCanEdit(true);
+        } else if (forbidden) {
+          setScopeError(true);
+        }
       }
       setLoading(false);
     });
   }, [url]);
 
   const handleCellBlur = useCallback(
-    async (e: React.FocusEvent<HTMLTableCellElement>, rowIdx: number, colIdx: number) => {
+    async (e: React.FocusEvent<HTMLDivElement>, rowIdx: number, colIdx: number) => {
       if (!canEdit || !spreadsheetId || !sheetName) return;
       const newValue = e.currentTarget.innerText;
       const original = rows![rowIdx + 1]?.[colIdx] ?? "";
@@ -266,6 +313,11 @@ export function SheetsViewer({ url }: { url: string }) {
             <Save className="h-3.5 w-3.5 text-green-400" />
             <span className="text-xs text-green-400">Édition activée — clique sur une cellule pour modifier</span>
           </>
+        ) : scopeError ? (
+          <>
+            <AlertCircle className="h-3.5 w-3.5 text-amber-400" />
+            <span className="text-xs text-amber-400">Permissions insuffisantes — déconnecte Drive et reconnecte pour activer l'édition</span>
+          </>
         ) : (
           <>
             <AlertCircle className="h-3.5 w-3.5 text-amber-400" />
@@ -282,7 +334,7 @@ export function SheetsViewer({ url }: { url: string }) {
               {allHeaders.map((h, i) => (
                 <th
                   key={i}
-                  className="relative text-left px-3 py-2 bg-secondary border border-border font-semibold text-muted-foreground whitespace-nowrap select-none"
+                  className="relative text-left px-2 py-2 bg-secondary border border-border font-semibold text-muted-foreground whitespace-nowrap select-none"
                   style={{ width: colWidths[i] ?? DEFAULT_COL, minWidth: MIN_COL }}
                 >
                   <span className="block truncate">{h}</span>
@@ -317,21 +369,15 @@ export function SheetsViewer({ url }: { url: string }) {
                   return (
                     <td
                       key={ci}
-                      className={`px-3 py-1.5 border border-border text-foreground relative ${canEdit ? "focus-within:bg-primary/5 focus-within:ring-1 focus-within:ring-primary" : ""}`}
+                      className={`px-2 py-1.5 border border-border relative ${canEdit ? "focus-within:bg-primary/5 focus-within:ring-1 focus-within:ring-inset focus-within:ring-primary" : ""}`}
                       style={{ width: colWidths[ci] ?? DEFAULT_COL }}
                     >
-                      <div
-                        contentEditable={canEdit}
-                        suppressContentEditableWarning
+                      <TextCell
+                        val={val}
+                        canEdit={canEdit}
                         onBlur={(e) => handleCellBlur(e, ri, ci)}
-                        className={`outline-none block truncate ${canEdit ? "cursor-text" : ""}`}
-                        title={val}
-                      >
-                        {val}
-                      </div>
-                      {isSaving && (
-                        <Loader2 className="h-3 w-3 animate-spin text-primary absolute right-1 top-1/2 -translate-y-1/2" />
-                      )}
+                        saving={isSaving}
+                      />
                     </td>
                   );
                 })}
