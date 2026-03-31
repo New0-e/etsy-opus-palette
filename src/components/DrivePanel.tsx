@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from "react";
 import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogIn, Loader2, ExternalLink, LogOut, FileText, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { driveStore } from "@/lib/driveStore";
 
 const CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string).trim();
 const SCOPE = "https://www.googleapis.com/auth/drive.readonly";
@@ -38,6 +40,7 @@ interface DriveItem {
   name: string;
   mimeType: string;
   webViewLink?: string;
+  thumbnailLink?: string;
 }
 
 function naturalSort(a: DriveItem, b: DriveItem): number {
@@ -51,7 +54,7 @@ function naturalSort(a: DriveItem, b: DriveItem): number {
 async function fetchItems(accessToken: string, parentId: string): Promise<DriveItem[]> {
   const q = `'${parentId}' in parents and trashed=false and (mimeType='${MIME_FOLDER}' or mimeType='${MIME_DOC}' or mimeType contains 'image/')`;
   const res = await fetch(
-    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,webViewLink)&pageSize=200`,
+    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,webViewLink,thumbnailLink)&pageSize=200`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );
   if (res.status === 401) throw new Error("token_expired");
@@ -71,6 +74,9 @@ export function DrivePanel() {
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Keep driveStore in sync with the token
+  useEffect(() => { driveStore.setToken(accessToken); }, [accessToken]);
 
   const loadRootItems = useCallback(async (token: string) => {
     setIsInitialLoading(true);
@@ -253,12 +259,19 @@ function DriveItemRow({
 
   if (!isFolder) {
     const isImage = item.mimeType.startsWith("image/");
-    return (
+
+    const row = (
       <a
         href={item.webViewLink ?? "#"}
         target="_blank"
         rel="noreferrer"
-        className="flex items-center gap-2 w-full py-1.5 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors"
+        draggable={isImage}
+        onDragStart={isImage ? (e) => {
+          e.dataTransfer.setData("drive-item-id", item.id);
+          e.dataTransfer.setData("drive-item-name", item.name);
+          e.dataTransfer.effectAllowed = "copy";
+        } : undefined}
+        className="flex items-center gap-2 w-full py-1.5 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors cursor-grab active:cursor-grabbing"
         style={{ paddingLeft: pl, paddingRight: "8px" }}
       >
         <span className="w-3 flex-shrink-0" />
@@ -268,6 +281,20 @@ function DriveItemRow({
         <span className="truncate">{item.name}</span>
       </a>
     );
+
+    if (isImage && item.thumbnailLink) {
+      return (
+        <HoverCard openDelay={400} closeDelay={100}>
+          <HoverCardTrigger asChild>{row}</HoverCardTrigger>
+          <HoverCardContent side="left" className="w-48 p-1 border-border bg-popover">
+            <img src={item.thumbnailLink} alt={item.name} className="rounded w-full object-cover" />
+            <p className="text-xs text-muted-foreground mt-1 truncate px-1">{item.name}</p>
+          </HoverCardContent>
+        </HoverCard>
+      );
+    }
+
+    return row;
   }
 
   return (

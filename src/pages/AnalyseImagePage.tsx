@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Upload, Tags } from "lucide-react";
 import { toast } from "sonner";
+import { driveStore } from "@/lib/driveStore";
 
 export default function AnalyseImagePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -11,9 +12,19 @@ export default function AnalyseImagePage() {
   const [result, setResult] = useState("");
   const [dragOver, setDragOver] = useState(false);
 
-  const onDrop = useCallback((e: React.DragEvent) => {
+  const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
+
+    // Handle Drive image drop
+    const driveId = e.dataTransfer.getData("drive-item-id");
+    const driveName = e.dataTransfer.getData("drive-item-name");
+    if (driveId) {
+      const f = await driveStore.fetchAsFile(driveId, driveName);
+      if (f) { setFile(f); setPreview(URL.createObjectURL(f)); }
+      return;
+    }
+
     const f = e.dataTransfer.files[0];
     if (f?.type.startsWith("image/")) {
       setFile(f);

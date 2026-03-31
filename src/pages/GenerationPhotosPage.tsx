@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,9 +33,18 @@ const accessoires = [
 function DropZone({ label, files, onFiles }: { label: string; files: File[]; onFiles: (f: File[]) => void }) {
   const [dragOver, setDragOver] = useState(false);
 
-  const onDrop = useCallback((e: React.DragEvent) => {
+  const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
+
+    const driveId = e.dataTransfer.getData("drive-item-id");
+    const driveName = e.dataTransfer.getData("drive-item-name");
+    if (driveId) {
+      const f = await driveStore.fetchAsFile(driveId, driveName);
+      if (f) onFiles([...files, f]);
+      return;
+    }
+
     const dropped = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
     onFiles([...files, ...dropped]);
   }, [files, onFiles]);
