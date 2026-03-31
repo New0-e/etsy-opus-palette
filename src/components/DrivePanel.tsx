@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogIn, Loader2, ExternalLink, LogOut, FileText, Image } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogIn, Loader2, ExternalLink, LogOut, FileText, Image, Table2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
@@ -34,6 +35,7 @@ function redirectUri(): string {
 
 const MIME_FOLDER = "application/vnd.google-apps.folder";
 const MIME_DOC = "application/vnd.google-apps.document";
+const MIME_SHEET = "application/vnd.google-apps.spreadsheet";
 
 interface DriveItem {
   id: string;
@@ -52,7 +54,7 @@ function naturalSort(a: DriveItem, b: DriveItem): number {
 }
 
 async function fetchItems(accessToken: string, parentId: string): Promise<DriveItem[]> {
-  const q = `'${parentId}' in parents and trashed=false and (mimeType='${MIME_FOLDER}' or mimeType='${MIME_DOC}' or mimeType contains 'image/')`;
+  const q = `'${parentId}' in parents and trashed=false and (mimeType='${MIME_FOLDER}' or mimeType='${MIME_DOC}' or mimeType='${MIME_SHEET}' or mimeType contains 'image/')`;
   const res = await fetch(
     `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,webViewLink,thumbnailLink)&pageSize=200`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
@@ -259,6 +261,7 @@ function DriveItemRow({
   onToggle: (item: DriveItem) => void;
   depth: number;
 }) {
+  const navigate = useNavigate();
   const isFolder = item.mimeType === MIME_FOLDER;
   const isExpanded = expandedIds.has(item.id);
   const isLoading = loadingIds.has(item.id);
@@ -267,25 +270,39 @@ function DriveItemRow({
 
   if (!isFolder) {
     const isImage = item.mimeType.startsWith("image/");
+    const isSheet = item.mimeType === MIME_SHEET;
+    const isViewable = item.mimeType === MIME_DOC || isSheet;
+
+    const handleClick = isViewable
+      ? (e: React.MouseEvent) => {
+          e.preventDefault();
+          navigate(`/viewer?url=${encodeURIComponent(item.webViewLink ?? "")}&title=${encodeURIComponent(item.name)}`);
+        }
+      : undefined;
+
+    const icon = isImage
+      ? <Image className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+      : isSheet
+        ? <Table2 className="h-4 w-4 text-green-400 flex-shrink-0" />
+        : <FileText className="h-4 w-4 text-blue-400 flex-shrink-0" />;
 
     const row = (
       <a
         href={item.webViewLink ?? "#"}
-        target="_blank"
+        target={isViewable ? "_self" : "_blank"}
         rel="noreferrer"
+        onClick={handleClick}
         draggable={isImage}
         onDragStart={isImage ? (e) => {
           e.dataTransfer.setData("drive-item-id", item.id);
           e.dataTransfer.setData("drive-item-name", item.name);
           e.dataTransfer.effectAllowed = "copy";
         } : undefined}
-        className="flex items-center gap-2 w-full py-1.5 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors cursor-grab active:cursor-grabbing"
+        className={`flex items-center gap-2 w-full py-1.5 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors ${isImage ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
         style={{ paddingLeft: pl, paddingRight: "8px" }}
       >
         <span className="w-3 flex-shrink-0" />
-        {isImage
-          ? <Image className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          : <FileText className="h-4 w-4 text-blue-400 flex-shrink-0" />}
+        {icon}
         <span className="truncate">{item.name}</span>
       </a>
     );

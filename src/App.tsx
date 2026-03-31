@@ -11,6 +11,7 @@ import GenerationPhotosPage from "@/pages/GenerationPhotosPage";
 import AnalyseImagePage from "@/pages/AnalyseImagePage";
 import AnalyseTagsPage from "@/pages/AnalyseTagsPage";
 import TagsConcurrentPage from "@/pages/TagsConcurrentPage";
+import ViewerPage from "@/pages/ViewerPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/analyse-image" element={<AnalyseImagePage />} />
             <Route path="/analyse-tags" element={<AnalyseTagsPage />} />
             <Route path="/tags-concurrent" element={<TagsConcurrentPage />} />
+            <Route path="/viewer" element={<ViewerPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

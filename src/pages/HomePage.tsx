@@ -86,7 +86,7 @@ export default function HomePage() {
           {sheets.map((sheet) => (
             <button
               key={sheet.title}
-              onClick={() => window.open(sheet.url, "_blank")}
+              onClick={() => navigate(`/viewer?url=${encodeURIComponent(sheet.url)}&title=${encodeURIComponent(sheet.title)}`)}
               className="tool-card text-left group flex items-center gap-4"
             >
               <sheet.icon className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
