@@ -6,7 +6,7 @@ import { Outlet } from "react-router-dom";
 export default function DashboardLayout() {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
+      <div className="h-screen flex w-full overflow-hidden">
         <AppSidebar />
         <main className="flex-1 overflow-auto p-6">
           <Outlet />

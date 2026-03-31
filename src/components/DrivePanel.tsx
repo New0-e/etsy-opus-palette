@@ -60,7 +60,15 @@ async function fetchItems(accessToken: string, parentId: string): Promise<DriveI
   if (res.status === 401) throw new Error("token_expired");
   if (!res.ok) throw new Error(`Drive API error: ${res.status}`);
   const data = await res.json();
-  return ((data.files ?? []) as DriveItem[]).sort(naturalSort);
+  const items = ((data.files ?? []) as DriveItem[]).sort(naturalSort);
+  // Précharger les thumbnails en arrière-plan pour un affichage instantané au hover
+  items.forEach((item) => {
+    if (item.thumbnailLink) {
+      const img = new window.Image();
+      img.src = item.thumbnailLink;
+    }
+  });
+  return items;
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -178,7 +186,7 @@ export function DrivePanel() {
   }, [accessToken, childrenMap, expandedIds]);
 
   return (
-    <div className={`border-l border-border bg-drive transition-all duration-300 flex flex-col ${isOpen ? "w-64" : "w-10"}`}>
+    <div className={`border-l border-border bg-drive transition-all duration-300 flex flex-col h-full ${isOpen ? "w-64" : "w-10"}`}>
       <div className="p-2 flex items-center justify-between border-b border-border">
         {isOpen && (
           <div className="flex items-center gap-1 px-2">
@@ -284,7 +292,7 @@ function DriveItemRow({
 
     if (isImage && item.thumbnailLink) {
       return (
-        <HoverCard openDelay={400} closeDelay={100}>
+        <HoverCard openDelay={100} closeDelay={50}>
           <HoverCardTrigger asChild>{row}</HoverCardTrigger>
           <HoverCardContent side="left" className="w-48 p-1 border-border bg-popover">
             <img src={item.thumbnailLink} alt={item.name} className="rounded w-full object-cover" />
