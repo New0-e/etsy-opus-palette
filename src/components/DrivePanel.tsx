@@ -3,7 +3,7 @@ import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogI
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
+const CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string).trim();
 const SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 const TOKEN_KEY = "drive_access_token";
 const VERIFIER_KEY = "drive_pkce_verifier";
