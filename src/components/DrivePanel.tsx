@@ -7,7 +7,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { driveStore } from "@/lib/driveStore";
 
 const CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string).trim();
-const SCOPE = "https://www.googleapis.com/auth/drive.readonly";
+const SCOPE = "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets";
 const TOKEN_KEY = "drive_access_token";
 const VERIFIER_KEY = "drive_pkce_verifier";
 
