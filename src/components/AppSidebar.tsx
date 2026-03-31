@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 const mainTools = [
-  { title: "Création Fiche", url: "/creation-fiche", icon: FileText },
+  { title: "Génération Fiches Produits", url: "/creation-fiche", icon: FileText },
   { title: "Téléchargement Images", url: "/download-images", icon: ImageDown },
   { title: "Génération Images", url: "/generation-photos", icon: Camera },
 ];

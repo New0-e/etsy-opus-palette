@@ -52,7 +52,7 @@ export default function CreationFichePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="font-display text-2xl font-bold mb-6">Création Fiche Produit</h1>
+      <h1 className="font-display text-2xl font-bold mb-6">Génération Fiches Produits</h1>
       <form onSubmit={handleSubmit} className="tool-card space-y-5">
         <div className="space-y-2">
           <Label>Lien Etsy</Label>

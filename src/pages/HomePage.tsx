@@ -1,4 +1,4 @@
-import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus } from "lucide-react";
+import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus, Tags, BarChart3, UserSearch } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -6,9 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
 const tools = [
-  { title: "Création Fiche Produit", desc: "Créer une nouvelle fiche produit Etsy", icon: FileText, url: "/creation-fiche", color: "text-primary" },
+  { title: "Génération Fiches Produits", desc: "Créer une nouvelle fiche produit Etsy", icon: FileText, url: "/creation-fiche", color: "text-primary" },
   { title: "Téléchargement Images", desc: "Télécharger les images scrapées", icon: ImageDown, url: "/download-images", color: "text-success" },
   { title: "Génération Images", desc: "Générer des images produit avec IA", icon: Camera, url: "/generation-photos", color: "text-warning" },
+];
+
+const secondaryTools = [
+  { title: "Analyse Image → Tags", desc: "Extraire les tags depuis une image", icon: Tags, url: "/analyse-image", color: "text-blue-400" },
+  { title: "Analyse Tags", desc: "Analyser et optimiser vos tags", icon: BarChart3, url: "/analyse-tags", color: "text-purple-400" },
+  { title: "Tags Concurrent", desc: "Espionner les tags des concurrents", icon: UserSearch, url: "/tags-concurrent", color: "text-pink-400" },
 ];
 
 const sheets = [
@@ -42,6 +48,24 @@ export default function HomePage() {
         <h2 className="font-display text-lg font-semibold mb-4">Outils Principaux</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {tools.map((tool) => (
+            <button
+              key={tool.url}
+              onClick={() => navigate(tool.url)}
+              className="tool-card text-left group hover:glow-primary"
+            >
+              <tool.icon className={`h-8 w-8 ${tool.color} mb-3`} />
+              <h3 className="font-display font-semibold text-foreground">{tool.title}</h3>
+              <p className="text-sm text-muted-foreground mt-1">{tool.desc}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Secondary Tools */}
+      <section>
+        <h2 className="font-display text-lg font-semibold mb-4">Outils Secondaires</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {secondaryTools.map((tool) => (
             <button
               key={tool.url}
               onClick={() => navigate(tool.url)}
