@@ -4,10 +4,14 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 function toEmbedUrl(url: string): string {
-  // Convert /edit... or /htmlview... to /preview for Google Docs/Sheets/Slides
-  return url
-    .replace(/\/edit[^/]*$/, "/preview")
-    .replace(/\/htmlview[^/]*$/, "/preview");
+  // Garde le mode édition mais retire les fragments (#gid=...) qui causent des problèmes
+  // et ajoute rm=minimal pour une interface allégée
+  const base = url.replace(/#.*$/, "");
+  if (base.includes("/edit")) {
+    const sep = base.includes("?") ? "&" : "?";
+    return `${base}${sep}rm=minimal`;
+  }
+  return base;
 }
 
 export default function ViewerPage() {
