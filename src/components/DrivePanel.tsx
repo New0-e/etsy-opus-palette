@@ -1,8 +1,30 @@
-import { useState, useCallback } from "react";
-import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogIn, Loader2, ExternalLink } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogIn, Loader2, ExternalLink, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useGoogleLogin } from "@react-oauth/google";
+
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
+const SCOPE = "https://www.googleapis.com/auth/drive.readonly";
+const TOKEN_KEY = "drive_access_token";
+
+function buildAuthUrl(): string {
+  const redirectUri = window.location.origin + window.location.pathname;
+  const params = new URLSearchParams({
+    client_id: CLIENT_ID,
+    redirect_uri: redirectUri,
+    response_type: "token",
+    scope: SCOPE,
+    prompt: "select_account",
+  });
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+}
+
+function parseTokenFromHash(): string | null {
+  const hash = window.location.hash.slice(1);
+  if (!hash) return null;
+  const params = new URLSearchParams(hash);
+  return params.get("access_token");
+}
 
 interface DriveFolder {
   id: string;
@@ -15,6 +37,7 @@ async function fetchFolders(accessToken: string, parentId: string): Promise<Driv
     `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)&orderBy=name&pageSize=100`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );
+  if (res.status === 401) throw new Error("token_expired");
   if (!res.ok) throw new Error(`Drive API error: ${res.status}`);
   const data = await res.json();
   return (data.files ?? []) as DriveFolder[];
@@ -22,7 +45,7 @@ async function fetchFolders(accessToken: string, parentId: string): Promise<Driv
 
 export function DrivePanel() {
   const [isOpen, setIsOpen] = useState(true);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() => sessionStorage.getItem(TOKEN_KEY));
   const [rootFolders, setRootFolders] = useState<DriveFolder[]>([]);
   const [childrenMap, setChildrenMap] = useState<Record<string, DriveFolder[]>>({});
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -36,26 +59,47 @@ export function DrivePanel() {
     try {
       const folders = await fetchFolders(token, "root");
       setRootFolders(folders);
-    } catch {
-      setError("Impossible de charger le Drive");
+    } catch (e) {
+      if ((e as Error).message === "token_expired") {
+        sessionStorage.removeItem(TOKEN_KEY);
+        setAccessToken(null);
+      } else {
+        setError("Impossible de charger le Drive");
+      }
     } finally {
       setIsInitialLoading(false);
     }
   }, []);
 
-  const login = useGoogleLogin({
-    flow: "implicit",
-    onSuccess: (tokenResponse) => {
-      const token = (tokenResponse as { access_token: string }).access_token;
+  // On mount: pick up token from URL hash after OAuth redirect
+  useEffect(() => {
+    const token = parseTokenFromHash();
+    if (token) {
+      sessionStorage.setItem(TOKEN_KEY, token);
       setAccessToken(token);
-      loadRootFolders(token);
-    },
-    onError: (err) => {
-      console.error("Google login error", err);
-      setError("Connexion échouée");
-    },
-    scope: "https://www.googleapis.com/auth/drive.readonly",
-  });
+      // Clean the hash from the URL without a page reload
+      window.history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
+  }, []);
+
+  // Load folders when token is set
+  useEffect(() => {
+    if (accessToken && rootFolders.length === 0) {
+      loadRootFolders(accessToken);
+    }
+  }, [accessToken, loadRootFolders, rootFolders.length]);
+
+  const handleLogin = () => {
+    window.location.href = buildAuthUrl();
+  };
+
+  const handleLogout = () => {
+    sessionStorage.removeItem(TOKEN_KEY);
+    setAccessToken(null);
+    setRootFolders([]);
+    setChildrenMap({});
+    setExpandedIds(new Set());
+  };
 
   const toggleFolder = useCallback(async (folder: DriveFolder) => {
     const { id } = folder;
@@ -85,14 +129,14 @@ export function DrivePanel() {
           <div className="flex items-center gap-1 px-2">
             <span className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider">Drive</span>
             {accessToken && (
-              <a
-                href="https://drive.google.com"
-                target="_blank"
-                rel="noreferrer"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <ExternalLink className="h-3 w-3" />
-              </a>
+              <>
+                <a href="https://drive.google.com" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground">
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+                <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground ml-1" title="Déconnecter">
+                  <LogOut className="h-3 w-3" />
+                </button>
+              </>
             )}
           </div>
         )}
@@ -109,12 +153,7 @@ export function DrivePanel() {
                 Connecte ton Google Drive pour voir tes dossiers
               </p>
               {error && <p className="text-xs text-destructive text-center">{error}</p>}
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full gap-2 text-xs"
-                onClick={() => login()}
-              >
+              <Button size="sm" variant="outline" className="w-full gap-2 text-xs" onClick={handleLogin}>
                 <LogIn className="h-3.5 w-3.5" />
                 Connecter Drive
               </Button>
@@ -136,7 +175,7 @@ export function DrivePanel() {
                   depth={0}
                 />
               ))}
-              {rootFolders.length === 0 && (
+              {rootFolders.length === 0 && !isInitialLoading && (
                 <p className="text-xs text-muted-foreground text-center py-4">Aucun dossier trouvé</p>
               )}
             </>
@@ -176,9 +215,7 @@ function FolderItem({
         {isLoading ? (
           <Loader2 className="h-3 w-3 animate-spin flex-shrink-0" />
         ) : (
-          <ChevronRight
-            className={`h-3 w-3 transition-transform flex-shrink-0 ${isExpanded ? "rotate-90" : ""}`}
-          />
+          <ChevronRight className={`h-3 w-3 transition-transform flex-shrink-0 ${isExpanded ? "rotate-90" : ""}`} />
         )}
         {isExpanded ? (
           <FolderOpen className="h-4 w-4 text-primary flex-shrink-0" />
@@ -202,10 +239,7 @@ function FolderItem({
             />
           ))}
           {children.length === 0 && (
-            <p
-              className="text-xs text-muted-foreground py-1"
-              style={{ paddingLeft: `${20 + depth * 12}px` }}
-            >
+            <p className="text-xs text-muted-foreground py-1" style={{ paddingLeft: `${20 + depth * 12}px` }}>
               Dossier vide
             </p>
           )}
