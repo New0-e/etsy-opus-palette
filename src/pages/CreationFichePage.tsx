@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,11 +6,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
-
-const boutiques = ["Boutique 1", "Boutique 2", "Boutique 3"];
+import { driveStore, type DriveFolder } from "@/lib/driveStore";
 
 export default function CreationFichePage() {
   const [loading, setLoading] = useState(false);
+  const [boutiques, setBoutiques] = useState<DriveFolder[]>([]);
+
+  useEffect(() => {
+    driveStore.fetchRootFolders().then(setBoutiques);
+  }, []);
+
   const [form, setForm] = useState({
     etsy_lien: "",
     lien_ali: "",
@@ -62,15 +67,20 @@ export default function CreationFichePage() {
           <Select value={form.boutique_nom} onValueChange={(v) => update("boutique_nom", v)}>
             <SelectTrigger><SelectValue placeholder="Sélectionner une boutique" /></SelectTrigger>
             <SelectContent>
+              {boutiques.length === 0 && (
+                <SelectItem value="__none" disabled>
+                  {driveStore.getToken() ? "Aucun dossier trouvé" : "Connecte Drive pour voir les boutiques"}
+                </SelectItem>
+              )}
               {boutiques.map((b) => (
-                <SelectItem key={b} value={b}>{b}</SelectItem>
+                <SelectItem key={b.id} value={b.name}>{b.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
           <Label>Niche (Direction du titre)</Label>
-          <Input placeholder="Ex: Bijoux minimalistes" value={form.categorie} onChange={(e) => update("categorie", e.target.value)} />
+          <Input value={form.categorie} onChange={(e) => update("categorie", e.target.value)} />
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
