@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogIn, Loader2, ExternalLink, LogOut } from "lucide-react";
+import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogIn, Loader2, ExternalLink, LogOut, FileText, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -30,21 +30,34 @@ function redirectUri(): string {
 
 // ── Drive API ─────────────────────────────────────────────────────────────────
 
-interface DriveFolder {
+const MIME_FOLDER = "application/vnd.google-apps.folder";
+const MIME_DOC = "application/vnd.google-apps.document";
+
+interface DriveItem {
   id: string;
   name: string;
+  mimeType: string;
+  webViewLink?: string;
 }
 
-async function fetchFolders(accessToken: string, parentId: string): Promise<DriveFolder[]> {
-  const query = `'${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+function naturalSort(a: DriveItem, b: DriveItem): number {
+  // Folders first, then files
+  const aIsFolder = a.mimeType === MIME_FOLDER;
+  const bIsFolder = b.mimeType === MIME_FOLDER;
+  if (aIsFolder !== bIsFolder) return aIsFolder ? -1 : 1;
+  return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+}
+
+async function fetchItems(accessToken: string, parentId: string): Promise<DriveItem[]> {
+  const q = `'${parentId}' in parents and trashed=false and (mimeType='${MIME_FOLDER}' or mimeType='${MIME_DOC}' or mimeType contains 'image/')`;
   const res = await fetch(
-    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)&orderBy=name&pageSize=100`,
+    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,webViewLink)&pageSize=200`,
     { headers: { Authorization: `Bearer ${accessToken}` } }
   );
   if (res.status === 401) throw new Error("token_expired");
   if (!res.ok) throw new Error(`Drive API error: ${res.status}`);
   const data = await res.json();
-  return (data.files ?? []) as DriveFolder[];
+  return ((data.files ?? []) as DriveItem[]).sort(naturalSort);
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -52,19 +65,19 @@ async function fetchFolders(accessToken: string, parentId: string): Promise<Driv
 export function DrivePanel() {
   const [isOpen, setIsOpen] = useState(true);
   const [accessToken, setAccessToken] = useState<string | null>(() => sessionStorage.getItem(TOKEN_KEY));
-  const [rootFolders, setRootFolders] = useState<DriveFolder[]>([]);
-  const [childrenMap, setChildrenMap] = useState<Record<string, DriveFolder[]>>({});
+  const [rootItems, setRootItems] = useState<DriveItem[]>([]);
+  const [childrenMap, setChildrenMap] = useState<Record<string, DriveItem[]>>({});
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadRootFolders = useCallback(async (token: string) => {
+  const loadRootItems = useCallback(async (token: string) => {
     setIsInitialLoading(true);
     setError(null);
     try {
-      const folders = await fetchFolders(token, "root");
-      setRootFolders(folders);
+      const items = await fetchItems(token, "root");
+      setRootItems(items);
     } catch (e) {
       if ((e as Error).message === "token_expired") {
         sessionStorage.removeItem(TOKEN_KEY);
@@ -85,7 +98,6 @@ export function DrivePanel() {
     const verifier = sessionStorage.getItem(VERIFIER_KEY);
     if (!code || !verifier) return;
 
-    // Clean URL immediately
     window.history.replaceState(null, "", window.location.pathname);
     sessionStorage.removeItem(VERIFIER_KEY);
 
@@ -100,20 +112,20 @@ export function DrivePanel() {
         if (data.error) throw new Error(data.error);
         sessionStorage.setItem(TOKEN_KEY, data.access_token);
         setAccessToken(data.access_token);
-        loadRootFolders(data.access_token);
+        loadRootItems(data.access_token);
       })
       .catch((e) => {
         setError("Connexion échouée : " + (e as Error).message);
         setIsInitialLoading(false);
       });
-  }, [loadRootFolders]);
+  }, [loadRootItems]);
 
-  // Load folders when token already stored
+  // Load items when token already stored
   useEffect(() => {
-    if (accessToken && rootFolders.length === 0) {
-      loadRootFolders(accessToken);
+    if (accessToken && rootItems.length === 0) {
+      loadRootItems(accessToken);
     }
-  }, [accessToken, loadRootFolders, rootFolders.length]);
+  }, [accessToken, loadRootItems, rootItems.length]);
 
   const handleLogin = async () => {
     const verifier = generateVerifier();
@@ -136,14 +148,14 @@ export function DrivePanel() {
   const handleLogout = () => {
     sessionStorage.removeItem(TOKEN_KEY);
     setAccessToken(null);
-    setRootFolders([]);
+    setRootItems([]);
     setChildrenMap({});
     setExpandedIds(new Set());
     setError(null);
   };
 
-  const toggleFolder = useCallback(async (folder: DriveFolder) => {
-    const { id } = folder;
+  const toggleFolder = useCallback(async (item: DriveItem) => {
+    const { id } = item;
     if (expandedIds.has(id)) {
       setExpandedIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
       return;
@@ -152,7 +164,7 @@ export function DrivePanel() {
     if (childrenMap[id]) return;
     setLoadingIds((prev) => new Set([...prev, id]));
     try {
-      const children = await fetchFolders(accessToken!, id);
+      const children = await fetchItems(accessToken!, id);
       setChildrenMap((prev) => ({ ...prev, [id]: children }));
     } finally {
       setLoadingIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
@@ -201,10 +213,10 @@ export function DrivePanel() {
             </div>
           ) : (
             <>
-              {rootFolders.map((folder) => (
-                <FolderItem
-                  key={folder.id}
-                  folder={folder}
+              {rootItems.map((item) => (
+                <DriveItemRow
+                  key={item.id}
+                  item={item}
                   expandedIds={expandedIds}
                   loadingIds={loadingIds}
                   childrenMap={childrenMap}
@@ -212,8 +224,8 @@ export function DrivePanel() {
                   depth={0}
                 />
               ))}
-              {rootFolders.length === 0 && (
-                <p className="text-xs text-muted-foreground text-center py-4">Aucun dossier trouvé</p>
+              {rootItems.length === 0 && (
+                <p className="text-xs text-muted-foreground text-center py-4">Aucun élément trouvé</p>
               )}
             </>
           )}
@@ -223,39 +235,62 @@ export function DrivePanel() {
   );
 }
 
-function FolderItem({
-  folder, expandedIds, loadingIds, childrenMap, onToggle, depth,
+function DriveItemRow({
+  item, expandedIds, loadingIds, childrenMap, onToggle, depth,
 }: {
-  folder: DriveFolder;
+  item: DriveItem;
   expandedIds: Set<string>;
   loadingIds: Set<string>;
-  childrenMap: Record<string, DriveFolder[]>;
-  onToggle: (folder: DriveFolder) => void;
+  childrenMap: Record<string, DriveItem[]>;
+  onToggle: (item: DriveItem) => void;
   depth: number;
 }) {
-  const isExpanded = expandedIds.has(folder.id);
-  const isLoading = loadingIds.has(folder.id);
-  const children = childrenMap[folder.id];
+  const isFolder = item.mimeType === MIME_FOLDER;
+  const isExpanded = expandedIds.has(item.id);
+  const isLoading = loadingIds.has(item.id);
+  const children = childrenMap[item.id];
+  const pl = `${8 + depth * 12}px`;
+
+  if (!isFolder) {
+    const isImage = item.mimeType.startsWith("image/");
+    return (
+      <a
+        href={item.webViewLink ?? "#"}
+        target="_blank"
+        rel="noreferrer"
+        className="flex items-center gap-2 w-full py-1.5 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors"
+        style={{ paddingLeft: pl, paddingRight: "8px" }}
+      >
+        <span className="w-3 flex-shrink-0" />
+        {isImage
+          ? <Image className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+          : <FileText className="h-4 w-4 text-blue-400 flex-shrink-0" />}
+        <span className="truncate">{item.name}</span>
+      </a>
+    );
+  }
 
   return (
     <div>
       <button
-        onClick={() => onToggle(folder)}
+        onClick={() => onToggle(item)}
         className="flex items-center gap-2 w-full py-1.5 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors"
-        style={{ paddingLeft: `${8 + depth * 12}px`, paddingRight: "8px" }}
+        style={{ paddingLeft: pl, paddingRight: "8px" }}
       >
         {isLoading ? (
           <Loader2 className="h-3 w-3 animate-spin flex-shrink-0" />
         ) : (
           <ChevronRight className={`h-3 w-3 transition-transform flex-shrink-0 ${isExpanded ? "rotate-90" : ""}`} />
         )}
-        {isExpanded ? <FolderOpen className="h-4 w-4 text-primary flex-shrink-0" /> : <Folder className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
-        <span className="truncate text-left">{folder.name}</span>
+        {isExpanded
+          ? <FolderOpen className="h-4 w-4 text-primary flex-shrink-0" />
+          : <Folder className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+        <span className="truncate text-left">{item.name}</span>
       </button>
       {isExpanded && children && (
         <div>
           {children.map((child) => (
-            <FolderItem key={child.id} folder={child} expandedIds={expandedIds} loadingIds={loadingIds} childrenMap={childrenMap} onToggle={onToggle} depth={depth + 1} />
+            <DriveItemRow key={child.id} item={child} expandedIds={expandedIds} loadingIds={loadingIds} childrenMap={childrenMap} onToggle={onToggle} depth={depth + 1} />
           ))}
           {children.length === 0 && (
             <p className="text-xs text-muted-foreground py-1" style={{ paddingLeft: `${20 + depth * 12}px` }}>Dossier vide</p>
