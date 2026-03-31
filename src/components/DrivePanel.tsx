@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogIn, Loader2, ExternalLink, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,23 +7,36 @@ const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string;
 const SCOPE = "https://www.googleapis.com/auth/drive.readonly";
 const TOKEN_KEY = "drive_access_token";
 
-function buildAuthUrl(): string {
-  const redirectUri = window.location.origin + window.location.pathname;
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    redirect_uri: redirectUri,
-    response_type: "token",
-    scope: SCOPE,
-    prompt: "select_account",
-  });
-  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+// Google Identity Services types
+declare global {
+  interface Window {
+    google?: {
+      accounts: {
+        oauth2: {
+          initTokenClient: (config: {
+            client_id: string;
+            scope: string;
+            callback: (response: { access_token?: string; error?: string }) => void;
+          }) => { requestAccessToken: () => void };
+        };
+      };
+    };
+  }
 }
 
-function parseTokenFromHash(): string | null {
-  const hash = window.location.hash.slice(1);
-  if (!hash) return null;
-  const params = new URLSearchParams(hash);
-  return params.get("access_token");
+function loadGisScript(): Promise<void> {
+  return new Promise((resolve) => {
+    if (window.google?.accounts?.oauth2) { resolve(); return; }
+    const existing = document.getElementById("gis-script");
+    if (existing) { existing.addEventListener("load", () => resolve()); return; }
+    const script = document.createElement("script");
+    script.id = "gis-script";
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = () => resolve();
+    document.head.appendChild(script);
+  });
 }
 
 interface DriveFolder {
@@ -52,6 +65,7 @@ export function DrivePanel() {
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const tokenClientRef = useRef<{ requestAccessToken: () => void } | null>(null);
 
   const loadRootFolders = useCallback(async (token: string) => {
     setIsInitialLoading(true);
@@ -63,6 +77,7 @@ export function DrivePanel() {
       if ((e as Error).message === "token_expired") {
         sessionStorage.removeItem(TOKEN_KEY);
         setAccessToken(null);
+        setError("Session expirée, reconnecte-toi");
       } else {
         setError("Impossible de charger le Drive");
       }
@@ -71,18 +86,27 @@ export function DrivePanel() {
     }
   }, []);
 
-  // On mount: pick up token from URL hash after OAuth redirect
+  // Load GIS and init token client on mount
   useEffect(() => {
-    const token = parseTokenFromHash();
-    if (token) {
-      sessionStorage.setItem(TOKEN_KEY, token);
-      setAccessToken(token);
-      // Clean the hash from the URL without a page reload
-      window.history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
-  }, []);
+    loadGisScript().then(() => {
+      tokenClientRef.current = window.google!.accounts.oauth2.initTokenClient({
+        client_id: CLIENT_ID,
+        scope: SCOPE,
+        callback: (response) => {
+          if (response.error || !response.access_token) {
+            setError("Connexion échouée : " + (response.error ?? "token manquant"));
+            return;
+          }
+          sessionStorage.setItem(TOKEN_KEY, response.access_token);
+          setAccessToken(response.access_token);
+          setRootFolders([]);
+          loadRootFolders(response.access_token);
+        },
+      });
+    });
+  }, [loadRootFolders]);
 
-  // Load folders when token is set
+  // Load folders if token already in session
   useEffect(() => {
     if (accessToken && rootFolders.length === 0) {
       loadRootFolders(accessToken);
@@ -90,7 +114,11 @@ export function DrivePanel() {
   }, [accessToken, loadRootFolders, rootFolders.length]);
 
   const handleLogin = () => {
-    window.location.href = buildAuthUrl();
+    if (!tokenClientRef.current) {
+      setError("Bibliothèque Google non chargée, réessaie");
+      return;
+    }
+    tokenClientRef.current.requestAccessToken();
   };
 
   const handleLogout = () => {
@@ -99,6 +127,7 @@ export function DrivePanel() {
     setRootFolders([]);
     setChildrenMap({});
     setExpandedIds(new Set());
+    setError(null);
   };
 
   const toggleFolder = useCallback(async (folder: DriveFolder) => {
