@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Loader2, LogIn, Save, AlertCircle } from "lucide-react";
+import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -51,6 +51,56 @@ function parseCSV(text: string): string[][] {
 
 function isUrl(val: string) {
   return /^https?:\/\//.test(val.trim());
+}
+
+function shortUrl(val: string): string {
+  try {
+    const u = new URL(val.trim());
+    const host = u.hostname.replace(/^www\./, "");
+    const path = u.pathname.length > 1 ? u.pathname.slice(0, 18) + (u.pathname.length > 18 ? "…" : "") : "";
+    return host + path;
+  } catch {
+    return val.slice(0, 25) + (val.length > 25 ? "…" : "");
+  }
+}
+
+function UrlCell({ val }: { val: string }) {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="flex items-center gap-1 min-w-0">
+      {expanded ? (
+        <span className="text-xs text-muted-foreground break-all flex-1">{val}</span>
+      ) : (
+        <a
+          href={val}
+          target="_blank"
+          rel="noreferrer"
+          className="text-primary hover:underline flex items-center gap-1 min-w-0 flex-1"
+          title={val}
+          onClick={e => e.stopPropagation()}
+        >
+          <ExternalLink className="h-3 w-3 flex-shrink-0" />
+          <span className="truncate text-xs">{shortUrl(val)}</span>
+        </a>
+      )}
+      <div className="flex items-center gap-0.5 flex-shrink-0">
+        <button
+          onClick={() => { navigator.clipboard.writeText(val); toast.success("Copié !"); }}
+          className="text-muted-foreground hover:text-foreground p-0.5 rounded"
+          title="Copier"
+        >
+          <Copy className="h-3 w-3" />
+        </button>
+        <button
+          onClick={() => setExpanded(v => !v)}
+          className="text-muted-foreground hover:text-foreground p-0.5 rounded"
+          title={expanded ? "Réduire" : "Voir complet"}
+        >
+          {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 async function fetchSheetName(spreadsheetId: string, gid: string, token: string): Promise<string | null> {
@@ -256,18 +306,10 @@ export function SheetsViewer({ url }: { url: string }) {
                     return (
                       <td
                         key={ci}
-                        className="px-3 py-1.5 border border-border"
+                        className="px-2 py-1.5 border border-border"
                         style={{ width: colWidths[ci] ?? DEFAULT_COL }}
                       >
-                        <a
-                          href={val}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-primary hover:underline block truncate"
-                          title={val}
-                        >
-                          {val}
-                        </a>
+                        <UrlCell val={val} />
                       </td>
                     );
                   }
