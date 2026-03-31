@@ -44,11 +44,16 @@ export function DrivePanel() {
   }, []);
 
   const login = useGoogleLogin({
+    flow: "implicit",
     onSuccess: (tokenResponse) => {
-      setAccessToken(tokenResponse.access_token);
-      loadRootFolders(tokenResponse.access_token);
+      const token = (tokenResponse as { access_token: string }).access_token;
+      setAccessToken(token);
+      loadRootFolders(token);
     },
-    onError: () => setError("Connexion échouée"),
+    onError: (err) => {
+      console.error("Google login error", err);
+      setError("Connexion échouée");
+    },
     scope: "https://www.googleapis.com/auth/drive.readonly",
   });
 
