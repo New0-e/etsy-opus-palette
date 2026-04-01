@@ -22,7 +22,7 @@ const TABS = [
     id: "commande",
     title: "Suivi Commande",
     icon: Package,
-    url: "https://docs.google.com/spreadsheets/d/1exMlQ6dnfIGF7xsgUJskk57IRypVK29E/edit?gid=513162334#gid=513162334",
+    url: "https://docs.google.com/spreadsheets/d/1kM5fQ_3upj86gdlw0-1w9kUqavodpi6XOlM05sExe9g/edit?gid=495771845#gid=495771845",
     type: "sheet" as const,
   },
   {
