@@ -5,11 +5,11 @@ import { NotepadViewer } from "./NotepadViewer";
 
 const TABS = [
   {
-    id: "tableau",
-    title: "Tableau Contrôle",
-    icon: Table2,
-    url: "https://docs.google.com/spreadsheets/d/1u3_-YtIYqCnO2YEPfLh1cCsjd2CcRiT1cKileCLA0Ig/edit?gid=0#gid=0",
-    type: "sheet" as const,
+    id: "prompt",
+    title: "Bloc Note",
+    icon: FileText,
+    url: "https://docs.google.com/document/d/1h9iRZWZSMjeu8aec_cVFFl0K24oBVR1HDZqhcjWErko/edit?tab=t.0",
+    type: "doc" as const,
   },
   {
     id: "boutique",
@@ -26,11 +26,11 @@ const TABS = [
     type: "sheet" as const,
   },
   {
-    id: "prompt",
-    title: "Prompt",
-    icon: FileText,
-    url: "https://docs.google.com/document/d/1h9iRZWZSMjeu8aec_cVFFl0K24oBVR1HDZqhcjWErko/edit?tab=t.0",
-    type: "doc" as const,
+    id: "tableau",
+    title: "Tableau Contrôle",
+    icon: Table2,
+    url: "https://docs.google.com/spreadsheets/d/1u3_-YtIYqCnO2YEPfLh1cCsjd2CcRiT1cKileCLA0Ig/edit?gid=0#gid=0",
+    type: "sheet" as const,
   },
 ] as const;
 
