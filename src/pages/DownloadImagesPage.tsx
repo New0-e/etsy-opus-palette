@@ -82,8 +82,8 @@ function ImageThumb({ url, index, selected, onToggle }: {
 
       {preview && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
-          <div className="rounded-lg overflow-hidden border border-border shadow-xl bg-background">
-            <img src={url} alt="Aperçu" className="w-72 h-72 object-contain" />
+          <div className="rounded-lg overflow-hidden border border-border shadow-xl bg-background w-72">
+            <img src={url} alt="Aperçu" className="w-full h-72 object-contain" />
           </div>
         </div>
       )}
