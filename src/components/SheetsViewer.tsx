@@ -225,8 +225,8 @@ export function SheetsViewer({ url }: { url: string }) {
         const code = typeof result === "string" ? result : "?";
         if (code === "401") toast.error("Token expiré — déconnecte et reconnecte Drive");
         else if (code === "403") toast.error("Permission refusée (403) — vérifie les scopes OAuth");
-        else toast.error(`Échec sauvegarde (${code}) — voir console F12`);
-        e.currentTarget.innerText = original;
+        else toast.error("Fichier Excel non supporté — convertis en Google Sheets natif (Fichier → Enregistrer en tant que Google Sheets)");
+        if (e.currentTarget) e.currentTarget.innerText = original;
       }
     },
     [spreadsheetId, gidRef, rows]
