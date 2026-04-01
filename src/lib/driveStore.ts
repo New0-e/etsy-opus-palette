@@ -108,10 +108,80 @@ export const driveStore = {
   },
 
   // ── Google Docs API ────────────────────────────────────────────────────────
+
+  /** Fetches all tabs from a Google Doc. Returns null if documents scope missing. */
+  async fetchDocTabs(docId: string): Promise<{ id: string; title: string; text: string }[] | null> {
+    if (!_token) return null;
+    try {
+      const res = await fetch(
+        `https://docs.googleapis.com/v1/documents/${docId}?includeTabsContent=true`,
+        { headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (!res.ok) return null;
+      const doc = await res.json();
+      const tabs: any[] = doc.tabs ?? [];
+      if (tabs.length === 0) return null;
+      return tabs.map(tab => {
+        const id: string = tab.tabProperties?.tabId ?? "";
+        const title: string = tab.tabProperties?.title ?? "Onglet";
+        let text = "";
+        const content: any[] = tab.documentTab?.body?.content ?? [];
+        for (const el of content) {
+          if (el.paragraph) {
+            for (const pe of (el.paragraph.elements ?? [])) {
+              if (pe.textRun?.content) text += pe.textRun.content;
+            }
+          }
+        }
+        return { id, title, text };
+      });
+    } catch {
+      return null;
+    }
+  },
+
+  /** Replaces the content of a specific tab. Returns false if documents scope missing (403). */
+  async saveDocTab(docId: string, tabId: string, text: string): Promise<boolean | "no_scope"> {
+    if (!_token) return false;
+    try {
+      // Get current endIndex for this tab
+      const res = await fetch(
+        `https://docs.googleapis.com/v1/documents/${docId}?includeTabsContent=true`,
+        { headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (res.status === 401 || res.status === 403) return "no_scope";
+      if (!res.ok) return false;
+      const doc = await res.json();
+      const tab = (doc.tabs ?? []).find((t: any) => t.tabProperties?.tabId === tabId);
+      const endIndex: number = tab?.documentTab?.body?.content?.at(-1)?.endIndex ?? 1;
+
+      const requests: object[] = [];
+      if (endIndex > 1) {
+        requests.push({ deleteContentRange: { range: { startIndex: 1, endIndex: endIndex - 1, tabId } } });
+      }
+      if (text) {
+        requests.push({ insertText: { location: { index: 1, tabId }, text } });
+      }
+
+      const saveRes = await fetch(
+        `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ requests }),
+        }
+      );
+      if (saveRes.status === 401 || saveRes.status === 403) return "no_scope";
+      return saveRes.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  /** Legacy single-doc fetch via Drive export (no documents scope needed) */
   async fetchDoc(docId: string): Promise<string | null> {
     if (!_token) return null;
     try {
-      // Drive export works with drive.readonly — no documents scope needed
       const res = await fetch(
         `https://www.googleapis.com/drive/v3/files/${docId}/export?mimeType=text/plain`,
         { headers: { Authorization: `Bearer ${_token}` } }
@@ -123,34 +193,23 @@ export const driveStore = {
     }
   },
 
+  /** Legacy save — kept for compatibility */
   async saveDoc(docId: string, text: string): Promise<boolean> {
     if (!_token) return false;
     try {
-      // Get current doc structure via Docs API (requires documents scope)
       const res = await fetch(
         `https://docs.googleapis.com/v1/documents/${docId}`,
         { headers: { Authorization: `Bearer ${_token}` } }
       );
-      if (res.status === 403) return false; // no documents scope yet
       if (!res.ok) return false;
       const doc = await res.json();
       const endIndex: number = doc.body?.content?.at(-1)?.endIndex ?? 1;
-
       const requests: object[] = [];
-      if (endIndex > 1) {
-        requests.push({ deleteContentRange: { range: { startIndex: 1, endIndex: endIndex - 1 } } });
-      }
-      if (text) {
-        requests.push({ insertText: { location: { index: 1 }, text } });
-      }
-
+      if (endIndex > 1) requests.push({ deleteContentRange: { range: { startIndex: 1, endIndex: endIndex - 1 } } });
+      if (text) requests.push({ insertText: { location: { index: 1 }, text } });
       const saveRes = await fetch(
         `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ requests }),
-        }
+        { method: "POST", headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" }, body: JSON.stringify({ requests }) }
       );
       return saveRes.ok;
     } catch {

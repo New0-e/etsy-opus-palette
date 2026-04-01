@@ -6,8 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Sparkles, Upload, X, Check, Download } from "lucide-react";
+import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
+
+const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/edc44347-0c53-473e-8047-956afd36b4f4";
+const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/edc44347-0c53-473e-8047-956afd36b4f4";
 
 const environments = [
   "Studio minimaliste fond blanc", "Studio marbre luxueux", "Salon boheme",
@@ -137,31 +140,64 @@ export default function GenerationPhotosPage() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<string[]>([]);
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
+  const [testMode, setTestMode] = useState(false);
 
   const handleGenerate = async () => {
     if (productImages.length === 0) { toast.error("Ajoutez au moins une image produit"); return; }
     setLoading(true);
+    setResults([]);
     try {
-      // In real implementation, upload images and send to n8n
-      toast.success("Génération lancée ! Les résultats apparaîtront ici.");
-      // Simulate results
-      setTimeout(() => {
-        setResults([
-          "https://placehold.co/400x400/1a1a2e/e2725b?text=Resultat+1",
-          "https://placehold.co/400x400/1a1a2e/e2725b?text=Resultat+2",
-          "https://placehold.co/400x400/1a1a2e/e2725b?text=Resultat+3",
-        ]);
-        setLoading(false);
-      }, 2000);
+      const formData = new FormData();
+      productImages.forEach((f) => formData.append("product_images", f));
+      bgImages.forEach((f) => formData.append("bg_images", f));
+      modelImages.forEach((f) => formData.append("model_images", f));
+      formData.append("mode", mode);
+      formData.append("image_count", imageCount);
+      if (instructions) formData.append("instructions", instructions);
+      if (mode === "manuel") {
+        if (categorie) formData.append("categorie", categorie);
+        if (selectedEnv.length) formData.append("environnement", selectedEnv.join(", "));
+        if (selectedEcl.length) formData.append("eclairage", selectedEcl.join(", "));
+        if (selectedAngle.length) formData.append("angle", selectedAngle.join(", "));
+        if (selectedAcc.length) formData.append("accessoires", selectedAcc.join(", "));
+      }
+
+      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) { toast.error(`Erreur ${res.status}`); return; }
+
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        const arr = Array.isArray(json) ? json : [json];
+        const urls = arr.flatMap((item: any) =>
+          item.image_urls ?? item.urls ?? item.images ?? (item.url ? [item.url] : [])
+        ).filter(Boolean);
+        if (urls.length) { setResults(urls); toast.success("Génération terminée !"); }
+        else { toast.success("Workflow lancé — les images seront disponibles sous peu."); }
+      } catch {
+        toast.success("Workflow lancé !");
+      }
     } catch {
-      toast.error("Erreur");
+      toast.error("Erreur de connexion au workflow");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="font-display text-2xl font-bold mb-6">Génération Images Produit</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-2xl font-bold">Génération Images Produit</h1>
+        <div className="flex items-center gap-2">
+          <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
+          <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
+          <Switch checked={testMode} onCheckedChange={setTestMode} />
+        </div>
+      </div>
       <div className="tool-card space-y-6">
         {/* Mode Toggle */}
         <div className="flex items-center gap-3">
