@@ -9,10 +9,17 @@ import { toast } from "sonner";
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/43af0a2f-2584-4327-8527-ac204967a1cc";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/43af0a2f-2584-4327-8527-ac204967a1cc";
 
+interface TagChange {
+  old: string;
+  new: string;
+  reason: string;
+}
+
 interface TagResult {
   new_tags: string[];
   old_tags: string[];
   new_tags_string: string;
+  changes: TagChange[];
 }
 
 function TagPill({ tag, color, copied, onCopy }: {
@@ -66,19 +73,34 @@ export default function AnalyseTagsPage() {
       });
       const text = await res.text();
       try {
+        // Essai JSON d'abord
         let parsed = JSON.parse(text);
-        // n8n renvoie parfois un tableau — on prend le premier élément
         if (Array.isArray(parsed)) parsed = parsed[0];
-        const result: TagResult = {
+        setResult({
           new_tags: Array.isArray(parsed?.new_tags) ? parsed.new_tags : [],
           old_tags: Array.isArray(parsed?.old_tags) ? parsed.old_tags : [],
           new_tags_string: parsed?.new_tags_string ?? "",
-        };
-        setResult(result);
+          changes: [],
+        });
       } catch {
-        setResult(null);
-        toast.error("Réponse inattendue du serveur");
-        return;
+        // Format texte brut
+        const oldLine = text.match(/Old tags:\s*([^\n]+)/i);
+        const old_tags = oldLine ? oldLine[1].split(",").map(t => t.trim()).filter(Boolean) : [];
+
+        const changeRegex = /\(([^)]+?)\s*->\s*([^)]+?)\)\s*:\s*([^\n(]+)/g;
+        const changes: TagChange[] = [];
+        let m: RegExpExecArray | null;
+        while ((m = changeRegex.exec(text)) !== null) {
+          changes.push({ old: m[1].trim(), new: m[2].trim(), reason: m[3].trim() });
+        }
+
+        const new_tags = changes.length ? changes.map(c => c.new) : [];
+        setResult({
+          old_tags,
+          new_tags,
+          new_tags_string: new_tags.join(", "),
+          changes,
+        });
       }
       toast.success("Analyse terminée !");
     } catch {
@@ -120,7 +142,6 @@ export default function AnalyseTagsPage() {
 
             {/* Comparaison anciens / nouveaux */}
             <div className="grid grid-cols-2 gap-3">
-              {/* Anciens tags */}
               <div className="p-4 rounded-lg bg-secondary border border-border space-y-3">
                 <div className="flex items-center gap-2">
                   <ArrowLeft className="h-3.5 w-3.5 text-muted-foreground" />
@@ -134,7 +155,6 @@ export default function AnalyseTagsPage() {
                 </div>
               </div>
 
-              {/* Nouveaux tags */}
               <div className="p-4 rounded-lg bg-secondary border border-primary/30 space-y-3">
                 <div className="flex items-center gap-2">
                   <ArrowRight className="h-3.5 w-3.5 text-primary" />
@@ -149,7 +169,7 @@ export default function AnalyseTagsPage() {
               </div>
             </div>
 
-            {/* String à copier */}
+            {/* Chaîne prête à l'emploi */}
             <div className="p-4 rounded-lg bg-secondary border border-border space-y-2">
               <div className="flex items-center justify-between">
                 <Label className="text-emerald-400">Chaîne prête à l'emploi</Label>
@@ -162,6 +182,25 @@ export default function AnalyseTagsPage() {
                 {result.new_tags_string}
               </p>
             </div>
+
+            {/* Explications des changements */}
+            {result.changes.length > 0 && (
+              <div className="p-4 rounded-lg bg-secondary border border-border space-y-3">
+                <Label className="text-amber-400">Explication des changements</Label>
+                <div className="space-y-2">
+                  {result.changes.map((c, i) => (
+                    <div key={i} className="flex items-start gap-2 text-xs">
+                      <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
+                        <span className="text-muted-foreground line-through">{c.old}</span>
+                        <ArrowRight className="h-3 w-3 text-primary flex-shrink-0" />
+                        <span className="text-primary font-medium">{c.new}</span>
+                      </div>
+                      <span className="text-muted-foreground">— {c.reason}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
           </div>
         )}
