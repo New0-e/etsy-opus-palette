@@ -80,26 +80,32 @@ export function NotepadViewer({ url }: { url: string }) {
   const loadFromDoc = useCallback(async () => {
     if (!docId) { setStatus("idle"); return; }
     setStatus("loading");
-    const text = await driveStore.fetchDoc(docId);
-    if (text === null) { setStatus("error"); return; }
+    const raw = await driveStore.fetchDoc(docId);
+    if (raw === null) { setStatus("error"); return; }
 
-    // Update the "main" (doc-linked) tab content
+    // Google Drive export prepends the document title and tab names as the first line(s).
+    // Strip any leading line that looks like a title/heading (no sentence punctuation, short).
+    const lines = raw.split("\n");
+    let start = 0;
+    while (start < lines.length && start < 3) {
+      const l = lines[start].trim();
+      // Skip blank lines or short title-like lines (≤60 chars, no period/comma/colon mid-text)
+      if (l === "" || (l.length <= 60 && !/[.,:;!?]/.test(l))) { start++; } else { break; }
+    }
+    const text = lines.slice(start).join("\n").trimStart();
+    const html = text.replace(/\n/g, "<br>");
+
     setTabs(prev => {
-      const next = prev.map(t => t.isDoc ? { ...t, content: text.replace(/\n/g, "<br>") } : t);
+      const next = prev.map(t => t.isDoc ? { ...t, content: html } : t);
       saveLocalTabs(next);
       return next;
     });
 
-    // Inject into editor only if "main" tab is currently active
     setActiveId(prev => {
-      // Defer DOM update
       setTimeout(() => {
-        const mainTab = loadLocalTabs().find(t => t.isDoc);
-        if (mainTab && editorRef.current) {
-          const current = loadLocalTabs().find(t => t.id === prev);
-          if (current?.isDoc) {
-            editorRef.current.innerHTML = text.replace(/\n/g, "<br>");
-          }
+        const current = loadLocalTabs().find(t => t.id === prev);
+        if (current?.isDoc && editorRef.current) {
+          editorRef.current.innerHTML = html;
         }
       }, 0);
       return prev;

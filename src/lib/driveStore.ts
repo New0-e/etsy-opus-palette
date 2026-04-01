@@ -79,7 +79,7 @@ export const driveStore = {
 
   async updateSheetCell(
     spreadsheetId: string,
-    sheetName: string,
+    sheetName: string,   // empty string = no prefix (targets first visible sheet)
     row: number,
     col: number,
     value: string
@@ -91,7 +91,8 @@ export const driveStore = {
       colStr = String.fromCharCode(64 + (c % 26 || 26)) + colStr;
       c = Math.floor((c - 1) / 26);
     }
-    const a1 = `${sheetName}!${colStr}${row + 2}`;
+    const cellRef = `${colStr}${row + 2}`;
+    const a1 = sheetName ? `${sheetName}!${cellRef}` : cellRef;
     try {
       const res = await fetch(
         `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(a1)}?valueInputOption=USER_ENTERED`,

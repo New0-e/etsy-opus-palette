@@ -203,23 +203,27 @@ export function SheetsViewer({ url }: { url: string }) {
       const original = rows![rowIdx + 1]?.[colIdx] ?? "";
       if (newValue === original) return;
 
+      const key = `${rowIdx}-${colIdx}`;
+      setSaving(key);
+
+      // Try with known sheet name first; if unavailable, try fetching it once, then fall back to no prefix
       let currentSheetName = sheetName;
       if (!currentSheetName) {
         const token = driveStore.getToken();
-        if (!token) { toast.error("Reconnecte Drive"); return; }
-        const name = await fetchSheetName(spreadsheetId, gidRef, token);
-        if (!name) {
-          toast.error("Impossible d'éditer — reconnecte Drive avec les permissions Sheets");
-          e.currentTarget.innerText = original;
-          return;
+        if (token) {
+          const name = await fetchSheetName(spreadsheetId, gidRef, token);
+          if (name) { setSheetName(name); currentSheetName = name; }
         }
-        setSheetName(name);
-        currentSheetName = name;
       }
 
-      const key = `${rowIdx}-${colIdx}`;
-      setSaving(key);
-      const ok = await driveStore.updateSheetCell(spreadsheetId, currentSheetName, rowIdx, colIdx, newValue);
+      // Attempt save — first with sheet name (or empty fallback for first sheet)
+      let ok = await driveStore.updateSheetCell(spreadsheetId, currentSheetName ?? "", rowIdx, colIdx, newValue);
+
+      // If failed and we had a sheet name, retry without it (first-sheet fallback)
+      if (!ok && currentSheetName) {
+        ok = await driveStore.updateSheetCell(spreadsheetId, "", rowIdx, colIdx, newValue);
+      }
+
       setSaving(null);
 
       if (ok) {
@@ -232,7 +236,7 @@ export function SheetsViewer({ url }: { url: string }) {
         });
         toast.success("Cellule sauvegardée");
       } else {
-        toast.error("Échec de la sauvegarde — reconnecte Drive");
+        toast.error("Échec — active l'API Google Sheets dans Cloud Console");
         e.currentTarget.innerText = original;
       }
     },
