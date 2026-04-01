@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -45,6 +45,50 @@ function parseCSV(text: string): string[][] {
     if (!rowEmpty) rows.push(row);
   }
   return rows;
+}
+
+function ImageThumb({ url, index, selected, onToggle }: {
+  url: string;
+  index: number;
+  selected: boolean;
+  onToggle: () => void;
+}) {
+  const [preview, setPreview] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showPreview = () => {
+    timer.current = setTimeout(() => setPreview(true), 500);
+  };
+  const hidePreview = () => {
+    if (timer.current) clearTimeout(timer.current);
+    setPreview(false);
+  };
+
+  return (
+    <div className="relative" onMouseEnter={showPreview} onMouseLeave={hidePreview}>
+      <button
+        onClick={onToggle}
+        className={`relative rounded-lg overflow-hidden border-2 transition-all w-full ${
+          selected ? "border-primary glow-primary" : "border-border hover:border-muted-foreground"
+        }`}
+      >
+        <img src={url} alt={`Image ${index + 1}`} className="w-full aspect-square object-cover" />
+        {selected && (
+          <div className="absolute top-2 right-2 bg-primary rounded-full p-1">
+            <Check className="h-3 w-3 text-primary-foreground" />
+          </div>
+        )}
+      </button>
+
+      {preview && (
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
+          <div className="rounded-lg overflow-hidden border border-border shadow-xl bg-background">
+            <img src={url} alt="Aperçu" className="w-48 h-48 object-contain" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 interface ProductRow {
@@ -109,9 +153,10 @@ export default function DownloadImagesPage() {
 
   const boutiques = [...new Set(products.map(p => p.boutique).filter(Boolean))].sort();
 
-  const filteredProducts = selectedBoutique
+  const filteredProducts = (selectedBoutique
     ? products.filter(p => p.boutique === selectedBoutique)
-    : products;
+    : products
+  ).slice().reverse();
 
   const activeProduct = products.find(
     p => `${p.numero}||${p.nom}` === selectedProductKey
@@ -185,7 +230,7 @@ export default function DownloadImagesPage() {
 
         {/* 1. Boutique */}
         <div className="space-y-2">
-          <Label>Boutique cible</Label>
+          <Label>Boutiques</Label>
           <Select
             value={selectedBoutique}
             onValueChange={v => {
@@ -241,26 +286,13 @@ export default function DownloadImagesPage() {
                 </Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {activeProduct.imageUrls.map((url, i) => (
-                    <button
+                    <ImageThumb
                       key={i}
-                      onClick={() => toggleImage(url)}
-                      className={`relative rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImages.includes(url)
-                          ? "border-primary glow-primary"
-                          : "border-border hover:border-muted-foreground"
-                      }`}
-                    >
-                      <img
-                        src={url}
-                        alt={`Image ${i + 1}`}
-                        className="w-full aspect-square object-cover"
-                      />
-                      {selectedImages.includes(url) && (
-                        <div className="absolute top-2 right-2 bg-primary rounded-full p-1">
-                          <Check className="h-3 w-3 text-primary-foreground" />
-                        </div>
-                      )}
-                    </button>
+                      url={url}
+                      index={i}
+                      selected={selectedImages.includes(url)}
+                      onToggle={() => toggleImage(url)}
+                    />
                   ))}
                 </div>
               </div>
