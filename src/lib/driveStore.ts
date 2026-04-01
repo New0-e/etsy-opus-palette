@@ -83,7 +83,7 @@ export const driveStore = {
     row: number,
     col: number,
     value: string
-  ): Promise<boolean> {
+  ): Promise<true | string | false> {
     if (!_token) return false;
     let colStr = "";
     let c = col + 1;
@@ -102,8 +102,14 @@ export const driveStore = {
           body: JSON.stringify({ values: [[value]] }),
         }
       );
-      return res.ok;
-    } catch {
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error(`[Sheets] PUT ${a1} → ${res.status}`, body);
+        return `${res.status}` as any;
+      }
+      return true;
+    } catch (e) {
+      console.error("[Sheets] fetch error", e);
       return false;
     }
   },

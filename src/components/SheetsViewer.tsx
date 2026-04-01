@@ -217,16 +217,16 @@ export function SheetsViewer({ url }: { url: string }) {
       }
 
       // Attempt save — first with sheet name (or empty fallback for first sheet)
-      let ok = await driveStore.updateSheetCell(spreadsheetId, currentSheetName ?? "", rowIdx, colIdx, newValue);
+      let result = await driveStore.updateSheetCell(spreadsheetId, currentSheetName ?? "", rowIdx, colIdx, newValue);
 
       // If failed and we had a sheet name, retry without it (first-sheet fallback)
-      if (!ok && currentSheetName) {
-        ok = await driveStore.updateSheetCell(spreadsheetId, "", rowIdx, colIdx, newValue);
+      if (result !== true && currentSheetName) {
+        result = await driveStore.updateSheetCell(spreadsheetId, "", rowIdx, colIdx, newValue);
       }
 
       setSaving(null);
 
-      if (ok) {
+      if (result === true) {
         setRows(prev => {
           if (!prev) return prev;
           const next = prev.map(r => [...r]);
@@ -236,7 +236,11 @@ export function SheetsViewer({ url }: { url: string }) {
         });
         toast.success("Cellule sauvegardée");
       } else {
-        toast.error("Échec — active l'API Google Sheets dans Cloud Console");
+        const code = typeof result === "string" ? result : "?";
+        if (code === "401") toast.error("Token expiré — déconnecte et reconnecte Drive");
+        else if (code === "403") toast.error("Permission refusée (403) — vérifie les scopes OAuth et l'API Sheets");
+        else if (code === "400") toast.error("Erreur 400 — plage A1 invalide");
+        else toast.error(`Échec sauvegarde (${code}) — voir console`);
         e.currentTarget.innerText = original;
       }
     },
