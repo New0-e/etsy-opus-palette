@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp } from "lucide-react";
+import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -64,43 +64,44 @@ function shortUrl(val: string): string {
   }
 }
 
+async function fetchSheetName(spreadsheetId: string, gid: string, token: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets(properties(sheetId,title))`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    const sheet = data.sheets?.find((s: any) => String(s.properties.sheetId) === gid);
+    return sheet?.properties?.title ?? data.sheets?.[0]?.properties?.title ?? null;
+  } catch {
+    return null;
+  }
+}
+
 // ── Cell components ───────────────────────────────────────────────────────────
 
 function UrlCell({ val }: { val: string }) {
-  const [expanded, setExpanded] = useState(false);
   return (
     <div className="flex items-center gap-1 min-w-0">
-      {expanded ? (
-        <span className="text-xs text-muted-foreground break-all flex-1">{val}</span>
-      ) : (
-        <a
-          href={val}
-          target="_blank"
-          rel="noreferrer"
-          className="text-primary hover:underline flex items-center gap-1 min-w-0 flex-1"
-          title={val}
-          onClick={e => e.stopPropagation()}
-        >
-          <ExternalLink className="h-3 w-3 flex-shrink-0" />
-          <span className="truncate text-xs">{shortUrl(val)}</span>
-        </a>
-      )}
-      <div className="flex items-center gap-0.5 flex-shrink-0">
-        <button
-          onClick={() => { navigator.clipboard.writeText(val); toast.success("Copié !"); }}
-          className="text-muted-foreground hover:text-foreground p-0.5 rounded"
-          title="Copier"
-        >
-          <Copy className="h-3 w-3" />
-        </button>
-        <button
-          onClick={() => setExpanded(v => !v)}
-          className="text-muted-foreground hover:text-foreground p-0.5 rounded"
-          title={expanded ? "Réduire" : "Voir complet"}
-        >
-          {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-        </button>
-      </div>
+      <a
+        href={val}
+        target="_blank"
+        rel="noreferrer"
+        className="text-primary hover:underline flex items-center gap-1 min-w-0 flex-1"
+        title={val}
+        onClick={e => e.stopPropagation()}
+      >
+        <ExternalLink className="h-3 w-3 flex-shrink-0" />
+        <span className="truncate text-xs">{shortUrl(val)}</span>
+      </a>
+      <button
+        onClick={() => { navigator.clipboard.writeText(val); toast.success("Copié !"); }}
+        className="text-muted-foreground hover:text-foreground p-0.5 rounded flex-shrink-0"
+        title="Copier"
+      >
+        <Copy className="h-3 w-3" />
+      </button>
     </div>
   );
 }
@@ -116,71 +117,41 @@ function TextCell({
   onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
   saving: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
   return (
     <div className="flex items-center gap-1 min-w-0">
       <div
         contentEditable={canEdit}
         suppressContentEditableWarning
         onBlur={onBlur}
-        className={`outline-none flex-1 text-xs text-foreground ${expanded ? "break-words whitespace-pre-wrap" : "truncate"} ${canEdit ? "cursor-text" : ""}`}
-        title={!expanded ? val : undefined}
+        className={`outline-none flex-1 text-xs text-foreground truncate ${canEdit ? "cursor-text" : ""}`}
+        title={val || undefined}
       >
         {val}
       </div>
-      <div className="flex items-center gap-0.5 flex-shrink-0">
-        {val && (
-          <button
-            onClick={() => setExpanded(v => !v)}
-            className="text-muted-foreground hover:text-foreground p-0.5 rounded"
-            title={expanded ? "Réduire" : "Voir complet"}
-          >
-            {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-          </button>
-        )}
-        {saving && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
-      </div>
+      {saving && <Loader2 className="h-3 w-3 animate-spin text-primary flex-shrink-0" />}
     </div>
   );
 }
 
-async function fetchSheetName(
-  spreadsheetId: string,
-  gid: string,
-  token: string
-): Promise<{ name: string | null; forbidden: boolean }> {
-  try {
-    const res = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets(properties(sheetId,title))`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (res.status === 403 || res.status === 401) return { name: null, forbidden: true };
-    if (!res.ok) return { name: null, forbidden: false };
-    const data = await res.json();
-    const sheet = data.sheets?.find((s: any) => String(s.properties.sheetId) === gid);
-    const name = sheet?.properties?.title ?? data.sheets?.[0]?.properties?.title ?? null;
-    return { name, forbidden: false };
-  } catch {
-    return { name: null, forbidden: false };
-  }
-}
-
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const MIN_COL = 60;
-const DEFAULT_COL = 140;
+const MIN_COL = 80;
+const DEFAULT_COL = 120;
+const EXTRA_ROWS = 20;
+const CELL_HEIGHT = 28;
 
 export function SheetsViewer({ url }: { url: string }) {
   const [rows, setRows] = useState<string[][] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sheetName, setSheetName] = useState<string | null>(null);
+  const [gidRef, setGidRef] = useState("0");
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(null);
-  const [canEdit, setCanEdit] = useState(false);
-  const [scopeError, setScopeError] = useState(false);
   const [colWidths, setColWidths] = useState<number[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
+
+  const hasToken = !!driveStore.getToken();
 
   useEffect(() => {
     const token = driveStore.getToken();
@@ -189,6 +160,7 @@ export function SheetsViewer({ url }: { url: string }) {
     const { spreadsheetId: sid, gid } = extractIds(url);
     if (!sid) { setError("URL invalide"); setLoading(false); return; }
     setSpreadsheetId(sid);
+    setGidRef(gid);
 
     Promise.allSettled([
       fetch(
@@ -201,22 +173,13 @@ export function SheetsViewer({ url }: { url: string }) {
         const parsed = parseCSV(csvResult.value);
         setRows(parsed);
         if (parsed[0]) {
-          const widths = parsed[0].map((h) =>
-            Math.max(MIN_COL, Math.min(240, (h.length + 4) * 8))
-          );
-          setColWidths(widths);
+          setColWidths(parsed[0].map(() => DEFAULT_COL));
         }
       } else {
         setError(`Erreur ${csvResult.reason?.message ?? ""}`);
       }
-      if (metaResult.status === "fulfilled") {
-        const { name, forbidden } = metaResult.value;
-        if (name) {
-          setSheetName(name);
-          setCanEdit(true);
-        } else if (forbidden) {
-          setScopeError(true);
-        }
+      if (metaResult.status === "fulfilled" && metaResult.value) {
+        setSheetName(metaResult.value);
       }
       setLoading(false);
     });
@@ -224,14 +187,28 @@ export function SheetsViewer({ url }: { url: string }) {
 
   const handleCellBlur = useCallback(
     async (e: React.FocusEvent<HTMLDivElement>, rowIdx: number, colIdx: number) => {
-      if (!canEdit || !spreadsheetId || !sheetName) return;
+      if (!spreadsheetId) return;
       const newValue = e.currentTarget.innerText;
       const original = rows![rowIdx + 1]?.[colIdx] ?? "";
       if (newValue === original) return;
 
+      let currentSheetName = sheetName;
+      if (!currentSheetName) {
+        const token = driveStore.getToken();
+        if (!token) { toast.error("Reconnecte Drive"); return; }
+        const name = await fetchSheetName(spreadsheetId, gidRef, token);
+        if (!name) {
+          toast.error("Impossible d'éditer — reconnecte Drive avec les permissions Sheets");
+          e.currentTarget.innerText = original;
+          return;
+        }
+        setSheetName(name);
+        currentSheetName = name;
+      }
+
       const key = `${rowIdx}-${colIdx}`;
       setSaving(key);
-      const ok = await driveStore.updateSheetCell(spreadsheetId, sheetName, rowIdx, colIdx, newValue);
+      const ok = await driveStore.updateSheetCell(spreadsheetId, currentSheetName, rowIdx, colIdx, newValue);
       setSaving(null);
 
       if (ok) {
@@ -248,7 +225,7 @@ export function SheetsViewer({ url }: { url: string }) {
         e.currentTarget.innerText = original;
       }
     },
-    [canEdit, spreadsheetId, sheetName, rows]
+    [spreadsheetId, sheetName, gidRef, rows]
   );
 
   const startResize = (e: React.MouseEvent, col: number) => {
@@ -303,25 +280,21 @@ export function SheetsViewer({ url }: { url: string }) {
   const [headers, ...dataRows] = rows;
   const maxCols = Math.max(headers.length, ...dataRows.map(r => r.length));
   const allHeaders = Array.from({ length: maxCols }, (_, i) => headers[i] ?? "");
+  const totalDataRows = dataRows.length + EXTRA_ROWS;
 
   return (
     <div className="flex flex-col h-full">
       {/* Statut édition */}
       <div className="flex items-center gap-2 px-4 py-1.5 border-b border-border bg-background flex-shrink-0">
-        {canEdit ? (
+        {hasToken ? (
           <>
             <Save className="h-3.5 w-3.5 text-green-400" />
             <span className="text-xs text-green-400">Édition activée — clique sur une cellule pour modifier</span>
           </>
-        ) : scopeError ? (
-          <>
-            <AlertCircle className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-xs text-amber-400">Permissions insuffisantes — déconnecte Drive et reconnecte pour activer l'édition</span>
-          </>
         ) : (
           <>
             <AlertCircle className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-xs text-amber-400">Lecture seule — reconnecte Drive pour activer l'édition</span>
+            <span className="text-xs text-amber-400">Lecture seule — connecte Drive pour activer l'édition</span>
           </>
         )}
       </div>
@@ -334,8 +307,8 @@ export function SheetsViewer({ url }: { url: string }) {
               {allHeaders.map((h, i) => (
                 <th
                   key={i}
-                  className="relative text-left px-2 py-2 bg-secondary border border-border font-semibold text-muted-foreground whitespace-nowrap select-none"
-                  style={{ width: colWidths[i] ?? DEFAULT_COL, minWidth: MIN_COL }}
+                  className="relative text-left px-2 bg-secondary border border-border font-semibold text-muted-foreground whitespace-nowrap select-none"
+                  style={{ width: colWidths[i] ?? DEFAULT_COL, minWidth: MIN_COL, height: CELL_HEIGHT }}
                 >
                   <span className="block truncate">{h}</span>
                   <div
@@ -347,42 +320,49 @@ export function SheetsViewer({ url }: { url: string }) {
             </tr>
           </thead>
           <tbody>
-            {dataRows.map((row, ri) => (
-              <tr key={ri} className="hover:bg-secondary/30 transition-colors">
-                {allHeaders.map((_, ci) => {
-                  const val = row[ci] ?? "";
-                  const key = `${ri}-${ci}`;
-                  const isSaving = saving === key;
+            {Array.from({ length: totalDataRows }, (_, ri) => {
+              const row = dataRows[ri] ?? [];
+              const isEmpty = ri >= dataRows.length;
+              return (
+                <tr
+                  key={ri}
+                  className={`hover:bg-secondary/30 transition-colors ${isEmpty ? "opacity-50 hover:opacity-100" : ""}`}
+                >
+                  {allHeaders.map((_, ci) => {
+                    const val = row[ci] ?? "";
+                    const key = `${ri}-${ci}`;
+                    const isSaving = saving === key;
 
-                  if (isUrl(val)) {
+                    if (isUrl(val)) {
+                      return (
+                        <td
+                          key={ci}
+                          className="px-2 border border-border overflow-hidden"
+                          style={{ width: colWidths[ci] ?? DEFAULT_COL, height: CELL_HEIGHT }}
+                        >
+                          <UrlCell val={val} />
+                        </td>
+                      );
+                    }
+
                     return (
                       <td
                         key={ci}
-                        className="px-2 py-1.5 border border-border"
-                        style={{ width: colWidths[ci] ?? DEFAULT_COL }}
+                        className={`px-2 border border-border overflow-hidden relative ${hasToken ? "focus-within:bg-primary/5 focus-within:ring-1 focus-within:ring-inset focus-within:ring-primary" : ""}`}
+                        style={{ width: colWidths[ci] ?? DEFAULT_COL, height: CELL_HEIGHT }}
                       >
-                        <UrlCell val={val} />
+                        <TextCell
+                          val={val}
+                          canEdit={hasToken}
+                          onBlur={(e) => handleCellBlur(e, ri, ci)}
+                          saving={isSaving}
+                        />
                       </td>
                     );
-                  }
-
-                  return (
-                    <td
-                      key={ci}
-                      className={`px-2 py-1.5 border border-border relative ${canEdit ? "focus-within:bg-primary/5 focus-within:ring-1 focus-within:ring-inset focus-within:ring-primary" : ""}`}
-                      style={{ width: colWidths[ci] ?? DEFAULT_COL }}
-                    >
-                      <TextCell
-                        val={val}
-                        canEdit={canEdit}
-                        onBlur={(e) => handleCellBlur(e, ri, ci)}
-                        saving={isSaving}
-                      />
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
+                  })}
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

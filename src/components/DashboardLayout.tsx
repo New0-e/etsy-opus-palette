@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DrivePanel } from "@/components/DrivePanel";
+import { BottomTabs } from "@/components/BottomTabs";
 import { Outlet } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShieldCheck, LogIn, ShieldAlert } from "lucide-react";
@@ -13,6 +14,7 @@ const CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string).trim();
 const SCOPE = [
   "https://www.googleapis.com/auth/drive.readonly",
   "https://www.googleapis.com/auth/spreadsheets",
+  "https://www.googleapis.com/auth/documents",
   "openid email profile",
 ].join(" ");
 const VERIFIER_KEY = "drive_pkce_verifier";
@@ -161,9 +163,12 @@ export default function DashboardLayout() {
     <SidebarProvider>
       <div className="h-screen flex w-full overflow-hidden">
         <AppSidebar />
-        <main className="flex-1 overflow-auto p-6">
-          <Outlet />
-        </main>
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <main className="flex-1 overflow-auto p-6">
+            <Outlet />
+          </main>
+          <BottomTabs />
+        </div>
         <DrivePanel />
       </div>
     </SidebarProvider>

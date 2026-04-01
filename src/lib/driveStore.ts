@@ -107,6 +107,63 @@ export const driveStore = {
     }
   },
 
+  // ── Google Docs API ────────────────────────────────────────────────────────
+  async fetchDoc(docId: string): Promise<string | null> {
+    if (!_token) return null;
+    try {
+      const res = await fetch(
+        `https://docs.googleapis.com/v1/documents/${docId}`,
+        { headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (!res.ok) return null;
+      const doc = await res.json();
+      let text = "";
+      for (const el of (doc.body?.content ?? [])) {
+        if (el.paragraph) {
+          for (const pe of (el.paragraph.elements ?? [])) {
+            if (pe.textRun?.content) text += pe.textRun.content;
+          }
+        }
+      }
+      return text;
+    } catch {
+      return null;
+    }
+  },
+
+  async saveDoc(docId: string, text: string): Promise<boolean> {
+    if (!_token) return false;
+    try {
+      const res = await fetch(
+        `https://docs.googleapis.com/v1/documents/${docId}`,
+        { headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (!res.ok) return false;
+      const doc = await res.json();
+      const endIndex: number = doc.body?.content?.at(-1)?.endIndex ?? 1;
+
+      const requests: object[] = [];
+      if (endIndex > 1) {
+        requests.push({ deleteContentRange: { range: { startIndex: 1, endIndex: endIndex - 1 } } });
+      }
+      if (text) {
+        requests.push({ insertText: { location: { index: 1 }, text } });
+      }
+
+      const saveRes = await fetch(
+        `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ requests }),
+        }
+      );
+      return saveRes.ok;
+    } catch {
+      return false;
+    }
+  },
+
   async fetchAsFile(id: string, name: string): Promise<File | null> {
     if (!_token) return null;
     try {

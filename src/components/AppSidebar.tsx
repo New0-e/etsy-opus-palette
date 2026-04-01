@@ -1,9 +1,9 @@
 import {
   FileText, ImageDown, Camera, Tags, BarChart3, UserSearch,
-  ExternalLink, FolderOpen, Table2, Store, Package,
+  ExternalLink, FolderOpen,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
@@ -23,38 +23,9 @@ const secondaryTools = [
   { title: "Tags Concurrent", url: "/tags-concurrent", icon: UserSearch },
 ];
 
-const sheetLinks = [
-  {
-    title: "Tableau Contrôle",
-    icon: Table2,
-    url: "https://docs.google.com/spreadsheets/d/1u3_-YtIYqCnO2YEPfLh1cCsjd2CcRiT1cKileCLA0Ig/edit?gid=0#gid=0",
-  },
-  {
-    title: "Liste Boutique",
-    icon: Store,
-    url: "https://docs.google.com/spreadsheets/d/1cetIf0cfWDxz-geTmatUOBchdjUUpCvS/edit?gid=1536179428#gid=1536179428",
-  },
-  {
-    title: "Suivi Commande",
-    icon: Package,
-    url: "https://docs.google.com/spreadsheets/d/1exMlQ6dnfIGF7xsgUJskk57IRypVK29E/edit?gid=513162334#gid=513162334",
-  },
-  {
-    title: "Prompt",
-    icon: FileText,
-    url: "https://docs.google.com/document/d/1h9iRZWZSMjeu8aec_cVFFl0K24oBVR1HDZqhcjWErko/edit?tab=t.0",
-  },
-];
-
 export function AppSidebar() {
   const location = useLocation();
-  const navigate = useNavigate();
   const isActive = (path: string) => location.pathname === path;
-
-  const openSheet = (title: string, url: string) => {
-    if (!url) return;
-    navigate(`/viewer?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`);
-  };
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -109,24 +80,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-0">
-        <div className="px-3 pb-1 pt-2 border-t border-sidebar-border">
-          <p className="text-xs uppercase tracking-wider text-muted-foreground px-1 py-1.5">Raccourci Drive</p>
-          <SidebarMenu>
-            {sheetLinks.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  onClick={() => openSheet(item.title, item.url)}
-                  disabled={!item.url}
-                  className={!item.url ? "opacity-40 cursor-not-allowed" : ""}
-                >
-                  <item.icon className="h-4 w-4" />
-                  <span>{item.title}</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </div>
-        <div className="p-4 pt-2">
+        <div className="p-4 pt-2 border-t border-sidebar-border">
           <Button
             variant="outline"
             className="w-full justify-start gap-2 border-border hover:bg-secondary"
