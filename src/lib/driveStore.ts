@@ -1,17 +1,64 @@
-// Module-level token store shared between DrivePanel and dropzones
-let _token: string | null = null;
+// ── Auth constants ─────────────────────────────────────────────────────────────
+export const ALLOWED_EMAIL = "etimbleowen@gmail.com";
+const TOKEN_KEY = "drive_access_token";
+const EMAIL_KEY  = "drive_user_email";
 
+// ── Module-level state ─────────────────────────────────────────────────────────
+let _token: string | null = null;
+let _email: string | null = null;
+const _listeners: Array<() => void> = [];
+
+// Auto-restore session on module load
+{
+  const t = sessionStorage.getItem(TOKEN_KEY);
+  const e = sessionStorage.getItem(EMAIL_KEY);
+  if (t && e === ALLOWED_EMAIL) {
+    _token = t;
+    _email = e;
+  }
+}
+
+// ── Types ──────────────────────────────────────────────────────────────────────
 export interface DriveFolder {
   id: string;
   name: string;
 }
 
+// ── Store ──────────────────────────────────────────────────────────────────────
 export const driveStore = {
-  setToken(t: string | null) {
-    _token = t;
-  },
+  // ── Token (legacy compat) ──────────────────────────────────────────────────
+  setToken(t: string | null) { _token = t; },
   getToken: () => _token,
 
+  // ── Auth ───────────────────────────────────────────────────────────────────
+  setAuth(token: string, email: string) {
+    _token = token;
+    _email = email;
+    sessionStorage.setItem(TOKEN_KEY, token);
+    sessionStorage.setItem(EMAIL_KEY, email);
+    _listeners.forEach(fn => fn());
+  },
+
+  logout() {
+    _token = null;
+    _email = null;
+    sessionStorage.removeItem(TOKEN_KEY);
+    sessionStorage.removeItem(EMAIL_KEY);
+    _listeners.forEach(fn => fn());
+  },
+
+  getEmail: () => _email,
+  isAuthorized: () => _email === ALLOWED_EMAIL,
+
+  onAuthChange(fn: () => void): () => void {
+    _listeners.push(fn);
+    return () => {
+      const i = _listeners.indexOf(fn);
+      if (i >= 0) _listeners.splice(i, 1);
+    };
+  },
+
+  // ── Drive API ──────────────────────────────────────────────────────────────
   async fetchRootFolders(): Promise<DriveFolder[]> {
     if (!_token) return [];
     try {
@@ -33,19 +80,18 @@ export const driveStore = {
   async updateSheetCell(
     spreadsheetId: string,
     sheetName: string,
-    row: number,   // 0-indexed data row (excludes header)
-    col: number,   // 0-indexed column
+    row: number,
+    col: number,
     value: string
   ): Promise<boolean> {
     if (!_token) return false;
-    // Convert col index to A1 notation (0→A, 1→B, 25→Z, 26→AA …)
     let colStr = "";
     let c = col + 1;
     while (c > 0) {
       colStr = String.fromCharCode(64 + (c % 26 || 26)) + colStr;
       c = Math.floor((c - 1) / 26);
     }
-    const a1 = `${sheetName}!${colStr}${row + 2}`; // +2: 1-indexed + skip header
+    const a1 = `${sheetName}!${colStr}${row + 2}`;
     try {
       const res = await fetch(
         `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(a1)}?valueInputOption=USER_ENTERED`,

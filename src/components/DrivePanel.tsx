@@ -1,35 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, LogIn, Loader2, ExternalLink, LogOut, FileText, Image, Table2 } from "lucide-react";
+import { ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen, Loader2, ExternalLink, LogOut, FileText, Image, Table2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { driveStore } from "@/lib/driveStore";
 
-const CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string).trim();
-const SCOPE = "https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/spreadsheets";
-const TOKEN_KEY = "drive_access_token";
-const VERIFIER_KEY = "drive_pkce_verifier";
-
-// ── PKCE helpers ──────────────────────────────────────────────────────────────
-
-function generateVerifier(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return btoa(String.fromCharCode(...array))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-}
-
-async function generateChallenge(verifier: string): Promise<string> {
-  const data = new TextEncoder().encode(verifier);
-  const digest = await crypto.subtle.digest("SHA-256", data);
-  return btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-}
-
-function redirectUri(): string {
-  return window.location.origin;
-}
 
 // ── Drive API ─────────────────────────────────────────────────────────────────
 
@@ -77,7 +53,6 @@ async function fetchItems(accessToken: string, parentId: string): Promise<DriveI
 
 export function DrivePanel() {
   const [isOpen, setIsOpen] = useState(true);
-  const [accessToken, setAccessToken] = useState<string | null>(() => sessionStorage.getItem(TOKEN_KEY));
   const [rootItems, setRootItems] = useState<DriveItem[]>([]);
   const [childrenMap, setChildrenMap] = useState<Record<string, DriveItem[]>>({});
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
@@ -85,10 +60,9 @@ export function DrivePanel() {
   const [isInitialLoading, setIsInitialLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Keep driveStore in sync with the token
-  useEffect(() => { driveStore.setToken(accessToken); }, [accessToken]);
+  const token = driveStore.getToken()!;
 
-  const loadRootItems = useCallback(async (token: string) => {
+  const loadRootItems = useCallback(async () => {
     setIsInitialLoading(true);
     setError(null);
     try {
@@ -96,78 +70,21 @@ export function DrivePanel() {
       setRootItems(items);
     } catch (e) {
       if ((e as Error).message === "token_expired") {
-        sessionStorage.removeItem(TOKEN_KEY);
-        setAccessToken(null);
-        setError("Session expirée, reconnecte-toi");
+        driveStore.logout();
       } else {
         setError("Impossible de charger le Drive");
       }
     } finally {
       setIsInitialLoading(false);
     }
-  }, []);
+  }, [token]);
 
-  // Pick up OAuth code after redirect
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const verifier = sessionStorage.getItem(VERIFIER_KEY);
-    if (!code || !verifier) return;
-
-    window.history.replaceState(null, "", window.location.pathname);
-    sessionStorage.removeItem(VERIFIER_KEY);
-
-    setIsInitialLoading(true);
-    fetch("/api/google-token", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, redirect_uri: redirectUri(), code_verifier: verifier }),
-    })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) throw new Error(data.error);
-        sessionStorage.setItem(TOKEN_KEY, data.access_token);
-        setAccessToken(data.access_token);
-        loadRootItems(data.access_token);
-      })
-      .catch((e) => {
-        setError("Connexion échouée : " + (e as Error).message);
-        setIsInitialLoading(false);
-      });
+    loadRootItems();
   }, [loadRootItems]);
 
-  // Load items when token already stored
-  useEffect(() => {
-    if (accessToken && rootItems.length === 0) {
-      loadRootItems(accessToken);
-    }
-  }, [accessToken, loadRootItems, rootItems.length]);
-
-  const handleLogin = async () => {
-    const verifier = generateVerifier();
-    const challenge = await generateChallenge(verifier);
-    sessionStorage.setItem(VERIFIER_KEY, verifier);
-
-    const params = new URLSearchParams({
-      client_id: CLIENT_ID,
-      redirect_uri: redirectUri(),
-      response_type: "code",
-      scope: SCOPE,
-      code_challenge: challenge,
-      code_challenge_method: "S256",
-      access_type: "online",
-      prompt: "consent",
-    });
-    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
-  };
-
   const handleLogout = () => {
-    sessionStorage.removeItem(TOKEN_KEY);
-    setAccessToken(null);
-    setRootItems([]);
-    setChildrenMap({});
-    setExpandedIds(new Set());
-    setError(null);
+    driveStore.logout();
   };
 
   const toggleFolder = useCallback(async (item: DriveItem) => {
@@ -180,12 +97,12 @@ export function DrivePanel() {
     if (childrenMap[id]) return;
     setLoadingIds((prev) => new Set([...prev, id]));
     try {
-      const children = await fetchItems(accessToken!, id);
+      const children = await fetchItems(token, id);
       setChildrenMap((prev) => ({ ...prev, [id]: children }));
     } finally {
       setLoadingIds((prev) => { const next = new Set(prev); next.delete(id); return next; });
     }
-  }, [accessToken, childrenMap, expandedIds]);
+  }, [token, childrenMap, expandedIds]);
 
   return (
     <div className={`border-l border-border bg-drive transition-all duration-300 flex flex-col h-full ${isOpen ? "w-64" : "w-10"}`}>
@@ -193,16 +110,14 @@ export function DrivePanel() {
         {isOpen && (
           <div className="flex items-center gap-1 px-2">
             <span className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider">Drive</span>
-            {accessToken && (
-              <>
-                <a href="https://drive.google.com" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground">
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-                <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground ml-1" title="Déconnecter">
-                  <LogOut className="h-3 w-3" />
-                </button>
-              </>
-            )}
+            <>
+              <a href="https://drive.google.com" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground">
+                <ExternalLink className="h-3 w-3" />
+              </a>
+              <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground ml-1" title="Déconnecter">
+                <LogOut className="h-3 w-3" />
+              </button>
+            </>
           </div>
         )}
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setIsOpen(!isOpen)}>
@@ -215,17 +130,6 @@ export function DrivePanel() {
           {isInitialLoading ? (
             <div className="flex justify-center py-6">
               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-            </div>
-          ) : !accessToken ? (
-            <div className="flex flex-col items-center gap-3 py-6 px-2">
-              <p className="text-xs text-muted-foreground text-center">
-                Connecte ton Google Drive pour voir tes dossiers
-              </p>
-              {error && <p className="text-xs text-destructive text-center">{error}</p>}
-              <Button size="sm" variant="outline" className="w-full gap-2 text-xs" onClick={handleLogin}>
-                <LogIn className="h-3.5 w-3.5" />
-                Connecter Drive
-              </Button>
             </div>
           ) : (
             <>
