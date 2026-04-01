@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy } from "lucide-react";
+import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -111,24 +111,26 @@ function TextCell({
   canEdit,
   onBlur,
   saving,
+  expanded,
 }: {
   val: string;
   canEdit: boolean;
   onBlur: (e: React.FocusEvent<HTMLDivElement>) => void;
   saving: boolean;
+  expanded: boolean;
 }) {
   return (
-    <div className="flex items-center gap-1 min-w-0">
+    <div className="flex items-start gap-1 min-w-0 w-full h-full">
       <div
         contentEditable={canEdit}
         suppressContentEditableWarning
         onBlur={onBlur}
-        className={`outline-none flex-1 text-xs text-foreground truncate ${canEdit ? "cursor-text" : ""}`}
-        title={val || undefined}
+        className={`outline-none flex-1 text-xs text-foreground min-w-0 ${expanded ? "whitespace-pre-wrap break-words" : "truncate"} ${canEdit ? "cursor-text" : ""}`}
+        title={!expanded ? (val || undefined) : undefined}
       >
         {val}
       </div>
-      {saving && <Loader2 className="h-3 w-3 animate-spin text-primary flex-shrink-0" />}
+      {saving && <Loader2 className="h-3 w-3 animate-spin text-primary flex-shrink-0 mt-0.5" />}
     </div>
   );
 }
@@ -149,7 +151,16 @@ export function SheetsViewer({ url }: { url: string }) {
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(null);
   const [colWidths, setColWidths] = useState<number[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
+
+  const toggleRow = useCallback((ri: number) => {
+    setExpandedRows(prev => {
+      const next = new Set(prev);
+      if (next.has(ri)) next.delete(ri); else next.add(ri);
+      return next;
+    });
+  }, []);
 
   const hasToken = !!driveStore.getToken();
 
@@ -323,10 +334,14 @@ export function SheetsViewer({ url }: { url: string }) {
             {Array.from({ length: totalDataRows }, (_, ri) => {
               const row = dataRows[ri] ?? [];
               const isEmpty = ri >= dataRows.length;
+              const isExpanded = expandedRows.has(ri);
+              // Check if any cell in this row has text content worth expanding
+              const hasLongText = row.some(v => v && !isUrl(v) && v.length > 14);
+
               return (
                 <tr
                   key={ri}
-                  className={`hover:bg-secondary/30 transition-colors ${isEmpty ? "opacity-50 hover:opacity-100" : ""}`}
+                  className={`hover:bg-secondary/30 transition-colors group/row ${isEmpty ? "opacity-50 hover:opacity-100" : ""}`}
                 >
                   {allHeaders.map((_, ci) => {
                     const val = row[ci] ?? "";
@@ -337,10 +352,12 @@ export function SheetsViewer({ url }: { url: string }) {
                       return (
                         <td
                           key={ci}
-                          className="px-2 border border-border overflow-hidden"
-                          style={{ width: colWidths[ci] ?? DEFAULT_COL, height: CELL_HEIGHT }}
+                          className="border border-border overflow-hidden"
+                          style={{ width: colWidths[ci] ?? DEFAULT_COL, maxWidth: colWidths[ci] ?? DEFAULT_COL }}
                         >
-                          <UrlCell val={val} />
+                          <div className="px-2" style={{ height: CELL_HEIGHT, overflow: "hidden", display: "flex", alignItems: "center" }}>
+                            <UrlCell val={val} />
+                          </div>
                         </td>
                       );
                     }
@@ -348,15 +365,37 @@ export function SheetsViewer({ url }: { url: string }) {
                     return (
                       <td
                         key={ci}
-                        className={`px-2 border border-border overflow-hidden relative ${hasToken ? "focus-within:bg-primary/5 focus-within:ring-1 focus-within:ring-inset focus-within:ring-primary" : ""}`}
-                        style={{ width: colWidths[ci] ?? DEFAULT_COL, height: CELL_HEIGHT }}
+                        className={`border border-border overflow-hidden relative ${hasToken ? "focus-within:bg-primary/5 focus-within:ring-1 focus-within:ring-inset focus-within:ring-primary" : ""}`}
+                        style={{ width: colWidths[ci] ?? DEFAULT_COL, maxWidth: colWidths[ci] ?? DEFAULT_COL }}
                       >
-                        <TextCell
-                          val={val}
-                          canEdit={hasToken}
-                          onBlur={(e) => handleCellBlur(e, ri, ci)}
-                          saving={isSaving}
-                        />
+                        <div
+                          className="px-2 flex items-start"
+                          style={{
+                            minHeight: CELL_HEIGHT,
+                            maxHeight: isExpanded ? "none" : CELL_HEIGHT,
+                            overflow: "hidden",
+                          }}
+                        >
+                          <TextCell
+                            val={val}
+                            canEdit={hasToken}
+                            onBlur={(e) => handleCellBlur(e, ri, ci)}
+                            saving={isSaving}
+                            expanded={isExpanded}
+                          />
+                        </div>
+                        {/* Expand button — only on first cell of rows with long text, on hover */}
+                        {ci === 0 && hasLongText && (
+                          <button
+                            onClick={() => toggleRow(ri)}
+                            className="absolute bottom-0.5 right-0.5 opacity-0 group-hover/row:opacity-100 transition-opacity text-muted-foreground hover:text-primary bg-background/80 rounded p-0.5"
+                            title={isExpanded ? "Réduire" : "Développer"}
+                          >
+                            {isExpanded
+                              ? <ChevronUp className="h-3 w-3" />
+                              : <ChevronDown className="h-3 w-3" />}
+                          </button>
+                        )}
                       </td>
                     );
                   })}

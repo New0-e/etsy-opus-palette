@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Table2, Store, Package, FileText, X, ChevronUp } from "lucide-react";
 import { SheetsViewer } from "./SheetsViewer";
-import { DocViewer } from "./DocViewer";
+import { NotepadViewer } from "./NotepadViewer";
 
 const TABS = [
   {
@@ -90,7 +90,7 @@ export function BottomTabs() {
           {/* Content — key forces remount on tab switch */}
           <div key={activeId} className="flex-1 overflow-hidden">
             {active.type === "sheet" && <SheetsViewer url={active.url} />}
-            {active.type === "doc" && <DocViewer url={active.url} />}
+            {active.type === "doc" && <NotepadViewer url={active.url} />}
           </div>
         </div>
       )}
