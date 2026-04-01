@@ -98,6 +98,7 @@ interface ProductRow {
   numero: string;
   nom: string;
   imageUrls: string[];
+  dossierPhotoId: string;
 }
 
 export default function DownloadImagesPage() {
@@ -128,10 +129,11 @@ export default function DownloadImagesPage() {
         const findCol = (...keywords: string[]) =>
           headers.findIndex(h => keywords.some(k => h.toLowerCase().includes(k.toLowerCase())));
 
-        const boutiqueIdx = findCol("boutique");
-        const numeroIdx   = findCol("numéro", "numero", "num", "n°", "ref", "référence", "id");
-        const nomIdx      = findCol("nom propre", "nom_propre", "nom");
-        const urlsIdx     = findCol("urls image", "url image", "urls_image", "image_url", "images");
+        const boutiqueIdx  = findCol("boutique");
+        const numeroIdx    = findCol("numéro", "numero", "num", "n°", "ref", "référence", "id");
+        const nomIdx       = findCol("nom propre", "nom_propre", "nom");
+        const urlsIdx      = findCol("urls image", "url image", "urls_image", "image_url", "images");
+        const dossierIdx   = findCol("id_dossier_photo_brute", "dossier_photo", "dossier photo");
 
         const rows: ProductRow[] = dataRows
           .filter(row => row.some(c => c.trim()))
@@ -144,7 +146,8 @@ export default function DownloadImagesPage() {
               .split(/[\n,]+/)
               .map(u => u.trim())
               .filter(u => /^https?:\/\//.test(u));
-            return { boutique, numero, nom, imageUrls };
+            const dossierPhotoId = dossierIdx >= 0 ? (row[dossierIdx] ?? "").trim() : "";
+            return { boutique, numero, nom, imageUrls, dossierPhotoId };
           })
           .filter(p => p.boutique || p.nom);
 
@@ -183,6 +186,7 @@ export default function DownloadImagesPage() {
             ? [activeProduct.numero, activeProduct.nom].filter(Boolean).join(" – ")
             : selectedProductKey,
           images: selectedImages,
+          dossier_photo_id: activeProduct?.dossierPhotoId ?? "",
         }),
       });
       if (res.ok) {
