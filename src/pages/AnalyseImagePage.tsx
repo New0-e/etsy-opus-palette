@@ -2,20 +2,53 @@ import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Upload, Tags, FlaskConical } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Loader2, Upload, Tags, FlaskConical, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore } from "@/lib/driveStore";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
 
+function TagSection({ title, tags, color, copied, onCopy }: {
+  title: string;
+  tags: string[];
+  color: string;
+  copied: string | null;
+  onCopy: (tag: string) => void;
+}) {
+  if (!tags?.length) return null;
+  return (
+    <div className="p-4 rounded-lg bg-secondary border border-border space-y-3">
+      <div className="flex items-center justify-between">
+        <Label className="text-primary">{title}</Label>
+        <span className="text-xs text-muted-foreground">{tags.length} tags</span>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {tags.map((tag, i) => (
+          <button
+            key={i}
+            onClick={() => onCopy(tag)}
+            title="Copier"
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md border text-xs font-medium transition-opacity hover:opacity-80 ${color}`}
+          >
+            {copied === tag ? <Check className="h-3 w-3 flex-shrink-0" /> : <Copy className="h-3 w-3 flex-shrink-0" />}
+            {tag}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AnalyseImagePage() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState<{ descriptive_keywords: string[]; buying_intent: string[]; search_queries: string[] } | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [testMode, setTestMode] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
 
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -51,8 +84,13 @@ export default function AnalyseImagePage() {
         method: "POST",
         body: formData,
       });
-      const data = await res.text();
-      setResult(data);
+      const text = await res.text();
+      try {
+        const json = JSON.parse(text);
+        setResult(json);
+      } catch {
+        setResult({ descriptive_keywords: [], buying_intent: [], search_queries: [text] });
+      }
       toast.success("Analyse terminée !");
     } catch {
       toast.error("Erreur lors de l'analyse");
@@ -101,9 +139,28 @@ export default function AnalyseImagePage() {
         </Button>
 
         {result && (
-          <div className="p-4 rounded-lg bg-secondary border border-border">
-            <Label className="mb-2 block text-primary">Résultat</Label>
-            <p className="text-sm text-foreground whitespace-pre-wrap">{result}</p>
+          <div className="space-y-4">
+            <TagSection
+              title="Mots-clés descriptifs"
+              tags={result.descriptive_keywords}
+              color="bg-primary/10 text-primary border-primary/20"
+              copied={copied}
+              onCopy={(tag) => { navigator.clipboard.writeText(tag); setCopied(tag); setTimeout(() => setCopied(null), 1500); }}
+            />
+            <TagSection
+              title="Intention d'achat"
+              tags={result.buying_intent}
+              color="bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+              copied={copied}
+              onCopy={(tag) => { navigator.clipboard.writeText(tag); setCopied(tag); setTimeout(() => setCopied(null), 1500); }}
+            />
+            <TagSection
+              title="Requêtes de recherche"
+              tags={result.search_queries}
+              color="bg-violet-500/10 text-violet-400 border-violet-500/20"
+              copied={copied}
+              onCopy={(tag) => { navigator.clipboard.writeText(tag); setCopied(tag); setTimeout(() => setCopied(null), 1500); }}
+            />
           </div>
         )}
       </div>
