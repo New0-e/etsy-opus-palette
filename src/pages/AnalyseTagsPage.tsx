@@ -71,37 +71,51 @@ export default function AnalyseTagsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tags }),
       });
-      const text = await res.text();
+      const raw = await res.text();
+      let text = raw;
+
+      // Extraire le texte depuis la réponse brute Gemini
+      // Format: [{content:{parts:[{text:"..."}]}}]
       try {
-        // Essai JSON d'abord
-        let parsed = JSON.parse(text);
-        if (Array.isArray(parsed)) parsed = parsed[0];
-        setResult({
-          new_tags: Array.isArray(parsed?.new_tags) ? parsed.new_tags : [],
-          old_tags: Array.isArray(parsed?.old_tags) ? parsed.old_tags : [],
-          new_tags_string: parsed?.new_tags_string ?? "",
-          changes: [],
-        });
-      } catch {
-        // Format texte brut
-        const oldLine = text.match(/Old tags:\s*([^\n]+)/i);
-        const old_tags = oldLine ? oldLine[1].split(",").map(t => t.trim()).filter(Boolean) : [];
-
-        const changeRegex = /\(([^)]+?)\s*->\s*([^)]+?)\)\s*:\s*([^\n(]+)/g;
-        const changes: TagChange[] = [];
-        let m: RegExpExecArray | null;
-        while ((m = changeRegex.exec(text)) !== null) {
-          changes.push({ old: m[1].trim(), new: m[2].trim(), reason: m[3].trim() });
+        const json = JSON.parse(raw);
+        const arr = Array.isArray(json) ? json : [json];
+        const candidate = arr[0];
+        const geminiText = candidate?.content?.parts?.[0]?.text
+          ?? candidate?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (geminiText) text = geminiText;
+        // Format n8n JSON structuré (new_tags / old_tags)
+        else if (candidate?.new_tags || candidate?.old_tags) {
+          setResult({
+            new_tags: Array.isArray(candidate?.new_tags) ? candidate.new_tags : [],
+            old_tags: Array.isArray(candidate?.old_tags) ? candidate.old_tags : [],
+            new_tags_string: candidate?.new_tags_string ?? "",
+            changes: [],
+          });
+          toast.success("Analyse terminée !");
+          return;
         }
+      } catch { /* pas du JSON, on traite comme texte brut */ }
 
-        const new_tags = changes.length ? changes.map(c => c.new) : [];
-        setResult({
-          old_tags,
-          new_tags,
-          new_tags_string: new_tags.join(", "),
-          changes,
-        });
+      // Parser le texte brut (- Old tags: ... + (old -> new): reason)
+      const oldLine = text.match(/[-–]?\s*Old tags:\s*([^\n]+)/i);
+      const old_tags = oldLine
+        ? oldLine[1].split(",").map(t => t.trim()).filter(Boolean)
+        : [];
+
+      const changeRegex = /\(([^)]+?)\s*->\s*([^)]+?)\)\s*:\s*([^\n(]+)/g;
+      const changes: TagChange[] = [];
+      let m: RegExpExecArray | null;
+      while ((m = changeRegex.exec(text)) !== null) {
+        changes.push({ old: m[1].trim(), new: m[2].trim(), reason: m[3].trim() });
       }
+
+      const new_tags = changes.map(c => c.new);
+      setResult({
+        old_tags,
+        new_tags,
+        new_tags_string: new_tags.join(", "),
+        changes,
+      });
       toast.success("Analyse terminée !");
     } catch {
       toast.error("Erreur lors de l'analyse");
