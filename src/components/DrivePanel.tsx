@@ -13,6 +13,14 @@ const MIME_FOLDER = "application/vnd.google-apps.folder";
 const MIME_DOC = "application/vnd.google-apps.document";
 const MIME_SHEET = "application/vnd.google-apps.spreadsheet";
 
+// Fichiers épinglés dans la sidebar — masqués ici pour éviter les doublons
+const SIDEBAR_PINNED = new Set([
+  "Tableau Contrôle",
+  "Liste Boutique",
+  "Suivi Commande",
+  "Prompt",
+]);
+
 interface DriveItem {
   id: string;
   name: string;
@@ -67,7 +75,7 @@ export function DrivePanel() {
     setError(null);
     try {
       const items = await fetchItems(token, "root");
-      setRootItems(items);
+      setRootItems(items.filter(item => !SIDEBAR_PINNED.has(item.name)));
     } catch (e) {
       if ((e as Error).message === "token_expired") {
         driveStore.logout();
