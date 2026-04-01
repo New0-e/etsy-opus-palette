@@ -66,7 +66,15 @@ export default function AnalyseTagsPage() {
       });
       const text = await res.text();
       try {
-        setResult(JSON.parse(text));
+        let parsed = JSON.parse(text);
+        // n8n renvoie parfois un tableau — on prend le premier élément
+        if (Array.isArray(parsed)) parsed = parsed[0];
+        const result: TagResult = {
+          new_tags: Array.isArray(parsed?.new_tags) ? parsed.new_tags : [],
+          old_tags: Array.isArray(parsed?.old_tags) ? parsed.old_tags : [],
+          new_tags_string: parsed?.new_tags_string ?? "",
+        };
+        setResult(result);
       } catch {
         setResult(null);
         toast.error("Réponse inattendue du serveur");
