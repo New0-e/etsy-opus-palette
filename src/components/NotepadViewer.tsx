@@ -55,6 +55,13 @@ export function NotepadViewer({ url }: { url: string }) {
 
   const activeTab = tabs.find(t => t.id === activeId) ?? tabs[0];
 
+  // Sync editor DOM when switching tabs
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = activeTab?.content ?? "";
+    }
+  }, [activeId]);
+
   // Load from Google Doc on first mount if main tab is empty
   useEffect(() => {
     const main = loadTabs().find(t => t.id === "main");
@@ -68,19 +75,15 @@ export function NotepadViewer({ url }: { url: string }) {
           persistTabs(next);
           return next;
         });
+        // Inject directly into the editor — state update alone ne re-synchonise pas le DOM
+        if (editorRef.current) {
+          editorRef.current.innerHTML = html;
+        }
       }
       setLoading(false);
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // Sync editor DOM when switching tabs
-  useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.innerHTML = activeTab?.content ?? "";
-      editorRef.current.focus();
-    }
-  }, [activeId]);
 
   const handleInput = useCallback(() => {
     if (!editorRef.current) return;
@@ -317,22 +320,22 @@ export function NotepadViewer({ url }: { url: string }) {
         </ToolBtn>
       </div>
 
-      {/* Editor */}
-      {loading ? (
-        <div className="flex items-center justify-center flex-1">
-          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-        </div>
-      ) : (
+      {/* Editor — toujours monté pour que le ref soit disponible dès le fetch */}
+      <div className="flex-1 relative" style={{ minHeight: 0 }}>
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10 pointer-events-none">
+            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+          </div>
+        )}
         <div
           ref={editorRef}
           contentEditable
           suppressContentEditableWarning
           onInput={handleInput}
-          className="flex-1 p-4 outline-none text-sm text-foreground overflow-auto leading-relaxed"
-          style={{ minHeight: 0 }}
+          className="h-full p-4 outline-none text-sm text-foreground overflow-auto leading-relaxed"
           spellCheck={false}
         />
-      )}
+      </div>
     </div>
   );
 }
