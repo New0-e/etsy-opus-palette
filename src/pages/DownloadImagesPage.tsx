@@ -8,7 +8,7 @@ import { driveStore } from "@/lib/driveStore";
 
 const SHEET_ID = "1u3_-YtIYqCnO2YEPfLh1cCsjd2CcRiT1cKileCLA0Ig";
 const GID = "0";
-const WEBHOOK_URL = "https://n8n.srv1196541.hstgr.cloud/webhook-test/upload-photos-brutes";
+const WEBHOOK_URL = "https://n8n.srv1196541.hstgr.cloud/webhook/upload-photos-brutes";
 
 function parseCSV(text: string): string[][] {
   const rows: string[][] = [];
@@ -82,8 +82,8 @@ function ImageThumb({ url, index, selected, onToggle }: {
 
       {preview && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
-          <div className="rounded-lg overflow-hidden border border-border shadow-xl bg-background w-72">
-            <img src={url} alt="Aperçu" className="w-full h-72 object-contain" />
+          <div className="rounded-lg overflow-hidden border border-border shadow-xl bg-background w-96">
+            <img src={url} alt="Aperçu" className="w-full h-96 object-contain" />
           </div>
         </div>
       )}
