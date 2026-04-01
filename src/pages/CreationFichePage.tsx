@@ -4,12 +4,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Loader2, Send } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Loader2, Send, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore, type DriveFolder } from "@/lib/driveStore";
 
+const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/eeea6c70-e494-4b2f-8fbf-0dee3337901b";
+const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/eeea6c70-e494-4b2f-8fbf-0dee3337901b";
+
 export default function CreationFichePage() {
   const [loading, setLoading] = useState(false);
+  const [testMode, setTestMode] = useState(false);
   const [boutiques, setBoutiques] = useState<DriveFolder[]>([]);
 
   useEffect(() => {
@@ -32,7 +37,7 @@ export default function CreationFichePage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("https://n8n.srv1196541.hstgr.cloud/webhook/eeea6c70-e494-4b2f-8fbf-0dee3337901b", {
+      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -52,7 +57,16 @@ export default function CreationFichePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="font-display text-2xl font-bold mb-6">Génération Fiches Produits</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-2xl font-bold">Génération Fiches Produits</h1>
+        <div className="flex items-center gap-2">
+          <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
+          <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>
+            Mode test
+          </span>
+          <Switch checked={testMode} onCheckedChange={setTestMode} />
+        </div>
+      </div>
       <form onSubmit={handleSubmit} className="tool-card space-y-5">
         <div className="space-y-2">
           <Label>Lien Etsy</Label>
