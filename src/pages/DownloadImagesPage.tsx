@@ -49,25 +49,51 @@ function parseCSV(text: string): string[][] {
   return rows;
 }
 
+const PREVIEW_SIZE = 480;
+const PREVIEW_GAP = 12;
+
 function ImageThumb({ url, index, selected, onToggle }: {
   url: string;
   index: number;
   selected: boolean;
   onToggle: () => void;
 }) {
-  const [preview, setPreview] = useState(false);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showPreview = () => {
-    timer.current = setTimeout(() => setPreview(true), 500);
+    timer.current = setTimeout(() => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+
+      // Horizontal: centre sur la vignette, recadré si déborde
+      let left = rect.left + rect.width / 2 - PREVIEW_SIZE / 2;
+      left = Math.max(8, Math.min(left, vw - PREVIEW_SIZE - 8));
+
+      // Vertical: au-dessus si la place suffit, sinon en-dessous
+      let top: number;
+      if (rect.top >= PREVIEW_SIZE + PREVIEW_GAP) {
+        top = rect.top - PREVIEW_SIZE - PREVIEW_GAP;
+      } else {
+        top = rect.bottom + PREVIEW_GAP;
+      }
+      // Évite de dépasser le bas
+      top = Math.min(top, vh - PREVIEW_SIZE - 8);
+
+      setPos({ top, left });
+    }, 500);
   };
+
   const hidePreview = () => {
     if (timer.current) clearTimeout(timer.current);
-    setPreview(false);
+    setPos(null);
   };
 
   return (
-    <div className="relative" onMouseEnter={showPreview} onMouseLeave={hidePreview}>
+    <div ref={containerRef} className="relative" onMouseEnter={showPreview} onMouseLeave={hidePreview}>
       <button
         onClick={onToggle}
         className={`relative rounded-lg overflow-hidden border-2 transition-all w-full ${
@@ -82,11 +108,12 @@ function ImageThumb({ url, index, selected, onToggle }: {
         )}
       </button>
 
-      {preview && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-50 pointer-events-none">
-          <div className="rounded-lg overflow-hidden border border-border shadow-xl bg-background w-96">
-            <img src={url} alt="Aperçu" className="w-full h-96 object-contain" />
-          </div>
+      {pos && (
+        <div
+          className="fixed z-50 pointer-events-none rounded-lg overflow-hidden border border-border shadow-2xl bg-background"
+          style={{ top: pos.top, left: pos.left, width: PREVIEW_SIZE, height: PREVIEW_SIZE }}
+        >
+          <img src={url} alt="Aperçu" className="w-full h-full object-contain" />
         </div>
       )}
     </div>
