@@ -1,9 +1,13 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Loader2, Upload, Tags } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Loader2, Upload, Tags, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore } from "@/lib/driveStore";
+
+const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
+const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
 
 export default function AnalyseImagePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -11,12 +15,12 @@ export default function AnalyseImagePage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
   const [dragOver, setDragOver] = useState(false);
+  const [testMode, setTestMode] = useState(false);
 
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
 
-    // Handle Drive image drop
     const driveId = e.dataTransfer.getData("drive-item-id");
     const driveName = e.dataTransfer.getData("drive-item-name");
     if (driveId) {
@@ -43,7 +47,7 @@ export default function AnalyseImagePage() {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      const res = await fetch("https://n8n.srv1196541.hstgr.cloud/webhook/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72", {
+      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
         method: "POST",
         body: formData,
       });
@@ -59,7 +63,14 @@ export default function AnalyseImagePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="font-display text-2xl font-bold mb-6">Analyse Image → Tags</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-2xl font-bold">Analyse Image → Tags</h1>
+        <div className="flex items-center gap-2">
+          <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
+          <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
+          <Switch checked={testMode} onCheckedChange={setTestMode} />
+        </div>
+      </div>
       <div className="tool-card space-y-6">
         <div>
           <Label className="mb-2 block">Image à analyser</Label>

@@ -2,13 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Loader2, Download, Check, AlertCircle, LogIn } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Loader2, Download, Check, AlertCircle, LogIn, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore } from "@/lib/driveStore";
 
 const SHEET_ID = "1u3_-YtIYqCnO2YEPfLh1cCsjd2CcRiT1cKileCLA0Ig";
 const GID = "0";
-const WEBHOOK_URL = "https://n8n.srv1196541.hstgr.cloud/webhook/upload-photos-brutes";
+const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/upload-photos-brutes";
+const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/upload-photos-brutes";
 
 function parseCSV(text: string): string[][] {
   const rows: string[][] = [];
@@ -106,6 +108,7 @@ export default function DownloadImagesPage() {
   const [selectedProductKey, setSelectedProductKey] = useState("");
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const [sending, setSending] = useState(false);
+  const [testMode, setTestMode] = useState(false);
 
   useEffect(() => {
     const token = driveStore.getToken();
@@ -171,7 +174,7 @@ export default function DownloadImagesPage() {
     if (!selectedImages.length) { toast.error("Sélectionnez au moins une image"); return; }
     setSending(true);
     try {
-      const res = await fetch(WEBHOOK_URL, {
+      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -225,7 +228,14 @@ export default function DownloadImagesPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="font-display text-2xl font-bold mb-6">Téléchargement Images</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-2xl font-bold">Téléchargement Images</h1>
+        <div className="flex items-center gap-2">
+          <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
+          <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
+          <Switch checked={testMode} onCheckedChange={setTestMode} />
+        </div>
+      </div>
       <div className="tool-card space-y-6">
 
         {/* 1. Boutique */}
