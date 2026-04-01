@@ -157,7 +157,7 @@ export default function AnalyseImagePage() {
             <TagSection
               title="Requêtes de recherche"
               tags={result.search_queries}
-              color="bg-violet-500/10 text-violet-400 border-violet-500/20"
+              color="bg-orange-500/10 text-orange-400 border-orange-500/20"
               copied={copied}
               onCopy={(tag) => { navigator.clipboard.writeText(tag); setCopied(tag); setTimeout(() => setCopied(null), 1500); }}
             />

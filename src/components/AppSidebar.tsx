@@ -42,7 +42,7 @@ const sheetLinks = [
   {
     title: "Prompt",
     icon: FileText,
-    url: "", // À renseigner : colle l'URL Google Doc ici
+    url: "https://docs.google.com/document/d/1h9iRZWZSMjeu8aec_cVFFl0K24oBVR1HDZqhcjWErko/edit?tab=t.0",
   },
 ];
 
