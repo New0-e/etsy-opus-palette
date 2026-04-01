@@ -79,32 +79,39 @@ export const driveStore = {
 
   async updateSheetCell(
     spreadsheetId: string,
-    sheetName: string,   // empty string = no prefix (targets first visible sheet)
-    row: number,
-    col: number,
+    gid: string,   // numeric sheet id from URL (?gid=...) — avoids needing sheet name
+    row: number,   // 0-based data row (0 = first row after header)
+    col: number,   // 0-based column
     value: string
   ): Promise<true | string | false> {
     if (!_token) return false;
-    let colStr = "";
-    let c = col + 1;
-    while (c > 0) {
-      colStr = String.fromCharCode(64 + (c % 26 || 26)) + colStr;
-      c = Math.floor((c - 1) / 26);
-    }
-    const cellRef = `${colStr}${row + 2}`;
-    const a1 = sheetName ? `${sheetName}!${cellRef}` : cellRef;
     try {
+      const sheetId = parseInt(gid, 10) || 0;
       const res = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(a1)}?valueInputOption=USER_ENTERED`,
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
         {
-          method: "PUT",
+          method: "POST",
           headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
-          body: JSON.stringify({ values: [[value]] }),
+          body: JSON.stringify({
+            requests: [{
+              updateCells: {
+                range: {
+                  sheetId,
+                  startRowIndex: row + 1, // +1 to skip header row
+                  endRowIndex:   row + 2,
+                  startColumnIndex: col,
+                  endColumnIndex:   col + 1,
+                },
+                rows: [{ values: [{ userEnteredValue: { stringValue: value } }] }],
+                fields: "userEnteredValue",
+              },
+            }],
+          }),
         }
       );
       if (!res.ok) {
         const body = await res.text().catch(() => "");
-        console.error(`[Sheets] PUT ${a1} → ${res.status}`, body);
+        console.error(`[Sheets] batchUpdate → ${res.status}`, body);
         return `${res.status}` as any;
       }
       return true;

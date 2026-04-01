@@ -152,6 +152,7 @@ export function SheetsViewer({ url }: { url: string }) {
   const [colWidths, setColWidths] = useState<number[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
+  // sheetName kept for potential future use but not required for saves (we use gid directly)
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
 
   const toggleRow = useCallback((ri: number) => {
@@ -206,23 +207,8 @@ export function SheetsViewer({ url }: { url: string }) {
       const key = `${rowIdx}-${colIdx}`;
       setSaving(key);
 
-      // Try with known sheet name first; if unavailable, try fetching it once, then fall back to no prefix
-      let currentSheetName = sheetName;
-      if (!currentSheetName) {
-        const token = driveStore.getToken();
-        if (token) {
-          const name = await fetchSheetName(spreadsheetId, gidRef, token);
-          if (name) { setSheetName(name); currentSheetName = name; }
-        }
-      }
-
-      // Attempt save — first with sheet name (or empty fallback for first sheet)
-      let result = await driveStore.updateSheetCell(spreadsheetId, currentSheetName ?? "", rowIdx, colIdx, newValue);
-
-      // If failed and we had a sheet name, retry without it (first-sheet fallback)
-      if (result !== true && currentSheetName) {
-        result = await driveStore.updateSheetCell(spreadsheetId, "", rowIdx, colIdx, newValue);
-      }
+      // Use gid directly as numeric sheetId — no fetchSheetName needed
+      const result = await driveStore.updateSheetCell(spreadsheetId, gidRef, rowIdx, colIdx, newValue);
 
       setSaving(null);
 
@@ -238,13 +224,12 @@ export function SheetsViewer({ url }: { url: string }) {
       } else {
         const code = typeof result === "string" ? result : "?";
         if (code === "401") toast.error("Token expiré — déconnecte et reconnecte Drive");
-        else if (code === "403") toast.error("Permission refusée (403) — vérifie les scopes OAuth et l'API Sheets");
-        else if (code === "400") toast.error("Erreur 400 — plage A1 invalide");
-        else toast.error(`Échec sauvegarde (${code}) — voir console`);
+        else if (code === "403") toast.error("Permission refusée (403) — vérifie les scopes OAuth");
+        else toast.error(`Échec sauvegarde (${code}) — voir console F12`);
         e.currentTarget.innerText = original;
       }
     },
-    [spreadsheetId, sheetName, gidRef, rows]
+    [spreadsheetId, gidRef, rows]
   );
 
   const startResize = (e: React.MouseEvent, col: number) => {
