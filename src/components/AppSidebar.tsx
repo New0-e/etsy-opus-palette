@@ -106,39 +106,37 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground">
-            Google Sheets
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {sheetLinks.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton
-                    onClick={() => openSheet(item.title, item.url)}
-                    disabled={!item.url}
-                    className={!item.url ? "opacity-40 cursor-not-allowed" : ""}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4">
-        <Button
-          variant="outline"
-          className="w-full justify-start gap-2 border-border hover:bg-secondary"
-          onClick={() => window.open("https://drive.google.com", "_blank")}
-        >
-          <FolderOpen className="h-4 w-4" />
-          <span className="group-data-[collapsible=icon]:hidden">Google Drive</span>
-          <ExternalLink className="h-3 w-3 ml-auto group-data-[collapsible=icon]:hidden" />
-        </Button>
+      <SidebarFooter className="p-0">
+        <div className="px-3 pb-1 pt-2 border-t border-sidebar-border">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground px-1 py-1.5">Raccourci Drive</p>
+          <SidebarMenu>
+            {sheetLinks.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  onClick={() => openSheet(item.title, item.url)}
+                  disabled={!item.url}
+                  className={!item.url ? "opacity-40 cursor-not-allowed" : ""}
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.title}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </div>
+        <div className="p-4 pt-2">
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-2 border-border hover:bg-secondary"
+            onClick={() => window.open("https://drive.google.com", "_blank")}
+          >
+            <FolderOpen className="h-4 w-4" />
+            <span className="group-data-[collapsible=icon]:hidden">Google Drive</span>
+            <ExternalLink className="h-3 w-3 ml-auto group-data-[collapsible=icon]:hidden" />
+          </Button>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
