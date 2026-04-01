@@ -20,7 +20,7 @@ export function DocViewer({ url }: { url: string }) {
     if (!docId) { setError("URL invalide"); setLoading(false); return; }
     setLoading(true);
     driveStore.fetchDoc(docId).then(content => {
-      if (content === null) setError("Impossible de charger — reconnecte Drive avec les permissions Documents");
+      if (content === null) setError("Impossible de charger le document");
       else { setText(content); setDirty(false); }
       setLoading(false);
     });
@@ -32,7 +32,7 @@ export function DocViewer({ url }: { url: string }) {
     const ok = await driveStore.saveDoc(docId, text);
     setSaving(false);
     if (ok) { toast.success("Document sauvegardé"); setDirty(false); }
-    else toast.error("Échec de la sauvegarde");
+    else toast.error("Reconnecte Drive (déconnecte → reconnecte) pour activer la sauvegarde");
   };
 
   if (loading) return (

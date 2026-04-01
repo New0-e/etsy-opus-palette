@@ -135,8 +135,8 @@ function TextCell({
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-const MIN_COL = 80;
-const DEFAULT_COL = 120;
+const MIN_COL = 60;
+const DEFAULT_COL = 100;
 const EXTRA_ROWS = 20;
 const CELL_HEIGHT = 28;
 
@@ -301,7 +301,7 @@ export function SheetsViewer({ url }: { url: string }) {
 
       {/* Tableau */}
       <div className="overflow-auto flex-1">
-        <table className="text-xs border-collapse" style={{ tableLayout: "fixed", minWidth: "100%" }}>
+        <table className="text-xs border-collapse" style={{ tableLayout: "fixed", width: "max-content" }}>
           <thead className="sticky top-0 z-10">
             <tr>
               {allHeaders.map((h, i) => (

@@ -111,21 +111,13 @@ export const driveStore = {
   async fetchDoc(docId: string): Promise<string | null> {
     if (!_token) return null;
     try {
+      // Drive export works with drive.readonly — no documents scope needed
       const res = await fetch(
-        `https://docs.googleapis.com/v1/documents/${docId}`,
+        `https://www.googleapis.com/drive/v3/files/${docId}/export?mimeType=text/plain`,
         { headers: { Authorization: `Bearer ${_token}` } }
       );
       if (!res.ok) return null;
-      const doc = await res.json();
-      let text = "";
-      for (const el of (doc.body?.content ?? [])) {
-        if (el.paragraph) {
-          for (const pe of (el.paragraph.elements ?? [])) {
-            if (pe.textRun?.content) text += pe.textRun.content;
-          }
-        }
-      }
-      return text;
+      return await res.text();
     } catch {
       return null;
     }
@@ -134,10 +126,12 @@ export const driveStore = {
   async saveDoc(docId: string, text: string): Promise<boolean> {
     if (!_token) return false;
     try {
+      // Get current doc structure via Docs API (requires documents scope)
       const res = await fetch(
         `https://docs.googleapis.com/v1/documents/${docId}`,
         { headers: { Authorization: `Bearer ${_token}` } }
       );
+      if (res.status === 403) return false; // no documents scope yet
       if (!res.ok) return false;
       const doc = await res.json();
       const endIndex: number = doc.body?.content?.at(-1)?.endIndex ?? 1;
