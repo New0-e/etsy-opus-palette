@@ -497,17 +497,19 @@ export function SheetsViewer({ url }: { url: string }) {
                               value={val}
                               disabled={!hasToken}
                               onChange={e => handleDropdownChange(e.target.value, ri, ci)}
-                              className="w-full h-full bg-transparent border-0 outline-none text-xs text-foreground cursor-pointer px-1 appearance-none"
+                              className="w-full h-full bg-transparent border-0 outline-none text-xs text-foreground cursor-pointer pl-1 pr-5 appearance-none"
                               style={{ backgroundColor: cellBg ?? "transparent" }}
                             >
-                              {!meta.options.includes(val) && val && (
-                                <option value={val}>{val}</option>
-                              )}
+                              {/* Option vide pour les cellules sans valeur sélectionnée */}
+                              <option value="">—</option>
                               {meta.options.map(opt => (
                                 <option key={opt} value={opt}>{opt}</option>
                               ))}
                             </select>
-                            {isSaving && <Loader2 className="absolute right-1 h-3 w-3 animate-spin text-primary pointer-events-none" />}
+                            {isSaving
+                              ? <Loader2 className="absolute right-1 h-3 w-3 animate-spin text-primary pointer-events-none" />
+                              : <ChevronDown className="absolute right-1 h-3 w-3 text-muted-foreground pointer-events-none" />
+                            }
                           </div>
                         </td>
                       );
