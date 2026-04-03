@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback } from "react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -142,8 +142,6 @@ export default function GenerationPhotosPage() {
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
   const [testMode, setTestMode] = useState(false);
 
-  const prevProductImagesRef = useRef<File[]>([]);
-
   const handleGenerate = useCallback(async (currentMode: "auto" | "manuel" = mode) => {
     if (productImages.length === 0) { toast.error("Ajoutez au moins une image produit"); return; }
     setLoading(true);
@@ -189,13 +187,6 @@ export default function GenerationPhotosPage() {
       setLoading(false);
     }
   }, [mode, productImages, bgImages, modelImages, imageCount, instructions, categorie, selectedEnv, selectedEcl, selectedAngle, selectedAcc, testMode]);
-
-  useEffect(() => {
-    if (mode === "auto" && productImages.length > 0 && productImages !== prevProductImagesRef.current) {
-      prevProductImagesRef.current = productImages;
-      handleGenerate("auto");
-    }
-  }, [productImages, mode, handleGenerate]);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -255,17 +246,10 @@ export default function GenerationPhotosPage() {
           </Select>
         </div>
 
-        {mode === "manuel" ? (
-          <Button onClick={() => handleGenerate("manuel")} disabled={loading} className="w-full gap-2">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
-            {loading ? "Génération en cours..." : "Générer"}
-          </Button>
-        ) : (
-          <div className="flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground">
-            {loading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Sparkles className="h-4 w-4 text-primary" />}
-            {loading ? "Envoi automatique en cours..." : "Envoi automatique dès qu'une image est ajoutée"}
-          </div>
-        )}
+        <Button onClick={() => handleGenerate()} disabled={loading} className="w-full gap-2">
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {loading ? "Génération en cours..." : "Générer"}
+        </Button>
 
         {/* Results */}
         {results.length > 0 && (
