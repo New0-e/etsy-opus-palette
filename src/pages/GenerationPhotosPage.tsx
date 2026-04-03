@@ -11,6 +11,26 @@ import { toast } from "sonner";
 
 const PROXY_URL = "/api/n8n-proxy";
 
+async function compressImage(file: File, maxPx = 1500, quality = 0.82): Promise<File> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (blob) => resolve(new File([blob!], file.name.replace(/\.[^.]+$/, ".jpg"), { type: "image/jpeg" })),
+        "image/jpeg", quality
+      );
+    };
+    img.src = url;
+  });
+}
+
 const environments = [
   "Studio minimaliste fond blanc", "Studio marbre luxueux", "Salon boheme",
   "Cuisine moderne ensoleilee", "Chambre cocooning", "Salle de bain luxueuse",
@@ -146,10 +166,15 @@ export default function GenerationPhotosPage() {
     setLoading(true);
     setResults([]);
     try {
+      const [compressedProducts, compressedBg, compressedModels] = await Promise.all([
+        Promise.all(productImages.map((f) => compressImage(f))),
+        Promise.all(bgImages.map((f) => compressImage(f))),
+        Promise.all(modelImages.map((f) => compressImage(f))),
+      ]);
       const formData = new FormData();
-      productImages.forEach((f) => formData.append("product_images", f));
-      bgImages.forEach((f) => formData.append("bg_images", f));
-      modelImages.forEach((f) => formData.append("model_images", f));
+      compressedProducts.forEach((f) => formData.append("product_images", f));
+      compressedBg.forEach((f) => formData.append("bg_images", f));
+      compressedModels.forEach((f) => formData.append("model_images", f));
       formData.append("mode", currentMode);
       formData.append("image_count", imageCount);
       if (instructions) formData.append("instructions", instructions);
@@ -167,7 +192,12 @@ export default function GenerationPhotosPage() {
         body: formData,
       });
 
-      if (!res.ok) { toast.error(`Erreur ${res.status}`); return; }
+      if (!res.ok) {
+        if (res.status === 413) { toast.error("Images trop lourdes — réduisez leur taille"); return; }
+        if (res.status === 404) { toast.error("Webhook introuvable — en mode test, lancez d'abord un test dans n8n"); return; }
+        toast.error(`Erreur ${res.status}`);
+        return;
+      }
 
       const text = await res.text();
       try {
