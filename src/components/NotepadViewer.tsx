@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Bold, Italic, Underline, Strikethrough,
   AlignLeft, AlignCenter, AlignRight, List,
-  Loader2, ExternalLink, RefreshCw, CheckCheck, AlertCircle, Plus, X,
+  Loader2, ExternalLink, RefreshCw, CheckCheck, AlertCircle, Plus, X, Trash2,
 } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
@@ -62,6 +62,7 @@ export function NotepadViewer() {
   const [folderId, setFolderId] = useState<string | null>(null);
   const [status, setStatus] = useState<Status>("loading");
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState("");
   const editorRef = useRef<HTMLDivElement>(null);
@@ -185,6 +186,21 @@ export function NotepadViewer() {
     setStatus("idle");
   }, [newName, folderId, activeId]);
 
+  // ── Delete doc ───────────────────────────────────────────────────────────
+
+  const handleDelete = useCallback(async (docId: string) => {
+    setConfirmDeleteId(null);
+    const remaining = docs.filter(d => d.id !== docId);
+    const nextActive = remaining.length > 0 ? remaining[0].id : "";
+    setDocs(remaining);
+    setActiveId(nextActive);
+    if (editorRef.current) editorRef.current.innerHTML = "";
+    if (nextActive && remaining.find(d => d.id === nextActive)?.loaded) {
+      if (editorRef.current) editorRef.current.innerHTML = remaining.find(d => d.id === nextActive)!.html;
+    }
+    await driveStore.deleteFile(docId);
+  }, [docs]);
+
   // ── Rename doc ────────────────────────────────────────────────────────────
 
   const handleRename = useCallback(async (docId: string, newTitle: string) => {
@@ -291,8 +307,28 @@ export function NotepadViewer() {
                   }}
                   onClick={e => e.stopPropagation()}
                 />
+              ) : confirmDeleteId === doc.id ? (
+                <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
+                  <span className="text-xs text-destructive">Supprimer ?</span>
+                  <button onMouseDown={e => e.preventDefault()} onClick={() => handleDelete(doc.id)} className="text-destructive hover:text-destructive/80 p-0.5" title="Confirmer">
+                    <CheckCheck className="h-3 w-3" />
+                  </button>
+                  <button onMouseDown={e => e.preventDefault()} onClick={() => setConfirmDeleteId(null)} className="text-muted-foreground hover:text-foreground p-0.5" title="Annuler">
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
               ) : (
-                <span onDoubleClick={e => { e.stopPropagation(); setEditingId(doc.id); }}>{doc.name}</span>
+                <div className="flex items-center gap-1 group/tab">
+                  <span onDoubleClick={e => { e.stopPropagation(); setEditingId(doc.id); }}>{doc.name}</span>
+                  <button
+                    onMouseDown={e => e.preventDefault()}
+                    onClick={e => { e.stopPropagation(); setConfirmDeleteId(doc.id); }}
+                    className="opacity-0 group-hover/tab:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-0.5 ml-0.5"
+                    title="Supprimer"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                </div>
               )}
             </div>
           ))}

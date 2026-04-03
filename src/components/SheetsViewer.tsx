@@ -147,7 +147,7 @@ export function SheetsViewer({ url }: { url: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sheets, setSheets] = useState<{ sheetId: number; title: string }[]>([]);
-  const [activeGid, setActiveGid] = useState("0");
+  const [activeGid, setActiveGid] = useState(() => extractIds(url).gid);
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(null);
   const [colWidths, setColWidths] = useState<number[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
@@ -158,6 +158,14 @@ export function SheetsViewer({ url }: { url: string }) {
 
   const { spreadsheetId: urlSid, gid: urlGid } = useMemo(() => extractIds(url), [url]);
 
+  // Reset active gid when URL changes
+  useEffect(() => {
+    setActiveGid(urlGid);
+    setSheets([]);
+    setRows(null);
+    setExpandedRows(new Set());
+  }, [urlSid]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const toggleRow = useCallback((ri: number) => {
     setExpandedRows(prev => {
       const next = new Set(prev);
@@ -167,12 +175,6 @@ export function SheetsViewer({ url }: { url: string }) {
   }, []);
 
   const hasToken = !!driveStore.getToken();
-
-  // Reset active gid when URL changes
-  useEffect(() => {
-    setActiveGid(urlGid);
-    setSheets([]);
-  }, [urlGid]);
 
   // Load all sheets metadata
   useEffect(() => {

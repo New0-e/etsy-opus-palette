@@ -1,11 +1,62 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileText, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SheetsViewer } from "@/components/SheetsViewer";
+import { driveStore } from "@/lib/driveStore";
+import { useState, useEffect } from "react";
 
 function isGoogleSheet(url: string) { return url.includes("/spreadsheets/"); }
 function isGoogleDoc(url: string) { return url.includes("/document/"); }
 function isDrivePreview(url: string) { return url.includes("drive.google.com/file/d/"); }
+
+function extractFileId(url: string): string | null {
+  return url.match(/\/file\/d\/([a-zA-Z0-9-_]+)/)?.[1] ?? null;
+}
+
+function PDFViewer({ url }: { url: string }) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let objectUrl: string | null = null;
+    const fileId = extractFileId(url);
+    const token = driveStore.getToken();
+    if (!fileId || !token) { setError(true); setLoading(false); return; }
+
+    fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(r => { if (!r.ok) throw new Error(`${r.status}`); return r.blob(); })
+      .then(blob => {
+        objectUrl = URL.createObjectURL(blob);
+        setBlobUrl(objectUrl);
+        setLoading(false);
+      })
+      .catch(() => { setError(true); setLoading(false); });
+
+    return () => { if (objectUrl) URL.revokeObjectURL(objectUrl); };
+  }, [url]);
+
+  if (loading) return (
+    <div className="flex items-center justify-center h-full">
+      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+    </div>
+  );
+  if (error) return (
+    <div className="flex flex-col items-center justify-center h-full gap-3">
+      <AlertCircle className="h-8 w-8 text-destructive" />
+      <p className="text-sm text-destructive">Impossible de charger le PDF</p>
+      <a href={url} target="_blank" rel="noreferrer">
+        <Button variant="outline" className="gap-2">
+          <ExternalLink className="h-4 w-4" />
+          Ouvrir dans Drive
+        </Button>
+      </a>
+    </div>
+  );
+  return <iframe src={blobUrl!} className="w-full h-full border-0" title="PDF" />;
+}
 
 export default function ViewerPage() {
   const [params] = useSearchParams();
@@ -58,14 +109,7 @@ export default function ViewerPage() {
           </div>
         )}
 
-        {pdf && (
-          <iframe
-            src={url}
-            className="w-full h-full border-0"
-            allow="autoplay"
-            title={title}
-          />
-        )}
+        {pdf && <PDFViewer url={url} />}
 
         {!sheet && !doc && !pdf && (
           <div className="flex flex-col items-center justify-center h-full gap-4">

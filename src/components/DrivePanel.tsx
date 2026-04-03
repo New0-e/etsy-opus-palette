@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  ChevronRight, Folder, FolderOpen, PanelRightClose, PanelRightOpen,
+  ChevronRight, Folder, PanelRightClose, PanelRightOpen,
   Loader2, ExternalLink, LogOut, FileText, Image, Table2, Home, RefreshCw, FileType2,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -68,7 +68,8 @@ type NavEntry = { id: string; name: string };
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export function DrivePanel() {
-  const [isOpen, setIsOpen] = useState(true);
+  const isMobile = useIsMobile();
+  const [isOpen, setIsOpen] = useState(() => !window.matchMedia("(max-width: 767px)").matches);
   const [navStack, setNavStack] = useState<NavEntry[]>([]);
   const [items, setItems] = useState<DriveItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -109,12 +110,30 @@ export function DrivePanel() {
     setNavStack(prev => prev.slice(0, idx + 1));
   };
 
+  const containerClass = isMobile
+    ? isOpen
+      ? "fixed inset-0 z-50 bg-background flex flex-col"
+      : "hidden"
+    : `border-l border-border bg-drive transition-all duration-300 flex flex-col h-full ${isOpen ? "w-64" : "w-10"}`;
+
   return (
-    <div className={`border-l border-border bg-drive transition-all duration-300 flex flex-col h-full ${isOpen ? "w-64" : "w-10"}`}>
+    <>
+      {/* Mobile toggle button — visible only when panel is closed */}
+      {isMobile && !isOpen && (
+        <button
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-12 right-3 z-40 bg-secondary border border-border rounded-full p-2 shadow-md text-muted-foreground hover:text-foreground"
+          title="Ouvrir Drive"
+        >
+          <PanelRightOpen className="h-4 w-4" />
+        </button>
+      )}
+
+    <div className={containerClass}>
 
       {/* Header */}
       <div className="p-2 flex items-center justify-between border-b border-border flex-shrink-0">
-        {isOpen && (
+        {(isOpen || !isMobile) && (
           <div className="flex items-center gap-1 px-1 min-w-0 flex-1">
             <span className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider flex-shrink-0">Drive</span>
             <a href="https://drive.google.com" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground ml-1 flex-shrink-0">
@@ -197,6 +216,7 @@ export function DrivePanel() {
         </>
       )}
     </div>
+    </>
   );
 }
 
@@ -263,7 +283,9 @@ function DriveItemRow({
       className={`flex items-center gap-2 w-full py-1.5 px-2 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors ${isImage ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
     >
       <span className="w-3 flex-shrink-0" />
-      {icon}
+      {isMobile && isImage && item.thumbnailLink
+        ? <img src={item.thumbnailLink} alt="" className="h-8 w-8 rounded object-cover flex-shrink-0" />
+        : icon}
       <span className="truncate">{item.name}</span>
     </a>
   );

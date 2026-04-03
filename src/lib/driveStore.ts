@@ -354,6 +354,18 @@ export const driveStore = {
     } catch { return null; }
   },
 
+  /** Permanently deletes a Drive file */
+  async deleteFile(fileId: string): Promise<boolean> {
+    if (!_token) return false;
+    try {
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${_token}` },
+      });
+      return res.status === 204;
+    } catch { return false; }
+  },
+
   /** Renames a Drive file */
   async renameFile(fileId: string, newName: string): Promise<boolean> {
     if (!_token) return false;

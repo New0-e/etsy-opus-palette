@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
@@ -52,17 +53,19 @@ function parseCSV(text: string): string[][] {
 const PREVIEW_SIZE = 480;
 const PREVIEW_GAP = 12;
 
-function ImageThumb({ url, index, selected, onToggle }: {
+function ImageThumb({ url, index, selected, onToggle, disablePreview }: {
   url: string;
   index: number;
   selected: boolean;
   onToggle: () => void;
+  disablePreview?: boolean;
 }) {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const showPreview = () => {
+    if (disablePreview) return;
     timer.current = setTimeout(() => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
@@ -129,6 +132,7 @@ interface ProductRow {
 }
 
 export default function DownloadImagesPage() {
+  const isMobile = useIsMobile();
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -333,6 +337,7 @@ export default function DownloadImagesPage() {
                       index={i}
                       selected={selectedImages.includes(url)}
                       onToggle={() => toggleImage(url)}
+                      disablePreview={isMobile}
                     />
                   ))}
                 </div>
