@@ -257,7 +257,7 @@ export function SheetsViewer({ url }: { url: string }) {
         if (e.currentTarget) e.currentTarget.innerText = original;
       }
     },
-    [spreadsheetId, gidRef, rows]
+    [spreadsheetId, activeGid, rows]
   );
 
   const startResize = (e: React.MouseEvent, col: number) => {
