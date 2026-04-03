@@ -88,13 +88,18 @@ export function BottomTabs() {
     <div className="flex-shrink-0 border-t border-border bg-background">
       {/* Panel */}
       {active && (
-        <div style={{ height }} className="flex flex-col">
-          {/* Resize handle */}
+        <div
+          className={maximized ? "absolute inset-0 z-50 bg-background flex flex-col" : "flex flex-col"}
+          style={maximized ? {} : { height }}
+        >
+          {/* Resize handle — hidden when maximized */}
+          {!maximized && (
           <div
             className="h-1.5 cursor-row-resize hover:bg-primary/50 transition-colors flex-shrink-0 bg-border/60 group"
             onMouseDown={startResize}
             title="Redimensionner"
           />
+          )}
           {/* Panel header */}
           <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-secondary/40 flex-shrink-0">
             <active.icon className="h-3.5 w-3.5 text-primary flex-shrink-0" />

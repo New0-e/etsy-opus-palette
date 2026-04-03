@@ -1,5 +1,16 @@
 // ── Auth constants ─────────────────────────────────────────────────────────────
 export const ALLOWED_EMAIL = "etimbleowen@gmail.com";
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function hexToSheetsRgb(hex: string): { red: number; green: number; blue: number } | null {
+  const m = hex.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+  if (!m) return null;
+  return {
+    red: parseInt(m[1], 16) / 255,
+    green: parseInt(m[2], 16) / 255,
+    blue: parseInt(m[3], 16) / 255,
+  };
+}
 const TOKEN_KEY = "drive_access_token";
 const EMAIL_KEY  = "drive_user_email";
 
@@ -129,6 +140,63 @@ export const driveStore = {
       console.error("[Sheets] fetch error", e);
       return false;
     }
+  },
+
+  // ── Sheets formatting ─────────────────────────────────────────────────────
+
+  async updateSheetCellFormat(
+    spreadsheetId: string,
+    gid: string,
+    row: number,   // 0-based data row (0 = first row after header)
+    col: number,
+    format: { bgColor?: string; textColor?: string; fontSize?: number }
+  ): Promise<boolean> {
+    if (!_token) return false;
+    try {
+      const sheetId = parseInt(gid, 10) || 0;
+      const userEnteredFormat: Record<string, any> = {};
+      const fields: string[] = [];
+
+      if (format.bgColor) {
+        const rgb = hexToSheetsRgb(format.bgColor);
+        if (rgb) { userEnteredFormat.backgroundColor = rgb; fields.push("userEnteredFormat.backgroundColor"); }
+      }
+      const textFormat: Record<string, any> = {};
+      if (format.textColor) {
+        const rgb = hexToSheetsRgb(format.textColor);
+        if (rgb) { textFormat.foregroundColor = rgb; fields.push("userEnteredFormat.textFormat.foregroundColor"); }
+      }
+      if (format.fontSize) {
+        textFormat.fontSize = format.fontSize;
+        fields.push("userEnteredFormat.textFormat.fontSize");
+      }
+      if (Object.keys(textFormat).length) userEnteredFormat.textFormat = textFormat;
+      if (!fields.length) return false;
+
+      const res = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            requests: [{
+              updateCells: {
+                range: {
+                  sheetId,
+                  startRowIndex: row + 1,
+                  endRowIndex: row + 2,
+                  startColumnIndex: col,
+                  endColumnIndex: col + 1,
+                },
+                rows: [{ values: [{ userEnteredFormat }] }],
+                fields: fields.join(","),
+              },
+            }],
+          }),
+        }
+      );
+      return res.ok;
+    } catch { return false; }
   },
 
   // ── Google Docs API ────────────────────────────────────────────────────────

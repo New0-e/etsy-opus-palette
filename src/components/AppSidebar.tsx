@@ -1,6 +1,6 @@
 import {
   FileText, ImageDown, Camera, Tags, BarChart3, UserSearch,
-  ExternalLink, FolderOpen,
+  ExternalLink, FolderOpen, FileImage,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -21,6 +21,7 @@ const secondaryTools = [
   { title: "Analyse Image → Tags", url: "/analyse-image", icon: Tags },
   { title: "Analyse Tags", url: "/analyse-tags", icon: BarChart3 },
   { title: "Tags Concurrent", url: "/tags-concurrent", icon: UserSearch },
+  { title: "Descriptif Image", url: "/descriptif-image", icon: FileImage },
 ];
 
 export function AppSidebar() {

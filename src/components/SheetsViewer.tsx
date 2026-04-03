@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
+import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp, RefreshCw, Palette } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -66,7 +66,13 @@ function shortUrl(val: string): string {
 
 // ── Cell metadata (colors + dropdowns) ───────────────────────────────────────
 
-type CellMeta = { bgColor?: string; options?: string[] };
+type CellMeta = { bgColor?: string; textColor?: string; options?: string[] };
+
+function rgbStringToHex(rgb: string): string {
+  const m = rgb.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+  if (!m) return "#000000";
+  return "#" + [m[1], m[2], m[3]].map(n => Number(n).toString(16).padStart(2, "0")).join("");
+}
 
 async function fetchSheetFormatting(spreadsheetId: string, gid: string, token: string): Promise<CellMeta[][]> {
   try {
@@ -88,6 +94,13 @@ async function fetchSheetFormatting(spreadsheetId: string, gid: string, token: s
           const g = Math.round((bg.green ?? 1) * 255);
           const b = Math.round((bg.blue ?? 1) * 255);
           if (r < 250 || g < 250 || b < 250) meta.bgColor = `rgb(${r},${g},${b})`;
+        }
+        const fg = cell.effectiveFormat?.textFormat?.foregroundColor;
+        if (fg) {
+          const r = Math.round((fg.red ?? 0) * 255);
+          const g = Math.round((fg.green ?? 0) * 255);
+          const b = Math.round((fg.blue ?? 0) * 255);
+          if (r > 10 || g > 10 || b > 10) meta.textColor = `rgb(${r},${g},${b})`;
         }
         const cond = cell.dataValidation?.condition;
         if (cond?.type === "ONE_OF_LIST") {
@@ -177,7 +190,7 @@ const DEFAULT_COL = 100;
 const EXTRA_ROWS = 20;
 const CELL_HEIGHT = 28;
 
-export function SheetsViewer({ url }: { url: string }) {
+export function SheetsViewer({ url, title }: { url: string; title?: string }) {
   const [rows, setRows] = useState<string[][] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -190,6 +203,10 @@ export function SheetsViewer({ url }: { url: string }) {
   const [missingScope, setMissingScope] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [formatting, setFormatting] = useState<CellMeta[][]>([]);
+  const [selectedCell, setSelectedCell] = useState<{ ri: number; ci: number } | null>(null);
+  const [fmtBg, setFmtBg] = useState("#ffffff");
+  const [fmtText, setFmtText] = useState("#000000");
+  const [fmtApplying, setFmtApplying] = useState(false);
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
 
   const { spreadsheetId: urlSid, gid: urlGid } = useMemo(() => extractIds(url), [url]);
@@ -322,6 +339,27 @@ export function SheetsViewer({ url }: { url: string }) {
     }
   }, [spreadsheetId, activeGid]);
 
+  // Sync format pickers when selected cell changes
+  useEffect(() => {
+    if (!selectedCell) return;
+    const meta = formatting[selectedCell.ri + 1]?.[selectedCell.ci] ?? {};
+    if (meta.bgColor) setFmtBg(rgbStringToHex(meta.bgColor));
+    if (meta.textColor) setFmtText(rgbStringToHex(meta.textColor));
+  }, [selectedCell, formatting]);
+
+  const applyFormat = useCallback(async (fmt: { bgColor?: string; textColor?: string; fontSize?: number }) => {
+    if (!selectedCell || !spreadsheetId) return;
+    setFmtApplying(true);
+    const ok = await driveStore.updateSheetCellFormat(spreadsheetId, activeGid, selectedCell.ri, selectedCell.ci, fmt);
+    setFmtApplying(false);
+    if (ok) {
+      const token = driveStore.getToken();
+      if (token) fetchSheetFormatting(spreadsheetId, activeGid, token).then(setFormatting);
+    } else {
+      toast.error("Erreur lors de l'application du format");
+    }
+  }, [selectedCell, spreadsheetId, activeGid]);
+
   const startResize = (e: React.MouseEvent, col: number) => {
     e.preventDefault();
     resizing.current = { col, startX: e.clientX, startW: colWidths[col] ?? DEFAULT_COL };
@@ -429,6 +467,44 @@ export function SheetsViewer({ url }: { url: string }) {
         )}
       </div>
 
+      {/* Barre de mise en forme cellule */}
+      {hasToken && (
+        <div className="flex items-center gap-2 px-3 py-1 border-b border-border bg-background flex-shrink-0 flex-wrap">
+          <Palette className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+          <span className="text-xs text-muted-foreground">
+            {selectedCell ? `L${selectedCell.ri + 1} C${selectedCell.ci + 1}` : "—"}
+          </span>
+          <div className="w-px h-3.5 bg-border" />
+          {/* Fond */}
+          <label className="flex items-center gap-1 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors" title="Couleur de fond">
+            <div className="w-3.5 h-3.5 rounded border border-border flex-shrink-0" style={{ backgroundColor: fmtBg }} />
+            <span>Fond</span>
+            <input type="color" className="absolute opacity-0 w-0 h-0" value={fmtBg}
+              onChange={e => { setFmtBg(e.target.value); applyFormat({ bgColor: e.target.value }); }} />
+          </label>
+          <div className="w-px h-3.5 bg-border" />
+          {/* Texte */}
+          <label className="flex items-center gap-1 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors" title="Couleur du texte">
+            <span className="text-xs font-bold border-b-2 leading-none" style={{ color: fmtText, borderColor: fmtText }}>A</span>
+            <span>Texte</span>
+            <input type="color" className="absolute opacity-0 w-0 h-0" value={fmtText}
+              onChange={e => { setFmtText(e.target.value); applyFormat({ textColor: e.target.value }); }} />
+          </label>
+          <div className="w-px h-3.5 bg-border" />
+          {/* Taille */}
+          <select
+            className="text-xs bg-secondary border border-border rounded px-1 h-5 outline-none cursor-pointer"
+            onChange={e => { if (e.target.value) { applyFormat({ fontSize: Number(e.target.value) }); e.currentTarget.value = ""; } }}
+            defaultValue=""
+          >
+            <option value="" disabled>Taille</option>
+            {[8, 9, 10, 11, 12, 14, 16, 18, 20, 24].map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          {fmtApplying && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
+          {!selectedCell && <span className="text-xs text-muted-foreground/40">← sélectionne une cellule</span>}
+        </div>
+      )}
+
       {/* Tableau */}
       <div className="overflow-auto flex-1">
         <table className="text-xs border-collapse" style={{ tableLayout: "fixed", width: "max-content" }}>
@@ -468,7 +544,13 @@ export function SheetsViewer({ url }: { url: string }) {
                     const isSaving = saving === key;
                     const meta = formatting[ri + 1]?.[ci] ?? {};
                     const cellBg = meta.bgColor;
-                    const cellStyle = { width: colWidths[ci] ?? DEFAULT_COL, maxWidth: colWidths[ci] ?? DEFAULT_COL, backgroundColor: cellBg };
+                    const cellStyle = {
+                      width: colWidths[ci] ?? DEFAULT_COL,
+                      maxWidth: colWidths[ci] ?? DEFAULT_COL,
+                      backgroundColor: cellBg,
+                      color: meta.textColor,
+                      outline: selectedCell?.ri === ri && selectedCell?.ci === ci ? "2px solid hsl(var(--primary))" : undefined,
+                    };
 
                     if (isUrl(val)) {
                       return (
@@ -476,6 +558,7 @@ export function SheetsViewer({ url }: { url: string }) {
                           key={ci}
                           className="border border-border overflow-hidden"
                           style={cellStyle}
+                          onClick={() => setSelectedCell({ ri, ci })}
                         >
                           <div className="px-2" style={{ height: CELL_HEIGHT, overflow: "hidden", display: "flex", alignItems: "center" }}>
                             <UrlCell val={val} />
@@ -491,19 +574,20 @@ export function SheetsViewer({ url }: { url: string }) {
                           key={ci}
                           className="border border-border overflow-hidden relative"
                           style={cellStyle}
+                          onClick={() => setSelectedCell({ ri, ci })}
                         >
                           <div className="relative flex items-center" style={{ height: CELL_HEIGHT }}>
                             <select
                               value={val}
                               disabled={!hasToken}
                               onChange={e => handleDropdownChange(e.target.value, ri, ci)}
-                              className="w-full h-full bg-transparent border-0 outline-none text-xs text-foreground cursor-pointer pl-1 pr-5 appearance-none"
-                              style={{ backgroundColor: cellBg ?? "transparent" }}
+                              className="w-full h-full border-0 outline-none text-xs cursor-pointer pl-1 pr-5 appearance-none"
+                              style={{ backgroundColor: cellBg ?? "#fff", color: "#000" }}
                             >
                               {/* Option vide pour les cellules sans valeur sélectionnée */}
-                              <option value="">—</option>
+                              <option value="" style={{ color: "#000", background: "#fff" }}>—</option>
                               {meta.options.map(opt => (
-                                <option key={opt} value={opt}>{opt}</option>
+                                <option key={opt} value={opt} style={{ color: "#000", background: "#fff" }}>{opt}</option>
                               ))}
                             </select>
                             {isSaving
@@ -518,8 +602,9 @@ export function SheetsViewer({ url }: { url: string }) {
                     return (
                       <td
                         key={ci}
-                        className={`border border-border overflow-hidden relative ${hasToken ? "focus-within:bg-primary/5 focus-within:ring-1 focus-within:ring-inset focus-within:ring-primary" : ""}`}
+                        className={`border border-border overflow-hidden relative ${hasToken ? "focus-within:bg-primary/5" : ""}`}
                         style={cellStyle}
+                        onClick={() => setSelectedCell({ ri, ci })}
                       >
                         <div
                           className="px-2 flex items-start"

@@ -123,11 +123,11 @@ function AuthGate() {
         </div>
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Accès restreint</h1>
-          <p className="text-sm text-muted-foreground mt-2">
-            Ce tableau de bord est privé.<br />
-            Connecte-toi avec{" "}
-            <span className="text-primary font-medium">{ALLOWED_EMAIL}</span>.
-          </p>
+          <p className="text-sm text-muted-foreground mt-2">Ce tableau de bord est privé.</p>
+          <div className="mt-3 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-primary/10 border border-primary/20">
+            <span className="text-xs text-muted-foreground">Compte autorisé :</span>
+            <span className="text-sm font-mono font-semibold text-foreground">{ALLOWED_EMAIL}</span>
+          </div>
         </div>
         {error && (
           <div className="flex items-start gap-2 text-sm text-destructive bg-destructive/10 rounded-lg px-4 py-3 text-left">
@@ -165,7 +165,7 @@ export default function DashboardLayout() {
     <SidebarProvider>
       <div className="h-screen flex w-full overflow-hidden">
         <AppSidebar />
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden relative">
           {/* Mobile top bar */}
           <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-border bg-background flex-shrink-0">
             <SidebarTrigger />

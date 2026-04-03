@@ -68,6 +68,9 @@ export function NotepadViewer() {
   const editorRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const newNameInputRef = useRef<HTMLInputElement>(null);
+  const savedSelectionRef = useRef<Range | null>(null);
+  const [textColor, setTextColor] = useState("#ffffff");
+  const [highlightColor, setHighlightColor] = useState("#fef08a");
 
   // ── Load folder + list docs ───────────────────────────────────────────────
 
@@ -218,10 +221,31 @@ export function NotepadViewer() {
     document.execCommand(cmd, false, value);
   }, []);
 
+  const saveSelection = useCallback(() => {
+    const sel = window.getSelection();
+    savedSelectionRef.current = (sel && sel.rangeCount > 0)
+      ? sel.getRangeAt(0).cloneRange()
+      : null;
+  }, []);
+
+  const restoreAndExec = useCallback((cmd: string, value: string) => {
+    editorRef.current?.focus();
+    if (savedSelectionRef.current) {
+      const sel = window.getSelection();
+      if (sel) { sel.removeAllRanges(); sel.addRange(savedSelectionRef.current); }
+    }
+    document.execCommand(cmd, false, value);
+  }, []);
+
   const setFontSize = (px: string) => {
     editorRef.current?.focus();
     const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) return;
+    if (!sel) return;
+    if (savedSelectionRef.current && sel.rangeCount === 0) {
+      sel.removeAllRanges();
+      sel.addRange(savedSelectionRef.current);
+    }
+    if (sel.rangeCount === 0) return;
     const range = sel.getRangeAt(0);
     if (range.collapsed) return;
     const frag = range.extractContents();
@@ -420,7 +444,7 @@ export function NotepadViewer() {
           <ToolBtn onClick={() => exec("strikeThrough")} title="Barré"><Strikethrough className="h-3.5 w-3.5" /></ToolBtn>
           <div className="w-px h-4 bg-border mx-0.5" />
           <select
-            onMouseDown={e => e.stopPropagation()}
+            onMouseDown={() => saveSelection()}
             onChange={e => { if (e.target.value) { setFontSize(e.target.value); e.target.value = ""; } }}
             className="text-xs bg-secondary border border-border rounded px-1 h-6 outline-none cursor-pointer text-foreground"
             defaultValue=""
@@ -432,13 +456,35 @@ export function NotepadViewer() {
             ))}
           </select>
           <div className="w-px h-4 bg-border mx-0.5" />
-          <label className="relative w-6 h-6 flex items-center justify-center rounded hover:bg-secondary cursor-pointer" title="Couleur texte">
-            <span className="text-xs font-bold text-foreground">A</span>
-            <input type="color" className="absolute opacity-0 w-0 h-0" onChange={e => exec("foreColor", e.target.value)} />
+          {/* Couleur du texte */}
+          <label
+            className="relative flex flex-col items-center justify-center w-7 h-6 rounded hover:bg-secondary cursor-pointer select-none"
+            title="Couleur du texte — sélectionne du texte puis clique"
+            onMouseDown={saveSelection}
+          >
+            <span className="text-[10px] font-bold text-foreground leading-none">A</span>
+            <div className="w-4 h-[3px] rounded-full" style={{ backgroundColor: textColor }} />
+            <input
+              type="color"
+              className="absolute opacity-0 w-0 h-0"
+              value={textColor}
+              onChange={e => { setTextColor(e.target.value); restoreAndExec("foreColor", e.target.value); }}
+            />
           </label>
-          <label className="relative w-6 h-6 flex items-center justify-center rounded hover:bg-secondary cursor-pointer" title="Surligneur">
-            <span className="text-xs font-bold" style={{ background: "linear-gradient(transparent 50%,#fef08a 50%)", WebkitBackgroundClip: "text", color: "transparent" }}>A</span>
-            <input type="color" className="absolute opacity-0 w-0 h-0" defaultValue="#fef08a" onChange={e => exec("hiliteColor", e.target.value)} />
+          {/* Surligneur */}
+          <label
+            className="relative flex flex-col items-center justify-center w-7 h-6 rounded hover:bg-secondary cursor-pointer select-none"
+            title="Surligneur — sélectionne du texte puis clique"
+            onMouseDown={saveSelection}
+          >
+            <span className="text-[10px] font-bold text-foreground leading-none">S</span>
+            <div className="w-4 h-[3px] rounded-full" style={{ backgroundColor: highlightColor }} />
+            <input
+              type="color"
+              className="absolute opacity-0 w-0 h-0"
+              value={highlightColor}
+              onChange={e => { setHighlightColor(e.target.value); restoreAndExec("hiliteColor", e.target.value); }}
+            />
           </label>
           <div className="w-px h-4 bg-border mx-0.5" />
           <ToolBtn onClick={() => exec("justifyLeft")} title="Gauche"><AlignLeft className="h-3.5 w-3.5" /></ToolBtn>

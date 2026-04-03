@@ -1,4 +1,4 @@
-import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus, Tags, BarChart3, UserSearch } from "lucide-react";
+import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus, Tags, BarChart3, UserSearch, FileImage } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -15,11 +15,12 @@ const secondaryTools = [
   { title: "Analyse Image → Tags", desc: "Extraire les tags depuis une image", icon: Tags, url: "/analyse-image", color: "text-blue-400" },
   { title: "Analyse Tags", desc: "Analyser et optimiser vos tags", icon: BarChart3, url: "/analyse-tags", color: "text-purple-400" },
   { title: "Tags Concurrent", desc: "Espionner les tags des concurrents", icon: UserSearch, url: "/tags-concurrent", color: "text-pink-400" },
+  { title: "Descriptif Image", desc: "Générer un descriptif depuis une image", icon: FileImage, url: "/descriptif-image", color: "text-teal-400" },
 ];
 
 const sheets = [
   { title: "Tableau Contrôle", icon: Table2, url: "https://docs.google.com/spreadsheets/d/1u3_-YtIYqCnO2YEPfLh1cCsjd2CcRiT1cKileCLA0Ig/edit?gid=0#gid=0" },
-  { title: "Liste Boutique", icon: Store, url: "https://docs.google.com/spreadsheets/d/1cetIf0cfWDxz-geTmatUOBchdjUUpCvS/edit?gid=1536179428#gid=1536179428" },
+  { title: "Liste Boutique", icon: Store, url: "https://docs.google.com/spreadsheets/d/1S1LsdSWUYZwBgFtcWu8hvOo27Y7rZCcyRShl7UI-zKo/edit?gid=1536179428#gid=1536179428" },
   { title: "Suivi Commande", icon: Package, url: "https://docs.google.com/spreadsheets/d/1exMlQ6dnfIGF7xsgUJskk57IRypVK29E/edit?gid=513162334#gid=513162334" },
 ];
 
@@ -40,7 +41,6 @@ export default function HomePage() {
     <div className="max-w-5xl mx-auto space-y-8">
       <div>
         <h1 className="font-display text-3xl font-bold tracking-tight">Dashboard Etsy</h1>
-        <p className="text-muted-foreground mt-1">Gérez vos boutiques et produits Etsy</p>
       </div>
 
       {/* Main Tools */}
@@ -84,15 +84,25 @@ export default function HomePage() {
         <h2 className="font-display text-lg font-semibold mb-4">Google Sheets</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {sheets.map((sheet) => (
-            <button
-              key={sheet.title}
-              onClick={() => navigate(`/viewer?url=${encodeURIComponent(sheet.url)}&title=${encodeURIComponent(sheet.title)}`)}
-              className="tool-card text-left group flex items-center gap-4"
-            >
-              <sheet.icon className="h-6 w-6 text-muted-foreground group-hover:text-primary transition-colors" />
-              <span className="font-medium text-foreground">{sheet.title}</span>
-              <ExternalLink className="h-4 w-4 text-muted-foreground ml-auto" />
-            </button>
+            <div key={sheet.title} className="tool-card group flex items-center gap-4">
+              <button
+                onClick={() => navigate(`/viewer?url=${encodeURIComponent(sheet.url)}&title=${encodeURIComponent(sheet.title)}`)}
+                className="flex items-center gap-4 flex-1 text-left min-w-0"
+              >
+                <sheet.icon className="h-6 w-6 flex-shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
+                <span className="font-medium text-foreground truncate">{sheet.title}</span>
+              </button>
+              <a
+                href={sheet.url}
+                target="_blank"
+                rel="noreferrer"
+                onClick={e => e.stopPropagation()}
+                className="flex-shrink-0 text-muted-foreground hover:text-primary transition-colors p-1 rounded"
+                title="Ouvrir dans Google Sheets"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            </div>
           ))}
         </div>
       </section>
