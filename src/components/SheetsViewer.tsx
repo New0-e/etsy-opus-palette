@@ -70,7 +70,7 @@ type CellMeta = { bgColor?: string; options?: string[] };
 
 async function fetchSheetFormatting(spreadsheetId: string, gid: string, token: string): Promise<CellMeta[][]> {
   try {
-    const fields = "sheets(properties/sheetId,data/rowData/values(userEnteredFormat/backgroundColor,dataValidation/condition))";
+    const fields = "sheets(properties/sheetId,data/rowData/values(effectiveFormat/backgroundColor,dataValidation/condition))";
     const res = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?includeGridData=true&fields=${encodeURIComponent(fields)}`,
       { headers: { Authorization: `Bearer ${token}` } }
@@ -82,7 +82,7 @@ async function fetchSheetFormatting(spreadsheetId: string, gid: string, token: s
     return (sheet.data?.[0]?.rowData ?? []).map((row: any) =>
       (row.values ?? []).map((cell: any): CellMeta => {
         const meta: CellMeta = {};
-        const bg = cell.userEnteredFormat?.backgroundColor;
+        const bg = cell.effectiveFormat?.backgroundColor;
         if (bg) {
           const r = Math.round((bg.red ?? 1) * 255);
           const g = Math.round((bg.green ?? 1) * 255);
