@@ -7,7 +7,7 @@ import { useLocation } from "react-router-dom";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
   SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem,
-  SidebarFooter, SidebarTrigger,
+  SidebarFooter, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 
@@ -26,6 +26,8 @@ const secondaryTools = [
 export function AppSidebar() {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
+  const { setOpenMobile } = useSidebar();
+  const closeOnMobile = () => setOpenMobile(false);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -45,7 +47,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {mainTools.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} onClick={closeOnMobile}>
                     <NavLink to={item.url} end activeClassName="bg-sidebar-accent text-primary font-medium">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
@@ -65,7 +67,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {secondaryTools.map((item) => (
                 <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                  <SidebarMenuButton asChild isActive={isActive(item.url)} onClick={closeOnMobile}>
                     <NavLink to={item.url} end activeClassName="bg-sidebar-accent text-primary font-medium">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>

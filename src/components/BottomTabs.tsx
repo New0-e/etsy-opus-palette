@@ -37,6 +37,7 @@ const TABS = [
 const DEFAULT_HEIGHT = 420;
 const MIN_HEIGHT = 160;
 const TAB_BAR_H = 34; // height of the tab buttons bar
+const MOBILE_TOP_H = 44; // height of the mobile top bar (md:hidden)
 
 export function BottomTabs() {
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -46,7 +47,10 @@ export function BottomTabs() {
   const resizing = useRef<{ startY: number; startH: number } | null>(null);
 
   const active = TABS.find(t => t.id === activeId);
-  const maxHeight = () => window.innerHeight - TAB_BAR_H - 8;
+  const maxHeight = () => {
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    return window.innerHeight - TAB_BAR_H - (isMobile ? MOBILE_TOP_H : 0);
+  };
 
   const toggleMaximize = () => {
     if (maximized) {
@@ -132,7 +136,7 @@ export function BottomTabs() {
       )}
 
       {/* Tab bar */}
-      <div className="flex items-center h-8 px-2 gap-0.5">
+      <div className="flex items-center h-8 px-2 gap-0.5 overflow-x-auto scrollbar-none">
         {TABS.map(tab => {
           const isActive = activeId === tab.id;
           return (

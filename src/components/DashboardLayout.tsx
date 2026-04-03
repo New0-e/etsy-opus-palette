@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { DrivePanel } from "@/components/DrivePanel";
 import { BottomTabs } from "@/components/BottomTabs";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShieldCheck, LogIn, ShieldAlert } from "lucide-react";
+import { Loader2, ShieldCheck, LogIn, ShieldAlert, Home } from "lucide-react";
 import { driveStore, ALLOWED_EMAIL } from "@/lib/driveStore";
 
 // ── PKCE helpers ───────────────────────────────────────────────────────────────
 
 const CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string).trim();
 const SCOPE = [
-  "https://www.googleapis.com/auth/drive.readonly",
+  "https://www.googleapis.com/auth/drive",
   "https://www.googleapis.com/auth/spreadsheets",
   "https://www.googleapis.com/auth/documents",
   "openid email profile",
@@ -148,6 +148,7 @@ function AuthGate() {
 
 export default function DashboardLayout() {
   const [isAuthorized, setIsAuthorized] = useState(driveStore.isAuthorized());
+  const navigate = useNavigate();
 
   useEffect(() => {
     return driveStore.onAuthChange(() => {
@@ -164,6 +165,17 @@ export default function DashboardLayout() {
       <div className="h-screen flex w-full overflow-hidden">
         <AppSidebar />
         <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Mobile top bar */}
+          <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-border bg-background flex-shrink-0">
+            <SidebarTrigger />
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Home className="h-4 w-4" />
+              <span>Accueil</span>
+            </button>
+          </div>
           <main className="flex-1 overflow-auto p-6">
             <Outlet />
           </main>

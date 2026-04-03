@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp } from "lucide-react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp, RefreshCw } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -64,19 +64,19 @@ function shortUrl(val: string): string {
   }
 }
 
-async function fetchSheetName(spreadsheetId: string, gid: string, token: string): Promise<string | null> {
+async function fetchAllSheets(spreadsheetId: string, token: string): Promise<{ sheetId: number; title: string }[]> {
   try {
     const res = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets(properties(sheetId,title))`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    if (!res.ok) return null;
+    if (!res.ok) return [];
     const data = await res.json();
-    const sheet = data.sheets?.find((s: any) => String(s.properties.sheetId) === gid);
-    return sheet?.properties?.title ?? data.sheets?.[0]?.properties?.title ?? null;
-  } catch {
-    return null;
-  }
+    return (data.sheets ?? []).map((s: any) => ({
+      sheetId: s.properties.sheetId,
+      title: s.properties.title,
+    }));
+  } catch { return []; }
 }
 
 // ── Cell components ───────────────────────────────────────────────────────────
@@ -146,14 +146,17 @@ export function SheetsViewer({ url }: { url: string }) {
   const [rows, setRows] = useState<string[][] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sheetName, setSheetName] = useState<string | null>(null);
-  const [gidRef, setGidRef] = useState("0");
+  const [sheets, setSheets] = useState<{ sheetId: number; title: string }[]>([]);
+  const [activeGid, setActiveGid] = useState("0");
   const [spreadsheetId, setSpreadsheetId] = useState<string | null>(null);
   const [colWidths, setColWidths] = useState<number[]>([]);
   const [saving, setSaving] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
-  // sheetName kept for potential future use but not required for saves (we use gid directly)
+  const [missingScope, setMissingScope] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
+
+  const { spreadsheetId: urlSid, gid: urlGid } = useMemo(() => extractIds(url), [url]);
 
   const toggleRow = useCallback((ri: number) => {
     setExpandedRows(prev => {
@@ -165,37 +168,49 @@ export function SheetsViewer({ url }: { url: string }) {
 
   const hasToken = !!driveStore.getToken();
 
+  // Reset active gid when URL changes
+  useEffect(() => {
+    setActiveGid(urlGid);
+    setSheets([]);
+  }, [urlGid]);
+
+  // Load all sheets metadata
+  useEffect(() => {
+    if (!urlSid) return;
+    const token = driveStore.getToken();
+    if (!token) return;
+    fetchAllSheets(urlSid, token).then(setSheets);
+  }, [urlSid]);
+
+  // Load CSV for active sheet
   useEffect(() => {
     const token = driveStore.getToken();
     if (!token) { setError("no_token"); setLoading(false); return; }
+    if (!urlSid) { setError("URL invalide"); setLoading(false); return; }
 
-    const { spreadsheetId: sid, gid } = extractIds(url);
-    if (!sid) { setError("URL invalide"); setLoading(false); return; }
-    setSpreadsheetId(sid);
-    setGidRef(gid);
+    setSpreadsheetId(urlSid);
+    setLoading(true);
+    setRows(null);
 
-    Promise.allSettled([
-      fetch(
-        `https://docs.google.com/spreadsheets/d/${sid}/export?format=csv&gid=${gid}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      ).then(r => { if (!r.ok) throw new Error(`${r.status}`); return r.text(); }),
-      fetchSheetName(sid, gid, token),
-    ]).then(([csvResult, metaResult]) => {
-      if (csvResult.status === "fulfilled") {
-        const parsed = parseCSV(csvResult.value);
-        setRows(parsed);
-        if (parsed[0]) {
-          setColWidths(parsed[0].map(() => DEFAULT_COL));
-        }
-      } else {
-        setError(`Erreur ${csvResult.reason?.message ?? ""}`);
-      }
-      if (metaResult.status === "fulfilled" && metaResult.value) {
-        setSheetName(metaResult.value);
-      }
-      setLoading(false);
+    driveStore.checkTokenScopes().then(scopes => {
+      if (scopes && !scopes.includes("spreadsheets")) setMissingScope(true);
     });
-  }, [url]);
+
+    fetch(
+      `https://docs.google.com/spreadsheets/d/${urlSid}/export?format=csv&gid=${activeGid}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    ).then(r => { if (!r.ok) throw new Error(`${r.status}`); return r.text(); })
+      .then(text => {
+        const parsed = parseCSV(text);
+        setRows(parsed);
+        if (parsed[0]) setColWidths(parsed[0].map(() => DEFAULT_COL));
+        setLoading(false);
+      })
+      .catch(e => {
+        setError(`Erreur ${e.message}`);
+        setLoading(false);
+      });
+  }, [urlSid, activeGid, refreshKey]);
 
   const handleCellBlur = useCallback(
     async (e: React.FocusEvent<HTMLDivElement>, rowIdx: number, colIdx: number) => {
@@ -208,7 +223,7 @@ export function SheetsViewer({ url }: { url: string }) {
       setSaving(key);
 
       // Use gid directly as numeric sheetId — no fetchSheetName needed
-      const result = await driveStore.updateSheetCell(spreadsheetId, gidRef, rowIdx, colIdx, newValue);
+      const result = await driveStore.updateSheetCell(spreadsheetId, activeGid, rowIdx, colIdx, newValue);
 
       setSaving(null);
 
@@ -223,9 +238,20 @@ export function SheetsViewer({ url }: { url: string }) {
         toast.success("Cellule sauvegardée");
       } else {
         const code = typeof result === "string" ? result : "?";
-        if (code === "401") toast.error("Token expiré — déconnecte et reconnecte Drive");
-        else if (code === "403") toast.error("Permission refusée (403) — vérifie les scopes OAuth");
-        else toast.error("Fichier Excel non supporté — convertis en Google Sheets natif (Fichier → Enregistrer en tant que Google Sheets)");
+        if (code === "401") {
+          toast.error("Token expiré — déconnecte et reconnecte Drive");
+        } else if (code === "403") {
+          toast.error("Permission refusée (403) — vérifie les scopes OAuth");
+        } else {
+          // Diagnose: check if spreadsheets scope is actually in the token
+          driveStore.checkTokenScopes().then(scopes => {
+            if (scopes && !scopes.includes("spreadsheets")) {
+              toast.error("Scope manquant — déconnecte-toi et reconnecte Drive pour autoriser l'édition Sheets", { duration: 8000 });
+            } else {
+              toast.error(`Erreur ${code} — le fichier doit être un Google Sheets natif (pas Excel). Vérifie la console F12.`, { duration: 8000 });
+            }
+          });
+        }
         if (e.currentTarget) e.currentTarget.innerText = original;
       }
     },
@@ -288,9 +314,45 @@ export function SheetsViewer({ url }: { url: string }) {
 
   return (
     <div className="flex flex-col h-full">
+      {/* Onglets feuilles */}
+      {sheets.length > 1 && (
+        <div className="flex overflow-x-auto scrollbar-none border-b border-border bg-secondary/10 flex-shrink-0">
+          {sheets.map(s => (
+            <button
+              key={s.sheetId}
+              onClick={() => { setActiveGid(String(s.sheetId)); setExpandedRows(new Set()); }}
+              className={`px-3 h-8 text-xs whitespace-nowrap flex-shrink-0 transition-colors border-b-2 ${
+                activeGid === String(s.sheetId)
+                  ? "border-primary text-foreground font-medium bg-background"
+                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary/40"
+              }`}
+            >
+              {s.title}
+            </button>
+          ))}
+        </div>
+      )}
+
       {/* Statut édition */}
       <div className="flex items-center gap-2 px-4 py-1.5 border-b border-border bg-background flex-shrink-0">
-        {hasToken ? (
+        <button
+          onClick={() => { setLoading(true); setRows(null); setRefreshKey(k => k + 1); }}
+          className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded flex-shrink-0"
+          title="Actualiser"
+        >
+          <RefreshCw className="h-3.5 w-3.5" />
+        </button>
+        {hasToken && missingScope ? (
+          <>
+            <AlertCircle className="h-3.5 w-3.5 text-destructive" />
+            <span className="text-xs text-destructive">Scope manquant — </span>
+            <button
+              className="text-xs text-primary underline"
+              onClick={() => { driveStore.logout(); window.location.reload(); }}
+            >déconnecte et reconnecte Drive</button>
+            <span className="text-xs text-destructive"> pour autoriser l'édition</span>
+          </>
+        ) : hasToken ? (
           <>
             <Save className="h-3.5 w-3.5 text-green-400" />
             <span className="text-xs text-green-400">Édition activée — clique sur une cellule pour modifier</span>

@@ -3,13 +3,9 @@ import { ArrowLeft, ExternalLink, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SheetsViewer } from "@/components/SheetsViewer";
 
-function isGoogleSheet(url: string) {
-  return url.includes("/spreadsheets/");
-}
-
-function isGoogleDoc(url: string) {
-  return url.includes("/document/");
-}
+function isGoogleSheet(url: string) { return url.includes("/spreadsheets/"); }
+function isGoogleDoc(url: string) { return url.includes("/document/"); }
+function isDrivePreview(url: string) { return url.includes("drive.google.com/file/d/"); }
 
 export default function ViewerPage() {
   const [params] = useSearchParams();
@@ -21,6 +17,7 @@ export default function ViewerPage() {
 
   const sheet = isGoogleSheet(url);
   const doc = isGoogleDoc(url);
+  const pdf = isDrivePreview(url);
 
   return (
     <div className="flex flex-col h-full -m-6">
@@ -61,7 +58,16 @@ export default function ViewerPage() {
           </div>
         )}
 
-        {!sheet && !doc && (
+        {pdf && (
+          <iframe
+            src={url}
+            className="w-full h-full border-0"
+            allow="autoplay"
+            title={title}
+          />
+        )}
+
+        {!sheet && !doc && !pdf && (
           <div className="flex flex-col items-center justify-center h-full gap-4">
             <p className="text-sm text-muted-foreground">Type de fichier non supporté</p>
             <a href={url} target="_blank" rel="noreferrer">
