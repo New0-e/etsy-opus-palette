@@ -67,9 +67,11 @@ type NavEntry = { id: string; name: string };
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function DrivePanel() {
+export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?: boolean; onMobileToggle?: () => void } = {}) {
   const isMobile = useIsMobile();
-  const [isOpen, setIsOpen] = useState(() => !window.matchMedia("(max-width: 767px)").matches);
+  const [internalOpen, setInternalOpen] = useState(() => !window.matchMedia("(max-width: 767px)").matches);
+  const isOpen = isMobile ? mobileOpen : internalOpen;
+  const toggleOpen = () => isMobile ? onMobileToggle?.() : setInternalOpen(v => !v);
   const [navStack, setNavStack] = useState<NavEntry[]>([]);
   const [items, setItems] = useState<DriveItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -118,16 +120,6 @@ export function DrivePanel() {
 
   return (
     <>
-      {/* Mobile toggle button — visible only when panel is closed */}
-      {isMobile && !isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-12 right-3 z-40 bg-secondary border border-border rounded-full p-2 shadow-md text-muted-foreground hover:text-foreground"
-          title="Ouvrir Drive"
-        >
-          <PanelRightOpen className="h-4 w-4" />
-        </button>
-      )}
 
     <div className={containerClass}>
 
@@ -155,7 +147,7 @@ export function DrivePanel() {
             </button>
           </div>
         )}
-        <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => setIsOpen(!isOpen)}>
+        <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={toggleOpen}>
           {isOpen ? <PanelRightClose className="h-3.5 w-3.5" /> : <PanelRightOpen className="h-3.5 w-3.5" />}
         </Button>
       </div>

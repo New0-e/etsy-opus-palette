@@ -64,6 +64,41 @@ function shortUrl(val: string): string {
   }
 }
 
+// ── Cell metadata (colors + dropdowns) ───────────────────────────────────────
+
+type CellMeta = { bgColor?: string; options?: string[] };
+
+async function fetchSheetFormatting(spreadsheetId: string, gid: string, token: string): Promise<CellMeta[][]> {
+  try {
+    const fields = "sheets(properties/sheetId,data/rowData/values(userEnteredFormat/backgroundColor,dataValidation/condition))";
+    const res = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?includeGridData=true&fields=${encodeURIComponent(fields)}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    const sheet = (data.sheets ?? []).find((s: any) => String(s.properties?.sheetId) === gid);
+    if (!sheet) return [];
+    return (sheet.data?.[0]?.rowData ?? []).map((row: any) =>
+      (row.values ?? []).map((cell: any): CellMeta => {
+        const meta: CellMeta = {};
+        const bg = cell.userEnteredFormat?.backgroundColor;
+        if (bg) {
+          const r = Math.round((bg.red ?? 1) * 255);
+          const g = Math.round((bg.green ?? 1) * 255);
+          const b = Math.round((bg.blue ?? 1) * 255);
+          if (r < 250 || g < 250 || b < 250) meta.bgColor = `rgb(${r},${g},${b})`;
+        }
+        const cond = cell.dataValidation?.condition;
+        if (cond?.type === "ONE_OF_LIST") {
+          meta.options = (cond.values ?? []).map((v: any) => v.userEnteredValue ?? "").filter(Boolean);
+        }
+        return meta;
+      })
+    );
+  } catch { return []; }
+}
+
 async function fetchAllSheets(spreadsheetId: string, token: string): Promise<{ sheetId: number; title: string }[]> {
   try {
     const res = await fetch(
@@ -154,6 +189,7 @@ export function SheetsViewer({ url }: { url: string }) {
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [missingScope, setMissingScope] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [formatting, setFormatting] = useState<CellMeta[][]>([]);
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
 
   const { spreadsheetId: urlSid, gid: urlGid } = useMemo(() => extractIds(url), [url]);
@@ -183,6 +219,15 @@ export function SheetsViewer({ url }: { url: string }) {
     if (!token) return;
     fetchAllSheets(urlSid, token).then(setSheets);
   }, [urlSid]);
+
+  // Load cell formatting (colors + dropdowns)
+  useEffect(() => {
+    if (!urlSid) return;
+    const token = driveStore.getToken();
+    if (!token) return;
+    setFormatting([]);
+    fetchSheetFormatting(urlSid, activeGid, token).then(setFormatting);
+  }, [urlSid, activeGid]);
 
   // Load CSV for active sheet
   useEffect(() => {
@@ -259,6 +304,23 @@ export function SheetsViewer({ url }: { url: string }) {
     },
     [spreadsheetId, activeGid, rows]
   );
+
+  const handleDropdownChange = useCallback(async (value: string, rowIdx: number, colIdx: number) => {
+    if (!spreadsheetId) return;
+    const key = `${rowIdx}-${colIdx}`;
+    setSaving(key);
+    const result = await driveStore.updateSheetCell(spreadsheetId, activeGid, rowIdx, colIdx, value);
+    setSaving(null);
+    if (result === true) {
+      setRows(prev => {
+        if (!prev) return prev;
+        const next = prev.map(r => [...r]);
+        if (!next[rowIdx + 1]) next[rowIdx + 1] = [];
+        next[rowIdx + 1][colIdx] = value;
+        return next;
+      });
+    }
+  }, [spreadsheetId, activeGid]);
 
   const startResize = (e: React.MouseEvent, col: number) => {
     e.preventDefault();
@@ -404,16 +466,48 @@ export function SheetsViewer({ url }: { url: string }) {
                     const val = row[ci] ?? "";
                     const key = `${ri}-${ci}`;
                     const isSaving = saving === key;
+                    const meta = formatting[ri + 1]?.[ci] ?? {};
+                    const cellBg = meta.bgColor;
+                    const cellStyle = { width: colWidths[ci] ?? DEFAULT_COL, maxWidth: colWidths[ci] ?? DEFAULT_COL, backgroundColor: cellBg };
 
                     if (isUrl(val)) {
                       return (
                         <td
                           key={ci}
                           className="border border-border overflow-hidden"
-                          style={{ width: colWidths[ci] ?? DEFAULT_COL, maxWidth: colWidths[ci] ?? DEFAULT_COL }}
+                          style={cellStyle}
                         >
                           <div className="px-2" style={{ height: CELL_HEIGHT, overflow: "hidden", display: "flex", alignItems: "center" }}>
                             <UrlCell val={val} />
+                          </div>
+                        </td>
+                      );
+                    }
+
+                    // Dropdown cell
+                    if (meta.options?.length) {
+                      return (
+                        <td
+                          key={ci}
+                          className="border border-border overflow-hidden relative"
+                          style={cellStyle}
+                        >
+                          <div className="relative flex items-center" style={{ height: CELL_HEIGHT }}>
+                            <select
+                              value={val}
+                              disabled={!hasToken}
+                              onChange={e => handleDropdownChange(e.target.value, ri, ci)}
+                              className="w-full h-full bg-transparent border-0 outline-none text-xs text-foreground cursor-pointer px-1 appearance-none"
+                              style={{ backgroundColor: cellBg ?? "transparent" }}
+                            >
+                              {!meta.options.includes(val) && val && (
+                                <option value={val}>{val}</option>
+                              )}
+                              {meta.options.map(opt => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                            {isSaving && <Loader2 className="absolute right-1 h-3 w-3 animate-spin text-primary pointer-events-none" />}
                           </div>
                         </td>
                       );
@@ -423,7 +517,7 @@ export function SheetsViewer({ url }: { url: string }) {
                       <td
                         key={ci}
                         className={`border border-border overflow-hidden relative ${hasToken ? "focus-within:bg-primary/5 focus-within:ring-1 focus-within:ring-inset focus-within:ring-primary" : ""}`}
-                        style={{ width: colWidths[ci] ?? DEFAULT_COL, maxWidth: colWidths[ci] ?? DEFAULT_COL }}
+                        style={cellStyle}
                       >
                         <div
                           className="px-2 flex items-start"

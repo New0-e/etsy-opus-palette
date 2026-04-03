@@ -5,7 +5,7 @@ import { DrivePanel } from "@/components/DrivePanel";
 import { BottomTabs } from "@/components/BottomTabs";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShieldCheck, LogIn, ShieldAlert, Home } from "lucide-react";
+import { Loader2, ShieldCheck, LogIn, ShieldAlert, Home, FolderOpen } from "lucide-react";
 import { driveStore, ALLOWED_EMAIL } from "@/lib/driveStore";
 
 // ── PKCE helpers ───────────────────────────────────────────────────────────────
@@ -148,6 +148,7 @@ function AuthGate() {
 
 export default function DashboardLayout() {
   const [isAuthorized, setIsAuthorized] = useState(driveStore.isAuthorized());
+  const [mobileDriveOpen, setMobileDriveOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -175,13 +176,20 @@ export default function DashboardLayout() {
               <Home className="h-4 w-4" />
               <span>Accueil</span>
             </button>
+            <button
+              onClick={() => setMobileDriveOpen(v => !v)}
+              className={`ml-auto flex items-center gap-1.5 text-sm font-medium transition-colors ${mobileDriveOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              title="Drive"
+            >
+              <FolderOpen className="h-4 w-4" />
+            </button>
           </div>
           <main className="flex-1 overflow-auto p-6">
             <Outlet />
           </main>
           <BottomTabs />
         </div>
-        <DrivePanel />
+        <DrivePanel mobileOpen={mobileDriveOpen} onMobileToggle={() => setMobileDriveOpen(v => !v)} />
       </div>
     </SidebarProvider>
   );
