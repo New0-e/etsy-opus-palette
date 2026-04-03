@@ -9,8 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/edc44347-0c53-473e-8047-956afd36b4f4";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/edc44347-0c53-473e-8047-956afd36b4f4";
+const PROXY_URL = "/api/n8n-proxy";
 
 const environments = [
   "Studio minimaliste fond blanc", "Studio marbre luxueux", "Salon boheme",
@@ -162,8 +161,9 @@ export default function GenerationPhotosPage() {
         if (selectedAcc.length) formData.append("accessoires", selectedAcc.join(", "));
       }
 
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
+      const res = await fetch(PROXY_URL, {
         method: "POST",
+        headers: { "x-test-mode": testMode ? "1" : "0" },
         body: formData,
       });
 
