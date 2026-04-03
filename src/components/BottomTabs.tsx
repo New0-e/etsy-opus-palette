@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { Table2, Store, Package, FileText, X, ChevronUp } from "lucide-react";
+import { Table2, Store, Package, FileText, X, ChevronUp, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import { SheetsViewer } from "./SheetsViewer";
 import { NotepadViewer } from "./NotepadViewer";
 
@@ -8,14 +8,14 @@ const TABS = [
     id: "prompt",
     title: "Bloc Note",
     icon: FileText,
-    url: "https://docs.google.com/document/d/1h9iRZWZSMjeu8aec_cVFFl0K24oBVR1HDZqhcjWErko/edit?tab=t.0",
+    url: "",
     type: "doc" as const,
   },
   {
     id: "boutique",
     title: "Liste Boutique",
     icon: Store,
-    url: "https://docs.google.com/spreadsheets/d/1cetIf0cfWDxz-geTmatUOBchdjUUpCvS/edit?gid=1536179428#gid=1536179428",
+    url: "https://docs.google.com/spreadsheets/d/1S1LsdSWUYZwBgFtcWu8hvOo27Y7rZCcyRShl7UI-zKo/edit?gid=1536179428#gid=1536179428",
     type: "sheet" as const,
   },
   {
@@ -36,14 +36,28 @@ const TABS = [
 
 const DEFAULT_HEIGHT = 420;
 const MIN_HEIGHT = 160;
-const MAX_HEIGHT = 750;
+const TAB_BAR_H = 34; // height of the tab buttons bar
 
 export function BottomTabs() {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
+  const [maximized, setMaximized] = useState(false);
+  const prevHeightRef = useRef(DEFAULT_HEIGHT);
   const resizing = useRef<{ startY: number; startH: number } | null>(null);
 
   const active = TABS.find(t => t.id === activeId);
+  const maxHeight = () => window.innerHeight - TAB_BAR_H - 8;
+
+  const toggleMaximize = () => {
+    if (maximized) {
+      setHeight(prevHeightRef.current);
+      setMaximized(false);
+    } else {
+      prevHeightRef.current = height;
+      setHeight(maxHeight());
+      setMaximized(true);
+    }
+  };
 
   const startResize = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -51,7 +65,9 @@ export function BottomTabs() {
     const onMove = (ev: MouseEvent) => {
       if (!resizing.current) return;
       const delta = resizing.current.startY - ev.clientY;
-      setHeight(Math.max(MIN_HEIGHT, Math.min(MAX_HEIGHT, resizing.current.startH + delta)));
+      const newH = Math.max(MIN_HEIGHT, Math.min(maxHeight(), resizing.current.startH + delta));
+      setHeight(newH);
+      setMaximized(newH >= maxHeight() - 10);
     };
     const onUp = () => {
       resizing.current = null;
@@ -60,7 +76,7 @@ export function BottomTabs() {
     };
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-  }, [height]);
+  }, [height]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggle = (id: string) => setActiveId(prev => prev === id ? null : id);
 
@@ -79,18 +95,38 @@ export function BottomTabs() {
           <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-secondary/40 flex-shrink-0">
             <active.icon className="h-3.5 w-3.5 text-primary flex-shrink-0" />
             <span className="text-xs font-semibold text-foreground">{active.title}</span>
-            <button
-              onClick={() => setActiveId(null)}
-              className="ml-auto text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded"
-              title="Fermer"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
+            <div className="ml-auto flex items-center gap-1">
+              {active.url && (
+                <a
+                  href={active.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded"
+                  title="Ouvrir dans Google"
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
+              )}
+              <button
+                onClick={toggleMaximize}
+                className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded"
+                title={maximized ? "Réduire" : "Plein écran"}
+              >
+                {maximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+              </button>
+              <button
+                onClick={() => { setActiveId(null); setMaximized(false); }}
+                className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded"
+                title="Fermer"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
           </div>
           {/* Content — key forces remount on tab switch */}
           <div key={activeId} className="flex-1 overflow-hidden">
             {active.type === "sheet" && <SheetsViewer url={active.url} />}
-            {active.type === "doc" && <NotepadViewer url={active.url} />}
+            {active.type === "doc" && <NotepadViewer />}
           </div>
         </div>
       )}

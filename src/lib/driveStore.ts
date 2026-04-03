@@ -58,6 +58,16 @@ export const driveStore = {
     };
   },
 
+  // ── Diagnostics ───────────────────────────────────────────────────────────
+  async checkTokenScopes(): Promise<string | null> {
+    if (!_token) return null;
+    try {
+      const res = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${_token}`);
+      const data = await res.json();
+      return data.scope ?? null;
+    } catch { return null; }
+  },
+
   // ── Drive API ──────────────────────────────────────────────────────────────
   async fetchRootFolders(): Promise<DriveFolder[]> {
     if (!_token) return [];
@@ -123,6 +133,59 @@ export const driveStore = {
 
   // ── Google Docs API ────────────────────────────────────────────────────────
 
+  /** Creates a new tab in a Google Doc. Returns the new tabId or null on failure. */
+  async createDocTab(docId: string, title: string): Promise<string | null> {
+    if (!_token) return null;
+    try {
+      const res = await fetch(
+        `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            requests: [{ createTab: { tabProperties: { title } } }],
+          }),
+        }
+      );
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error(`[Docs] createDocTab → ${res.status}`, body);
+        return null;
+      }
+      const data = await res.json();
+      return data.replies?.[0]?.createTab?.tabProperties?.tabId ?? null;
+    } catch (e) {
+      console.error("[Docs] createDocTab error", e);
+      return null;
+    }
+  },
+
+  /** Renames a tab in a Google Doc */
+  async renameDocTab(docId: string, tabId: string, newTitle: string): Promise<boolean> {
+    if (!_token) return false;
+    try {
+      const res = await fetch(
+        `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            requests: [{ updateTabProperties: { tabProperties: { tabId, title: newTitle }, fields: "title" } }],
+          }),
+        }
+      );
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error(`[Docs] renameDocTab → ${res.status}`, body);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      console.error("[Docs] renameDocTab error", e);
+      return false;
+    }
+  },
+
   /** Fetches all tabs from a Google Doc. Returns null if documents scope missing. */
   async fetchDocTabs(docId: string): Promise<{ id: string; title: string; text: string }[] | null> {
     if (!_token) return null;
@@ -186,7 +249,12 @@ export const driveStore = {
         }
       );
       if (saveRes.status === 401 || saveRes.status === 403) return "no_scope";
-      return saveRes.ok;
+      if (!saveRes.ok) {
+        const body = await saveRes.text().catch(() => "");
+        console.error(`[Docs] saveDocTab batchUpdate → ${saveRes.status} tabId=${tabId}`, body);
+        return false;
+      }
+      return true;
     } catch {
       return false;
     }
@@ -229,6 +297,74 @@ export const driveStore = {
     } catch {
       return false;
     }
+  },
+
+  /** Resolves a folder path like ["Stockage", "Bloc_note"] to its Drive folder ID */
+  async resolveFolderPath(path: string[]): Promise<string | null> {
+    if (!_token) return null;
+    let parentId = "root";
+    for (const segment of path) {
+      const q = `'${parentId}' in parents and name='${segment}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+      try {
+        const res = await fetch(
+          `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)&pageSize=1`,
+          { headers: { Authorization: `Bearer ${_token}` } }
+        );
+        if (!res.ok) return null;
+        const data = await res.json();
+        const id = data.files?.[0]?.id;
+        if (!id) return null;
+        parentId = id;
+      } catch { return null; }
+    }
+    return parentId;
+  },
+
+  /** Lists all Google Docs in a folder */
+  async listGDocsInFolder(folderId: string): Promise<{ id: string; name: string }[]> {
+    if (!_token) return [];
+    try {
+      const q = `'${folderId}' in parents and mimeType='application/vnd.google-apps.document' and trashed=false`;
+      const res = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&orderBy=name&pageSize=100`,
+        { headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (!res.ok) return [];
+      const data = await res.json();
+      return data.files ?? [];
+    } catch { return []; }
+  },
+
+  /** Creates a new Google Doc in a folder. Returns the new file ID or null. */
+  async createGDoc(name: string, folderId: string): Promise<string | null> {
+    if (!_token) return null;
+    try {
+      const res = await fetch("https://www.googleapis.com/drive/v3/files", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          mimeType: "application/vnd.google-apps.document",
+          parents: [folderId],
+        }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.id ?? null;
+    } catch { return null; }
+  },
+
+  /** Renames a Drive file */
+  async renameFile(fileId: string, newName: string): Promise<boolean> {
+    if (!_token) return false;
+    try {
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName }),
+      });
+      return res.ok;
+    } catch { return false; }
   },
 
   async fetchAsFile(id: string, name: string): Promise<File | null> {

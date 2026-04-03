@@ -5,9 +5,13 @@ import {
   Loader2, ExternalLink, RefreshCw, CheckCheck, AlertCircle, Plus, X,
 } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
-// ── Toolbar button ────────────────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const BLOC_NOTE_PATH = ["Stockage", "Bloc_note"];
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
 function ToolBtn({ onClick, title, children }: { onClick: () => void; title: string; children: React.ReactNode }) {
   return (
@@ -21,37 +25,177 @@ function ToolBtn({ onClick, title, children }: { onClick: () => void; title: str
   );
 }
 
-// ── Tab storage (localStorage) ────────────────────────────────────────────────
-
-const TABS_KEY = "notepad_tabs_v2";
-
-interface NoteTab { id: string; name: string; content: string; isDoc?: boolean }
-
-function loadLocalTabs(): NoteTab[] {
-  try {
-    const s = localStorage.getItem(TABS_KEY);
-    if (s) { const t = JSON.parse(s); if (Array.isArray(t) && t.length) return t; }
-  } catch {}
-  return [{ id: "main", name: "Bloc Note", content: "", isDoc: true }];
+function htmlToText(html: string): string {
+  const walk = (node: Node): string => {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? "";
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+    const el = node as HTMLElement;
+    const tag = el.tagName.toLowerCase();
+    if (tag === "br") return "\n";
+    const inner = Array.from(el.childNodes).map(walk).join("");
+    if (["div", "p", "li", "tr", "h1", "h2", "h3", "h4", "h5", "h6"].includes(tag)) {
+      return inner ? inner + "\n" : "\n";
+    }
+    return inner;
+  };
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return walk(tmp).replace(/\n{3,}/g, "\n\n").trimEnd();
 }
-function saveLocalTabs(tabs: NoteTab[]) {
-  localStorage.setItem(TABS_KEY, JSON.stringify(tabs));
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface DocFile {
+  id: string;
+  name: string;
+  html: string;
+  loaded: boolean;
 }
+
+type Status = "loading" | "saving" | "saved" | "idle" | "error" | "no_folder";
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-type SyncStatus = "loading" | "saving" | "saved" | "idle" | "error" | "no_api";
-
-export function NotepadViewer({ url }: { url: string }) {
-  const [tabs, setTabs] = useState<NoteTab[]>(() => loadLocalTabs());
-  const [activeId, setActiveId] = useState<string>(() => loadLocalTabs()[0]?.id ?? "main");
-  const [status, setStatus] = useState<SyncStatus>("loading");
-  const [editingTabId, setEditingTabId] = useState<string | null>(null);
+export function NotepadViewer() {
+  const [docs, setDocs] = useState<DocFile[]>([]);
+  const [activeId, setActiveId] = useState<string>("");
+  const [folderId, setFolderId] = useState<string | null>(null);
+  const [status, setStatus] = useState<Status>("loading");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
+  const [newName, setNewName] = useState("");
   const editorRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const docId = url.match(/document\/d\/([a-zA-Z0-9-_]+)/)?.[1] ?? null;
+  const newNameInputRef = useRef<HTMLInputElement>(null);
 
-  const activeTab = tabs.find(t => t.id === activeId) ?? tabs[0];
+  // ── Load folder + list docs ───────────────────────────────────────────────
+
+  const load = useCallback(async () => {
+    setStatus("loading");
+    const fid = await driveStore.resolveFolderPath(BLOC_NOTE_PATH);
+    if (!fid) { setStatus("no_folder"); return; }
+    setFolderId(fid);
+
+    const files = await driveStore.listGDocsInFolder(fid);
+    if (files.length === 0) {
+      setDocs([]);
+      setActiveId("");
+      setStatus("idle");
+      return;
+    }
+
+    // Load content of first doc
+    const first = files[0];
+    const text = await driveStore.fetchDoc(first.id);
+    const html = text ? text.replace(/\n/g, "<br>") : "";
+
+    const docFiles: DocFile[] = files.map((f, i) =>
+      i === 0
+        ? { id: f.id, name: f.name, html, loaded: true }
+        : { id: f.id, name: f.name, html: "", loaded: false }
+    );
+    setDocs(docFiles);
+    setActiveId(first.id);
+    setStatus("idle");
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  // Inject first doc content into editor after docs load
+  useEffect(() => {
+    if (docs.length > 0 && editorRef.current && status === "idle") {
+      const doc = docs.find(d => d.id === activeId);
+      if (doc?.loaded) editorRef.current.innerHTML = doc.html;
+    }
+  }, [docs.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Switch tab ────────────────────────────────────────────────────────────
+
+  const switchTab = useCallback(async (id: string) => {
+    if (id === activeId) return;
+    // Snapshot current editor
+    if (editorRef.current) {
+      const html = editorRef.current.innerHTML;
+      setDocs(prev => prev.map(d => d.id === activeId ? { ...d, html } : d));
+    }
+    setActiveId(id);
+    const doc = docs.find(d => d.id === id);
+    if (doc && !doc.loaded) {
+      setStatus("loading");
+      const text = await driveStore.fetchDoc(id);
+      const html = text ? text.replace(/\n/g, "<br>") : "";
+      setDocs(prev => prev.map(d => d.id === id ? { ...d, html, loaded: true } : d));
+      if (editorRef.current) editorRef.current.innerHTML = html;
+      setStatus("idle");
+    }
+  }, [activeId, docs]);
+
+  // Update editor when switching to an already-loaded tab
+  useEffect(() => {
+    if (!editorRef.current || !activeId) return;
+    const doc = docs.find(d => d.id === activeId);
+    if (doc?.loaded) editorRef.current.innerHTML = doc.html;
+  }, [activeId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Save ──────────────────────────────────────────────────────────────────
+
+  const save = useCallback(async (docId: string, html: string) => {
+    setStatus("saving");
+    const text = htmlToText(html);
+    const ok = await driveStore.saveDoc(docId, text);
+    if (ok) { setStatus("saved"); setTimeout(() => setStatus("idle"), 2000); }
+    else { setStatus("error"); setTimeout(() => setStatus("idle"), 3000); }
+  }, []);
+
+  // ── Editor input ──────────────────────────────────────────────────────────
+
+  const handleInput = useCallback(() => {
+    if (!editorRef.current || !activeId) return;
+    const html = editorRef.current.innerHTML;
+    setDocs(prev => prev.map(d => d.id === activeId ? { ...d, html } : d));
+    setStatus("idle");
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => save(activeId, html), 2000);
+  }, [activeId, save]);
+
+  // ── Create new doc ────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    if (creating) {
+      setNewName("Nouveau document");
+      setTimeout(() => { newNameInputRef.current?.select(); }, 50);
+    }
+  }, [creating]);
+
+  const confirmCreate = useCallback(async () => {
+    const name = newName.trim() || "Nouveau document";
+    setCreating(false);
+    setNewName("");
+    if (!folderId) return;
+    setStatus("loading");
+    const id = await driveStore.createGDoc(name, folderId);
+    if (!id) { setStatus("error"); setTimeout(() => setStatus("idle"), 3000); return; }
+    if (editorRef.current && activeId) {
+      const html = editorRef.current.innerHTML;
+      setDocs(prev => prev.map(d => d.id === activeId ? { ...d, html } : d));
+    }
+    setDocs(prev => [...prev, { id, name, html: "", loaded: true }]);
+    setActiveId(id);
+    if (editorRef.current) editorRef.current.innerHTML = "";
+    setStatus("idle");
+  }, [newName, folderId, activeId]);
+
+  // ── Rename doc ────────────────────────────────────────────────────────────
+
+  const handleRename = useCallback(async (docId: string, newTitle: string) => {
+    const trimmed = newTitle.trim();
+    setEditingId(null);
+    if (!trimmed) return;
+    setDocs(prev => prev.map(d => d.id === docId ? { ...d, name: trimmed } : d));
+    await driveStore.renameFile(docId, trimmed);
+  }, []);
+
+  // ── Toolbar ───────────────────────────────────────────────────────────────
 
   const exec = useCallback((cmd: string, value?: string) => {
     editorRef.current?.focus();
@@ -75,194 +219,124 @@ export function NotepadViewer({ url }: { url: string }) {
     sel.addRange(r);
   };
 
-  // ── Load from GDoc (Drive export — no Docs API needed) ───────────────────
-
-  const loadFromDoc = useCallback(async () => {
-    if (!docId) { setStatus("idle"); return; }
-    setStatus("loading");
-    const raw = await driveStore.fetchDoc(docId);
-    if (raw === null) { setStatus("error"); return; }
-
-    // Google Drive export prepends the document title and tab names as the first line(s).
-    // Strip any leading line that looks like a title/heading (no sentence punctuation, short).
-    const lines = raw.split("\n");
-    let start = 0;
-    while (start < lines.length && start < 3) {
-      const l = lines[start].trim();
-      // Skip blank lines or short title-like lines (≤60 chars, no period/comma/colon mid-text)
-      if (l === "" || (l.length <= 60 && !/[.,:;!?]/.test(l))) { start++; } else { break; }
-    }
-    const text = lines.slice(start).join("\n").trimStart();
-    const html = text.replace(/\n/g, "<br>");
-
-    setTabs(prev => {
-      const next = prev.map(t => t.isDoc ? { ...t, content: html } : t);
-      saveLocalTabs(next);
-      return next;
-    });
-
-    setActiveId(prev => {
-      setTimeout(() => {
-        const current = loadLocalTabs().find(t => t.id === prev);
-        if (current?.isDoc && editorRef.current) {
-          editorRef.current.innerHTML = html;
-        }
-      }, 0);
-      return prev;
-    });
-    setStatus("idle");
-  }, [docId]);
-
-  // On mount: load from GDoc for doc-linked tab
-  useEffect(() => { loadFromDoc(); }, [loadFromDoc]);
-
-  // Sync editor when switching tabs
-  useEffect(() => {
-    if (!editorRef.current) return;
-    const tab = tabs.find(t => t.id === activeId);
-    editorRef.current.innerHTML = tab?.content ?? "";
-  }, [activeId]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Save to GDoc ──────────────────────────────────────────────────────────
-
-  const saveToDoc = useCallback(async (html: string) => {
-    if (!docId) return;
-    setStatus("saving");
-    const tmp = document.createElement("div");
-    tmp.innerHTML = html;
-    const text = tmp.innerText;
-    const result = await driveStore.saveDocTab(docId, "", text);
-    if (result === "no_scope") {
-      // Try legacy saveDoc
-      const ok = await driveStore.saveDoc(docId, text);
-      if (ok) { setStatus("saved"); setTimeout(() => setStatus("idle"), 2000); }
-      else { setStatus("no_api"); }
-    } else if (result === true) {
-      setStatus("saved"); setTimeout(() => setStatus("idle"), 2000);
-    } else {
-      setStatus("no_api");
-    }
-  }, [docId]);
-
-  // ── Handle editor input ───────────────────────────────────────────────────
-
-  const handleInput = useCallback(() => {
-    if (!editorRef.current) return;
-    const html = editorRef.current.innerHTML;
-
-    // Save to local state immediately
-    setTabs(prev => {
-      const next = prev.map(t => t.id === activeId ? { ...t, content: html } : t);
-      saveLocalTabs(next);
-      return next;
-    });
-
-    setStatus("idle");
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-
-    // Auto-save to GDoc only for doc-linked tabs
-    if (activeTab?.isDoc) {
-      debounceRef.current = setTimeout(() => saveToDoc(html), 2000);
-    }
-  }, [activeId, activeTab, saveToDoc]);
-
-  // ── Tab management ────────────────────────────────────────────────────────
-
-  const snapshotCurrent = useCallback(() => {
-    if (!editorRef.current) return;
-    const html = editorRef.current.innerHTML;
-    setTabs(prev => {
-      const next = prev.map(t => t.id === activeId ? { ...t, content: html } : t);
-      saveLocalTabs(next);
-      return next;
-    });
-  }, [activeId]);
-
-  const switchTab = (id: string) => {
-    if (id === activeId) return;
-    snapshotCurrent();
-    setActiveId(id);
-  };
-
-  const addTab = () => {
-    snapshotCurrent();
-    const id = `tab_${Date.now()}`;
-    const newTab: NoteTab = { id, name: `Note ${tabs.length + 1}`, content: "" };
-    setTabs(prev => { const next = [...prev, newTab]; saveLocalTabs(next); return next; });
-    setActiveId(id);
-  };
-
-  const removeTab = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (tabs.length === 1) return;
-    const next = tabs.filter(t => t.id !== id);
-    saveLocalTabs(next);
-    setTabs(next);
-    if (activeId === id) setActiveId(next[0]?.id ?? "");
-  };
-
-  const renameTab = (id: string, name: string) => {
-    setTabs(prev => { const next = prev.map(t => t.id === id ? { ...t, name } : t); saveLocalTabs(next); return next; });
-    setEditingTabId(null);
-  };
-
   // ── Status bar ────────────────────────────────────────────────────────────
 
-  const statusEl: Record<SyncStatus, React.ReactNode> = {
-    loading: <><Loader2 className="h-3.5 w-3.5 animate-spin" /><span>Chargement…</span></>,
-    saving:  <><Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /><span className="text-primary">Sauvegarde…</span></>,
-    saved:   <><CheckCheck className="h-3.5 w-3.5 text-green-400" /><span className="text-green-400">Synchronisé ✓</span></>,
-    idle:    <><CheckCheck className="h-3.5 w-3.5 text-muted-foreground/60" /><span className="text-muted-foreground/60">{activeTab?.isDoc ? "Connecté au GDoc" : "Note locale"}</span></>,
-    error:   <><AlertCircle className="h-3.5 w-3.5 text-destructive" /><span className="text-destructive">Erreur de lecture</span></>,
-    no_api:  <><AlertCircle className="h-3.5 w-3.5 text-amber-400" /><span className="text-amber-400">Active l'API Google Docs dans Cloud Console</span></>,
+  const statusEl: Record<Status, React.ReactNode> = {
+    loading:   <><Loader2 className="h-3.5 w-3.5 animate-spin" /><span>Chargement…</span></>,
+    saving:    <><Loader2 className="h-3.5 w-3.5 animate-spin text-primary" /><span className="text-primary">Sauvegarde…</span></>,
+    saved:     <><CheckCheck className="h-3.5 w-3.5 text-green-400" /><span className="text-green-400">Sauvegardé ✓</span></>,
+    idle:      <><CheckCheck className="h-3.5 w-3.5 text-muted-foreground/60" /><span className="text-muted-foreground/60">Connecté au GDoc</span></>,
+    error:     <><AlertCircle className="h-3.5 w-3.5 text-destructive" /><span className="text-destructive">Erreur de sauvegarde</span></>,
+    no_folder: <><AlertCircle className="h-3.5 w-3.5 text-amber-400" /><span className="text-amber-400">Dossier introuvable</span></>,
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Special screens ───────────────────────────────────────────────────────
+
+  if (status === "loading" && docs.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (status === "no_folder") {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-3 text-center px-8">
+        <AlertCircle className="h-7 w-7 text-amber-400" />
+        <div>
+          <p className="text-sm font-medium">Dossier Drive introuvable</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Crée le dossier <code className="bg-secondary px-1 rounded">Mon Drive / Stockage / Bloc_note</code> dans Google Drive.
+          </p>
+        </div>
+        <Button variant="outline" size="sm" onClick={load}>
+          <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+          Réessayer
+        </Button>
+      </div>
+    );
+  }
+
+  // ── Main render ───────────────────────────────────────────────────────────
 
   return (
     <div className="flex flex-col h-full bg-background">
-      {/* Tab bar */}
+
+      {/* ── Tab bar ── */}
       <div className="flex items-center border-b border-border bg-secondary/20 flex-shrink-0 overflow-x-auto">
+
+        {/* Doc tabs */}
         <div className="flex items-center flex-nowrap flex-1 min-w-0">
-          {tabs.map(tab => (
+          {docs.map(doc => (
             <div
-              key={tab.id}
-              onClick={() => switchTab(tab.id)}
-              className={`flex items-center gap-1 px-3 h-8 text-xs font-medium whitespace-nowrap border-r border-border cursor-pointer select-none flex-shrink-0 transition-colors group/tab ${
-                activeId === tab.id ? "bg-background text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+              key={doc.id}
+              onClick={() => switchTab(doc.id)}
+              className={`flex items-center gap-1 px-3 h-8 text-xs font-medium whitespace-nowrap border-r border-border flex-shrink-0 transition-colors cursor-pointer select-none ${
+                activeId === doc.id
+                  ? "bg-background text-foreground border-b-2 border-b-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
               }`}
             >
-              {editingTabId === tab.id ? (
+              {editingId === doc.id ? (
                 <input
                   autoFocus
-                  defaultValue={tab.name}
-                  className="bg-transparent outline-none border-b border-primary text-xs w-20"
-                  onBlur={e => renameTab(tab.id, e.target.value || tab.name)}
-                  onKeyDown={e => { if (e.key === "Enter") renameTab(tab.id, (e.target as HTMLInputElement).value || tab.name); e.stopPropagation(); }}
+                  defaultValue={doc.name}
+                  className="bg-transparent outline-none border-b border-primary text-xs w-28"
+                  onBlur={e => handleRename(doc.id, e.target.value || doc.name)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter") handleRename(doc.id, (e.target as HTMLInputElement).value || doc.name);
+                    if (e.key === "Escape") setEditingId(null);
+                    e.stopPropagation();
+                  }}
                   onClick={e => e.stopPropagation()}
                 />
               ) : (
-                <span onDoubleClick={e => { e.stopPropagation(); setEditingTabId(tab.id); }}>{tab.name}</span>
-              )}
-              {tab.isDoc && <span className="text-primary/50 text-[9px] ml-0.5">●</span>}
-              {tabs.length > 1 && (
-                <button
-                  onMouseDown={e => e.stopPropagation()}
-                  onClick={e => removeTab(tab.id, e)}
-                  className="opacity-0 group-hover/tab:opacity-100 hover:text-destructive transition-all ml-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                <span onDoubleClick={e => { e.stopPropagation(); setEditingId(doc.id); }}>{doc.name}</span>
               )}
             </div>
           ))}
-          <button
-            onClick={addTab}
-            className="flex items-center justify-center w-8 h-8 text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors flex-shrink-0 border-r border-border"
-            title="Nouvel onglet"
-          >
-            <Plus className="h-3.5 w-3.5" />
-          </button>
+
+          {/* New doc — inline input or + button */}
+          {creating ? (
+            <div className="flex items-center gap-1 px-2 h-8 border-r border-border flex-shrink-0">
+              <input
+                ref={newNameInputRef}
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                className="bg-transparent outline-none border-b border-primary text-xs w-32"
+                onKeyDown={e => {
+                  if (e.key === "Enter") confirmCreate();
+                  if (e.key === "Escape") setCreating(false);
+                  e.stopPropagation();
+                }}
+              />
+              <button
+                onMouseDown={e => e.preventDefault()}
+                onClick={confirmCreate}
+                className="text-primary hover:text-primary/80 p-0.5 transition-colors"
+                title="Confirmer"
+              >
+                <CheckCheck className="h-3 w-3" />
+              </button>
+              <button
+                onMouseDown={e => e.preventDefault()}
+                onClick={() => setCreating(false)}
+                className="text-muted-foreground hover:text-foreground p-0.5 transition-colors"
+                title="Annuler"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setCreating(true)}
+              className="px-2 h-8 flex items-center text-muted-foreground hover:text-foreground hover:bg-secondary/50 flex-shrink-0 transition-colors border-r border-border"
+              title="Nouveau document"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
 
         {/* Status + actions */}
@@ -270,70 +344,93 @@ export function NotepadViewer({ url }: { url: string }) {
           <div className="flex items-center gap-1">{statusEl[status]}</div>
           <button
             onMouseDown={e => e.preventDefault()}
-            onClick={loadFromDoc}
+            onClick={load}
             className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded ml-1"
-            title="Recharger depuis Google Docs"
+            title="Recharger"
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
-          <a href={url} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded" title="Ouvrir dans Google Docs">
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
+          {activeId && (
+            <a
+              href={`https://docs.google.com/document/d/${activeId}/edit`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded"
+              title="Ouvrir dans Google Docs"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          )}
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex items-center gap-0.5 px-2 py-1 border-b border-border flex-shrink-0 flex-wrap">
-        <ToolBtn onClick={() => exec("bold")} title="Gras"><Bold className="h-3.5 w-3.5" /></ToolBtn>
-        <ToolBtn onClick={() => exec("italic")} title="Italique"><Italic className="h-3.5 w-3.5" /></ToolBtn>
-        <ToolBtn onClick={() => exec("underline")} title="Souligné"><Underline className="h-3.5 w-3.5" /></ToolBtn>
-        <ToolBtn onClick={() => exec("strikeThrough")} title="Barré"><Strikethrough className="h-3.5 w-3.5" /></ToolBtn>
-        <div className="w-px h-4 bg-border mx-0.5" />
-        <select
-          onMouseDown={e => e.stopPropagation()}
-          onChange={e => { if (e.target.value) { setFontSize(e.target.value); e.target.value = ""; } }}
-          className="text-xs bg-secondary border border-border rounded px-1 h-6 outline-none cursor-pointer text-foreground"
-          defaultValue=""
-          title="Taille"
-        >
-          <option value="" disabled>Taille</option>
-          {["10px","12px","14px","16px","18px","20px","24px","28px","32px","40px"].map(s => (
-            <option key={s} value={s}>{s.replace("px","")}</option>
-          ))}
-        </select>
-        <div className="w-px h-4 bg-border mx-0.5" />
-        <label className="relative w-6 h-6 flex items-center justify-center rounded hover:bg-secondary cursor-pointer" title="Couleur texte">
-          <span className="text-xs font-bold text-foreground">A</span>
-          <input type="color" className="absolute opacity-0 w-0 h-0" onChange={e => exec("foreColor", e.target.value)} />
-        </label>
-        <label className="relative w-6 h-6 flex items-center justify-center rounded hover:bg-secondary cursor-pointer" title="Surligneur">
-          <span className="text-xs font-bold" style={{ background: "linear-gradient(transparent 50%,#fef08a 50%)", WebkitBackgroundClip: "text", color: "transparent" }}>A</span>
-          <input type="color" className="absolute opacity-0 w-0 h-0" defaultValue="#fef08a" onChange={e => exec("hiliteColor", e.target.value)} />
-        </label>
-        <div className="w-px h-4 bg-border mx-0.5" />
-        <ToolBtn onClick={() => exec("justifyLeft")} title="Gauche"><AlignLeft className="h-3.5 w-3.5" /></ToolBtn>
-        <ToolBtn onClick={() => exec("justifyCenter")} title="Centre"><AlignCenter className="h-3.5 w-3.5" /></ToolBtn>
-        <ToolBtn onClick={() => exec("justifyRight")} title="Droite"><AlignRight className="h-3.5 w-3.5" /></ToolBtn>
-        <div className="w-px h-4 bg-border mx-0.5" />
-        <ToolBtn onClick={() => exec("insertUnorderedList")} title="Liste"><List className="h-3.5 w-3.5" /></ToolBtn>
-      </div>
+      {/* ── Empty state ── */}
+      {docs.length === 0 && status === "idle" && (
+        <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center">
+          <p className="text-sm text-muted-foreground">Aucun document dans Stockage/Bloc_note</p>
+          <Button size="sm" onClick={() => setCreating(true)}>
+            <Plus className="h-3.5 w-3.5 mr-1.5" />
+            Créer un document
+          </Button>
+        </div>
+      )}
 
-      {/* Editor */}
-      <div className="flex-1 relative" style={{ minHeight: 0 }}>
-        {status === "loading" && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10 pointer-events-none">
-            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-          </div>
-        )}
-        <div
-          ref={editorRef}
-          contentEditable={status !== "loading"}
-          suppressContentEditableWarning
-          onInput={handleInput}
-          className="h-full p-4 outline-none text-sm text-foreground overflow-auto leading-relaxed"
-          spellCheck={false}
-        />
-      </div>
+      {/* ── Toolbar ── */}
+      {docs.length > 0 && (
+        <div className="flex items-center gap-0.5 px-2 py-1 border-b border-border flex-shrink-0 flex-wrap">
+          <ToolBtn onClick={() => exec("bold")} title="Gras"><Bold className="h-3.5 w-3.5" /></ToolBtn>
+          <ToolBtn onClick={() => exec("italic")} title="Italique"><Italic className="h-3.5 w-3.5" /></ToolBtn>
+          <ToolBtn onClick={() => exec("underline")} title="Souligné"><Underline className="h-3.5 w-3.5" /></ToolBtn>
+          <ToolBtn onClick={() => exec("strikeThrough")} title="Barré"><Strikethrough className="h-3.5 w-3.5" /></ToolBtn>
+          <div className="w-px h-4 bg-border mx-0.5" />
+          <select
+            onMouseDown={e => e.stopPropagation()}
+            onChange={e => { if (e.target.value) { setFontSize(e.target.value); e.target.value = ""; } }}
+            className="text-xs bg-secondary border border-border rounded px-1 h-6 outline-none cursor-pointer text-foreground"
+            defaultValue=""
+            title="Taille"
+          >
+            <option value="" disabled>Taille</option>
+            {["10px","12px","14px","16px","18px","20px","24px","28px","32px","40px"].map(s => (
+              <option key={s} value={s}>{s.replace("px","")}</option>
+            ))}
+          </select>
+          <div className="w-px h-4 bg-border mx-0.5" />
+          <label className="relative w-6 h-6 flex items-center justify-center rounded hover:bg-secondary cursor-pointer" title="Couleur texte">
+            <span className="text-xs font-bold text-foreground">A</span>
+            <input type="color" className="absolute opacity-0 w-0 h-0" onChange={e => exec("foreColor", e.target.value)} />
+          </label>
+          <label className="relative w-6 h-6 flex items-center justify-center rounded hover:bg-secondary cursor-pointer" title="Surligneur">
+            <span className="text-xs font-bold" style={{ background: "linear-gradient(transparent 50%,#fef08a 50%)", WebkitBackgroundClip: "text", color: "transparent" }}>A</span>
+            <input type="color" className="absolute opacity-0 w-0 h-0" defaultValue="#fef08a" onChange={e => exec("hiliteColor", e.target.value)} />
+          </label>
+          <div className="w-px h-4 bg-border mx-0.5" />
+          <ToolBtn onClick={() => exec("justifyLeft")} title="Gauche"><AlignLeft className="h-3.5 w-3.5" /></ToolBtn>
+          <ToolBtn onClick={() => exec("justifyCenter")} title="Centre"><AlignCenter className="h-3.5 w-3.5" /></ToolBtn>
+          <ToolBtn onClick={() => exec("justifyRight")} title="Droite"><AlignRight className="h-3.5 w-3.5" /></ToolBtn>
+          <div className="w-px h-4 bg-border mx-0.5" />
+          <ToolBtn onClick={() => exec("insertUnorderedList")} title="Liste"><List className="h-3.5 w-3.5" /></ToolBtn>
+        </div>
+      )}
+
+      {/* ── Editor ── */}
+      {docs.length > 0 && (
+        <div className="flex-1 relative" style={{ minHeight: 0 }}>
+          {status === "loading" && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-10 pointer-events-none">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          )}
+          <div
+            ref={editorRef}
+            contentEditable={status !== "loading"}
+            suppressContentEditableWarning
+            onInput={handleInput}
+            className="h-full p-4 outline-none text-sm text-foreground overflow-auto leading-relaxed"
+            spellCheck={false}
+          />
+        </div>
+      )}
     </div>
   );
 }
