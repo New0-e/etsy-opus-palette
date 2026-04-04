@@ -77,12 +77,13 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const token = driveStore.getToken()!;
   const isRoot = navStack.length === 0;
   const currentId = isRoot ? "root" : navStack[navStack.length - 1].id;
 
   // Load contents of the current folder
   const loadCurrent = useCallback(async (folderId: string, root: boolean) => {
+    const token = driveStore.getToken();
+    if (!token) return;
     setLoading(true);
     setError(null);
     try {
@@ -90,14 +91,14 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
       setItems(result);
     } catch (e) {
       if ((e as Error).message === "token_expired") {
-        driveStore.logout();
+        driveStore.handleExpiredToken();
       } else {
         setError("Impossible de charger le Drive");
       }
     } finally {
       setLoading(false);
     }
-  }, [token]);
+  }, []);
 
   useEffect(() => {
     loadCurrent(currentId, isRoot);

@@ -14,10 +14,34 @@ import TagsConcurrentPage from "@/pages/TagsConcurrentPage";
 import DescriptifImagePage from "@/pages/DescriptifImagePage";
 import ViewerPage from "@/pages/ViewerPage";
 import NotFound from "@/pages/NotFound";
+import { Component, type ReactNode } from "react";
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null };
+  static getDerivedStateFromError(error: Error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="h-screen flex items-center justify-center bg-background">
+          <div className="text-center space-y-4 px-8 max-w-sm">
+            <p className="text-destructive font-medium">Une erreur est survenue</p>
+            <p className="text-xs text-muted-foreground font-mono">{(this.state.error as Error).message}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="text-sm text-primary underline"
+            >Recharger la page</button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <ErrorBoundary>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -40,6 +64,7 @@ const App = () => (
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </ErrorBoundary>
 );
 
 export default App;

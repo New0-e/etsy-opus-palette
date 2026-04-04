@@ -263,7 +263,11 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
     fetch(
       `https://docs.google.com/spreadsheets/d/${urlSid}/export?format=csv&gid=${activeGid}`,
       { headers: { Authorization: `Bearer ${token}` } }
-    ).then(r => { if (!r.ok) throw new Error(`${r.status}`); return r.text(); })
+    ).then(r => {
+        if (r.status === 401) { driveStore.handleExpiredToken(); throw new Error("401"); }
+        if (!r.ok) throw new Error(`${r.status}`);
+        return r.text();
+      })
       .then(text => {
         const parsed = parseCSV(text);
         setRows(parsed);

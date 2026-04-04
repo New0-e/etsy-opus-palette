@@ -18,6 +18,7 @@ const SCOPE = [
   "openid email profile",
 ].join(" ");
 const VERIFIER_KEY = "drive_pkce_verifier";
+const RETURN_KEY = "drive_auth_return";
 
 function generateVerifier(): string {
   const array = new Uint8Array(32);
@@ -46,7 +47,10 @@ function AuthGate() {
     const verifier = sessionStorage.getItem(VERIFIER_KEY);
     if (!code || !verifier) return;
 
-    window.history.replaceState(null, "", window.location.pathname);
+    // Restore the page the user was on before the OAuth redirect
+    const returnPath = sessionStorage.getItem(RETURN_KEY) || window.location.pathname;
+    sessionStorage.removeItem(RETURN_KEY);
+    window.history.replaceState(null, "", returnPath);
     sessionStorage.removeItem(VERIFIER_KEY);
     setLoading(true);
 
@@ -84,6 +88,8 @@ function AuthGate() {
   }, []);
 
   const handleLogin = async () => {
+    // Save current location so we can return here after OAuth
+    sessionStorage.setItem(RETURN_KEY, window.location.pathname + window.location.search);
     const verifier = generateVerifier();
     const challenge = await generateChallenge(verifier);
     sessionStorage.setItem(VERIFIER_KEY, verifier);

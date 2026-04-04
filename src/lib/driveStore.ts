@@ -69,6 +69,11 @@ export const driveStore = {
     };
   },
 
+  // ── Token expiry ──────────────────────────────────────────────────────────
+  handleExpiredToken() {
+    this.logout();
+  },
+
   // ── Diagnostics ───────────────────────────────────────────────────────────
   async checkTokenScopes(): Promise<string | null> {
     if (!_token) return null;
