@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp, RefreshCw, Palette } from "lucide-react";
+import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp, RefreshCw, Palette, Star } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { getFavorites, addFavorite, removeFavorite } from "@/lib/colorFavorites";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -173,7 +174,7 @@ function TextCell({
         contentEditable={canEdit}
         suppressContentEditableWarning
         onBlur={onBlur}
-        className={`outline-none flex-1 text-xs text-foreground min-w-0 ${expanded ? "whitespace-pre-wrap break-words" : "truncate"} ${canEdit ? "cursor-text" : ""}`}
+        className={`outline-none flex-1 text-xs min-w-0 ${expanded ? "whitespace-pre-wrap break-words" : "truncate"} ${canEdit ? "cursor-text" : ""}`}
         title={!expanded ? (val || undefined) : undefined}
       >
         {val}
@@ -207,6 +208,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
   const [fmtBg, setFmtBg] = useState("#ffffff");
   const [fmtText, setFmtText] = useState("#000000");
   const [fmtApplying, setFmtApplying] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>(() => getFavorites());
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
 
   const { spreadsheetId: urlSid, gid: urlGid } = useMemo(() => extractIds(url), [url]);
@@ -506,19 +508,41 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
           </select>
           {fmtApplying && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
           {!selectedCell && <span className="text-xs text-muted-foreground/40">← sélectionne une cellule</span>}
+          <div className="w-px h-3.5 bg-border" />
+          {/* Favoris couleurs */}
+          <Star className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+          {favorites.map((fav, i) => (
+            <button
+              key={i}
+              className="w-4 h-4 rounded-full border border-border/60 flex-shrink-0 hover:scale-125 transition-transform"
+              style={{ backgroundColor: fav }}
+              title={`${fav} — clic: fond | clic droit: supprimer`}
+              onClick={() => { setFmtBg(fav); applyFormat({ bgColor: fav }); }}
+              onContextMenu={e => { e.preventDefault(); setFavorites(removeFavorite(fav)); }}
+            />
+          ))}
+          <button
+            className="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            title={`Ajouter ${fmtBg} aux favoris`}
+            onClick={() => setFavorites(addFavorite(fmtBg))}
+          >
+            <div className="w-3.5 h-3.5 rounded-full border border-dashed border-current flex items-center justify-center" style={{ backgroundColor: fmtBg }}>
+              <span className="text-[8px] leading-none font-bold" style={{ color: fmtBg === "#ffffff" ? "#888" : "#fff" }}>+</span>
+            </div>
+          </button>
         </div>
       )}
 
       {/* Tableau */}
-      <div className="overflow-auto flex-1">
+      <div className="overflow-auto flex-1" style={{ backgroundColor: "#ffffff" }}>
         <table className="text-xs border-collapse" style={{ tableLayout: "fixed", width: "max-content" }}>
           <thead className="sticky top-0 z-10">
             <tr>
               {allHeaders.map((h, i) => (
                 <th
                   key={i}
-                  className="relative text-left px-2 bg-secondary border border-border font-semibold text-muted-foreground whitespace-nowrap select-none"
-                  style={{ width: colWidths[i] ?? DEFAULT_COL, minWidth: MIN_COL, height: CELL_HEIGHT }}
+                  className="relative text-left px-2 border border-border font-semibold whitespace-nowrap select-none"
+                  style={{ width: colWidths[i] ?? DEFAULT_COL, minWidth: MIN_COL, height: CELL_HEIGHT, backgroundColor: "#f1f3f4", color: "#444746" }}
                 >
                   <span className="block truncate">{h}</span>
                   <div
@@ -551,8 +575,8 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                     const cellStyle = {
                       width: colWidths[ci] ?? DEFAULT_COL,
                       maxWidth: colWidths[ci] ?? DEFAULT_COL,
-                      backgroundColor: cellBg,
-                      color: meta.textColor,
+                      backgroundColor: cellBg ?? "#ffffff",
+                      color: meta.textColor ?? "#000000",
                       outline: selectedCell?.ri === ri && selectedCell?.ci === ci ? "2px solid hsl(var(--primary))" : undefined,
                     };
 

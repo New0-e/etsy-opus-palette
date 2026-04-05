@@ -2,10 +2,11 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import {
   Bold, Italic, Underline, Strikethrough,
   AlignLeft, AlignCenter, AlignRight, List,
-  Loader2, ExternalLink, RefreshCw, CheckCheck, AlertCircle, Plus, X, Trash2,
+  Loader2, ExternalLink, RefreshCw, CheckCheck, AlertCircle, Plus, X, Trash2, Star,
 } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
+import { getFavorites, addFavorite, removeFavorite } from "@/lib/colorFavorites";
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -69,8 +70,9 @@ export function NotepadViewer() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const newNameInputRef = useRef<HTMLInputElement>(null);
   const savedSelectionRef = useRef<Range | null>(null);
-  const [textColor, setTextColor] = useState("#ffffff");
+  const [textColor, setTextColor] = useState("#000000");
   const [highlightColor, setHighlightColor] = useState("#fef08a");
+  const [favorites, setFavorites] = useState<string[]>(() => getFavorites());
 
   // ── Load folder + list docs ───────────────────────────────────────────────
 
@@ -487,6 +489,30 @@ export function NotepadViewer() {
             />
           </label>
           <div className="w-px h-4 bg-border mx-0.5" />
+          {/* Favoris couleurs */}
+          <Star className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+          {favorites.map((fav, i) => (
+            <button
+              key={i}
+              className="w-4 h-4 rounded-full border border-border/60 flex-shrink-0 hover:scale-125 transition-transform"
+              style={{ backgroundColor: fav }}
+              title={`${fav} — clic: couleur texte | clic droit: supprimer`}
+              onMouseDown={saveSelection}
+              onClick={() => { setTextColor(fav); restoreAndExec("foreColor", fav); }}
+              onContextMenu={e => { e.preventDefault(); setFavorites(removeFavorite(fav)); }}
+            />
+          ))}
+          <button
+            className="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+            title={`Ajouter ${textColor} aux favoris`}
+            onMouseDown={e => e.preventDefault()}
+            onClick={() => setFavorites(addFavorite(textColor))}
+          >
+            <div className="w-3.5 h-3.5 rounded-full border border-dashed border-current flex items-center justify-center" style={{ backgroundColor: textColor }}>
+              <span className="text-[8px] leading-none font-bold" style={{ color: textColor === "#ffffff" || textColor === "#000000" ? (textColor === "#ffffff" ? "#888" : "#fff") : "#fff" }}>+</span>
+            </div>
+          </button>
+          <div className="w-px h-4 bg-border mx-0.5" />
           <ToolBtn onClick={() => exec("justifyLeft")} title="Gauche"><AlignLeft className="h-3.5 w-3.5" /></ToolBtn>
           <ToolBtn onClick={() => exec("justifyCenter")} title="Centre"><AlignCenter className="h-3.5 w-3.5" /></ToolBtn>
           <ToolBtn onClick={() => exec("justifyRight")} title="Droite"><AlignRight className="h-3.5 w-3.5" /></ToolBtn>
@@ -508,7 +534,8 @@ export function NotepadViewer() {
             contentEditable={status !== "loading"}
             suppressContentEditableWarning
             onInput={handleInput}
-            className="h-full p-4 outline-none text-sm text-foreground overflow-auto leading-relaxed"
+            className="h-full p-4 outline-none text-sm overflow-auto leading-relaxed"
+            style={{ backgroundColor: "#ffffff", color: "#000000" }}
             spellCheck={false}
           />
         </div>
