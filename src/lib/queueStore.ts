@@ -30,6 +30,7 @@ export type QueueEvent = { type: "done" | "error"; item: QueueItem };
 
 let _queue: QueueItem[] = [];
 let _processing = false;
+let _cooldown = false;
 const _stateListeners: Array<() => void> = [];
 const _eventListeners: Array<(e: QueueEvent) => void> = [];
 
@@ -37,8 +38,13 @@ function _notify() {
   _stateListeners.forEach(fn => fn());
 }
 
+function _scheduleNext() {
+  _cooldown = true;
+  setTimeout(() => { _cooldown = false; _process(); }, 5000);
+}
+
 function _process() {
-  if (_processing) return;
+  if (_processing || _cooldown) return;
   const pending = _queue.find(i => i.status === "pending");
   if (!pending) return;
 
@@ -77,7 +83,7 @@ function _process() {
       _queue = _queue.map(i => i.id === pending.id ? updated : i);
       _notify();
       _eventListeners.forEach(fn => fn({ type: status as "done" | "error", item: updated }));
-      _process();
+      _scheduleNext();
     })
     .catch(() => {
       _processing = false;
@@ -85,6 +91,7 @@ function _process() {
       _queue = _queue.map(i => i.id === pending.id ? updated : i);
       _notify();
       _eventListeners.forEach(fn => fn({ type: "error", item: updated }));
+      _scheduleNext();
     });
 }
 

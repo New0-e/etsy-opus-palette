@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Send, FlaskConical, Clock, CheckCheck, AlertCircle, X, RefreshCw, ListOrdered } from "lucide-react";
+import { Loader2, Send, FlaskConical, Clock, CheckCheck, AlertCircle, X, RefreshCw, ListOrdered, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore, type DriveFolder } from "@/lib/driveStore";
 import { queueStore, type QueueItem, type FicheFormData } from "@/lib/queueStore";
@@ -28,10 +28,12 @@ function QueueRow({
   item,
   onRetry,
   onRemove,
+  onEdit,
 }: {
   item: QueueItem;
   onRetry: () => void;
   onRemove: () => void;
+  onEdit: () => void;
 }) {
   const icon = {
     pending:    <Clock className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />,
@@ -76,6 +78,15 @@ function QueueRow({
         </span>
       )}
       <div className="flex items-center gap-1 flex-shrink-0">
+        {item.status === "pending" && (
+          <button
+            onClick={onEdit}
+            className="text-muted-foreground hover:text-primary transition-colors p-0.5 rounded"
+            title="Modifier"
+          >
+            <Pencil className="h-3 w-3" />
+          </button>
+        )}
         {item.status === "error" && (
           <button
             onClick={onRetry}
@@ -122,6 +133,12 @@ export default function CreationFichePage() {
   }, []);
 
   const update = (key: string, val: string) => setForm(prev => ({ ...prev, [key]: val }));
+
+  const handleEdit = (item: QueueItem) => {
+    setForm({ ...item.form });
+    setTestMode(item.testMode);
+    queueStore.removeItem(item.id);
+  };
 
   // ── Submit — adds to global queue, resets form ───────────────────────────────
   const handleSubmit = (e: React.FormEvent) => {
@@ -264,6 +281,7 @@ export default function CreationFichePage() {
                 item={item}
                 onRetry={() => queueStore.retryItem(item.id)}
                 onRemove={() => queueStore.removeItem(item.id)}
+                onEdit={() => handleEdit(item)}
               />
             ))}
           </div>

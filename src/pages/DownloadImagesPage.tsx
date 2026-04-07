@@ -188,7 +188,9 @@ export default function DownloadImagesPage() {
       .catch(e => { setError(e.message); setLoading(false); });
   }, []);
 
-  const boutiques = [...new Set(products.map(p => p.boutique).filter(Boolean))].sort();
+  const boutiques = [...new Set(products.map(p => p.boutique).filter(Boolean))]
+    .filter(b => b.toLowerCase() !== "stockage")
+    .sort();
 
   const filteredProducts = (selectedBoutique
     ? products.filter(p => p.boutique === selectedBoutique)
