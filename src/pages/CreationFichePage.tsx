@@ -126,9 +126,9 @@ export default function CreationFichePage() {
   // ── Submit — adds to global queue, resets form ───────────────────────────────
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const label = form.nom_du_produit.trim()
-      || (form.fiche_numero ? `Fiche #${form.fiche_numero}` : "")
-      || `Fiche ${queue.length + 1}`;
+    const num = form.fiche_numero ? `#${form.fiche_numero}` : "";
+    const nom = form.nom_du_produit.trim();
+    const label = num && nom ? `${num} ${nom}` : num || nom || `Fiche ${queue.length + 1}`;
     const item: QueueItem = {
       id: crypto.randomUUID(),
       form: { ...form },
