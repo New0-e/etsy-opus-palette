@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -8,33 +8,11 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Send, FlaskConical, Clock, CheckCheck, AlertCircle, X, RefreshCw, ListOrdered } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore, type DriveFolder } from "@/lib/driveStore";
-
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/eeea6c70-e494-4b2f-8fbf-0dee3337901b";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/eeea6c70-e494-4b2f-8fbf-0dee3337901b";
+import { queueStore, type QueueItem, type FicheFormData } from "@/lib/queueStore";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
-type FormData = {
-  etsy_lien: string;
-  lien_ali: string;
-  boutique_nom: string;
-  categorie: string;
-  nom_du_produit: string;
-  fiche_numero: string;
-  caracteristiques_instructions: string;
-};
-
-type QueueStatus = "pending" | "processing" | "done" | "error";
-
-type QueueItem = {
-  id: string;
-  form: FormData;
-  status: QueueStatus;
-  label: string;
-  testMode: boolean;
-};
-
-const EMPTY_FORM: FormData = {
+const EMPTY_FORM: FicheFormData = {
   etsy_lien: "",
   lien_ali: "",
   boutique_nom: "",
@@ -124,49 +102,26 @@ function QueueRow({
 export default function CreationFichePage() {
   const [testMode, setTestMode] = useState(false);
   const [boutiques, setBoutiques] = useState<DriveFolder[]>([]);
-  const [form, setForm] = useState<FormData>(EMPTY_FORM);
-  const [queue, setQueue] = useState<QueueItem[]>([]);
-  const processingRef = useRef(false);
+  const [form, setForm] = useState<FicheFormData>(EMPTY_FORM);
+  const [queue, setQueue] = useState<QueueItem[]>(queueStore.getQueue());
 
   useEffect(() => {
     driveStore.fetchRootFolders().then(setBoutiques);
   }, []);
 
+  // Sync with global store + listen for toast notifications
+  useEffect(() => {
+    const unsub = queueStore.subscribe(() => setQueue([...queueStore.getQueue()]));
+    const unsubEvent = queueStore.onEvent(({ type, item }) => {
+      if (type === "done") toast.success(`✓ "${item.label}" créée avec succès !`);
+      else toast.error(`Erreur lors de la création de "${item.label}"`);
+    });
+    return () => { unsub(); unsubEvent(); };
+  }, []);
+
   const update = (key: string, val: string) => setForm(prev => ({ ...prev, [key]: val }));
 
-  // ── Queue processor ──────────────────────────────────────────────────────────
-  // Fires whenever queue changes. Picks first "pending" item and processes it.
-  // processingRef prevents concurrent processing.
-  useEffect(() => {
-    if (processingRef.current) return;
-    const pending = queue.find(i => i.status === "pending");
-    if (!pending) return;
-
-    processingRef.current = true;
-    setQueue(prev => prev.map(i => i.id === pending.id ? { ...i, status: "processing" } : i));
-
-    const webhook = pending.testMode ? WEBHOOK_TEST : WEBHOOK_PROD;
-
-    fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(pending.form),
-    })
-      .then(r => {
-        processingRef.current = false;
-        const status: QueueStatus = r.ok ? "done" : "error";
-        setQueue(prev => prev.map(i => i.id === pending.id ? { ...i, status } : i));
-        if (r.ok) toast.success(`✓ "${pending.label}" créée avec succès !`);
-        else toast.error(`Erreur lors de la création de "${pending.label}"`);
-      })
-      .catch(() => {
-        processingRef.current = false;
-        setQueue(prev => prev.map(i => i.id === pending.id ? { ...i, status: "error" } : i));
-        toast.error(`Erreur de connexion — "${pending.label}"`);
-      });
-  }, [queue]);
-
-  // ── Submit — adds to queue immediately, resets form ──────────────────────────
+  // ── Submit — adds to global queue, resets form ───────────────────────────────
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const label = form.nom_du_produit.trim()
@@ -179,7 +134,7 @@ export default function CreationFichePage() {
       label,
       testMode,
     };
-    setQueue(prev => [...prev, item]);
+    queueStore.addItem(item);
     // Keep boutique + categorie for rapid chain submissions, reset the rest
     setForm(prev => ({
       ...EMPTY_FORM,
@@ -187,18 +142,6 @@ export default function CreationFichePage() {
       categorie: prev.categorie,
     }));
     toast.info(`"${label}" ajouté à la file`);
-  };
-
-  const retryItem = (id: string) => {
-    setQueue(prev => prev.map(i => i.id === id ? { ...i, status: "pending" } : i));
-  };
-
-  const removeItem = (id: string) => {
-    setQueue(prev => prev.filter(i => i.id !== id));
-  };
-
-  const clearDone = () => {
-    setQueue(prev => prev.filter(i => i.status !== "done" && i.status !== "error"));
   };
 
   const pendingCount  = queue.filter(i => i.status === "pending").length;
@@ -305,7 +248,7 @@ export default function CreationFichePage() {
             </div>
             {hasDoneOrErr && (
               <button
-                onClick={clearDone}
+                onClick={() => queueStore.clearDone()}
                 className="text-xs text-muted-foreground hover:text-foreground transition-colors"
               >
                 Effacer terminés
@@ -317,8 +260,8 @@ export default function CreationFichePage() {
               <QueueRow
                 key={item.id}
                 item={item}
-                onRetry={() => retryItem(item.id)}
-                onRemove={() => removeItem(item.id)}
+                onRetry={() => queueStore.retryItem(item.id)}
+                onRemove={() => queueStore.removeItem(item.id)}
               />
             ))}
           </div>

@@ -1,7 +1,8 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, ExternalLink, FileText, Loader2, AlertCircle } from "lucide-react";
+import { ArrowLeft, ExternalLink, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SheetsViewer } from "@/components/SheetsViewer";
+import { DocViewer } from "@/components/DocViewer";
 import { driveStore } from "@/lib/driveStore";
 import { useState, useEffect } from "react";
 
@@ -91,23 +92,7 @@ export default function ViewerPage() {
       <div className="flex-1 overflow-hidden">
         {sheet && <SheetsViewer url={url} title={title} />}
 
-        {doc && (
-          <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-8">
-            <FileText className="h-12 w-12 text-blue-400" />
-            <div>
-              <p className="font-medium text-foreground">{title}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Google bloque l'affichage des Docs dans des applications tierces.
-              </p>
-            </div>
-            <a href={url} target="_blank" rel="noreferrer">
-              <Button className="gap-2">
-                <ExternalLink className="h-4 w-4" />
-                Ouvrir dans Google Docs
-              </Button>
-            </a>
-          </div>
-        )}
+        {doc && <DocViewer url={url} />}
 
         {pdf && <PDFViewer url={url} />}
 
