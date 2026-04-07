@@ -21,6 +21,7 @@ export type QueueItem = {
   status: QueueStatus;
   label: string;
   testMode: boolean;
+  errorMessage?: string;
 };
 
 export type QueueEvent = { type: "done" | "error"; item: QueueItem };
@@ -52,10 +53,27 @@ function _process() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(pending.form),
   })
-    .then(r => {
+    .then(async r => {
       _processing = false;
-      const status: QueueStatus = r.ok ? "done" : "error";
-      const updated: QueueItem = { ...pending, status };
+      // Try to read JSON body — n8n "Respond to Webhook" peut renvoyer un message
+      let body: Record<string, unknown> = {};
+      try { body = await r.json(); } catch { /* pas de JSON */ }
+
+      // Erreur si : HTTP non-ok OU body contient un champ erreur (même en 200)
+      const hasBodyError = !r.ok
+        || body.error != null
+        || body.success === false
+        || body.status === "error";
+
+      const status: QueueStatus = hasBodyError ? "error" : "done";
+      const errorMessage = hasBodyError
+        ? (typeof body.error === "string" ? body.error
+          : typeof body.message === "string" ? body.message
+          : !r.ok ? `Erreur HTTP ${r.status}`
+          : undefined)
+        : undefined;
+
+      const updated: QueueItem = { ...pending, status, errorMessage };
       _queue = _queue.map(i => i.id === pending.id ? updated : i);
       _notify();
       _eventListeners.forEach(fn => fn({ type: status as "done" | "error", item: updated }));
@@ -63,7 +81,7 @@ function _process() {
     })
     .catch(() => {
       _processing = false;
-      const updated: QueueItem = { ...pending, status: "error" };
+      const updated: QueueItem = { ...pending, status: "error", errorMessage: "Erreur de connexion" };
       _queue = _queue.map(i => i.id === pending.id ? updated : i);
       _notify();
       _eventListeners.forEach(fn => fn({ type: "error", item: updated }));

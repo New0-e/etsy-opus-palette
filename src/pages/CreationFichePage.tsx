@@ -66,7 +66,9 @@ function QueueRow({
       {icon}
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium truncate">{item.label}</p>
-        <p className={`text-xs ${statusColor}`}>{statusLabel}</p>
+        <p className={`text-xs ${statusColor} truncate`}>
+          {item.status === "error" && item.errorMessage ? item.errorMessage : statusLabel}
+        </p>
       </div>
       {item.testMode && (
         <span className="text-xs text-amber-400 bg-amber-400/10 border border-amber-400/20 px-1.5 py-0.5 rounded font-medium flex-shrink-0">
