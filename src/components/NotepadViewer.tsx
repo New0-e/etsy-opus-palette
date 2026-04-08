@@ -143,7 +143,7 @@ export function NotepadViewer() {
     } else if (doc?.loaded && editorRef.current) {
       editorRef.current.innerHTML = doc.html;
     }
-  }, [activeId, docs, save]);
+  }, [activeId, docs]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
   // ── Save ──────────────────────────────────────────────────────────────────
