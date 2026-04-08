@@ -119,11 +119,18 @@ export function NotepadViewer() {
 
   const switchTab = useCallback(async (id: string) => {
     if (id === activeId) return;
-    // Snapshot current editor
+
+    // Snapshot + sauvegarde immédiate si un debounce est en attente
     if (editorRef.current) {
       const html = editorRef.current.innerHTML;
       setDocs(prev => prev.map(d => d.id === activeId ? { ...d, html } : d));
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+        debounceRef.current = null;
+        save(activeId, html);
+      }
     }
+
     setActiveId(id);
     const doc = docs.find(d => d.id === id);
     if (doc && !doc.loaded) {
@@ -133,15 +140,11 @@ export function NotepadViewer() {
       setDocs(prev => prev.map(d => d.id === id ? { ...d, html, loaded: true } : d));
       if (editorRef.current) editorRef.current.innerHTML = html;
       setStatus("idle");
+    } else if (doc?.loaded && editorRef.current) {
+      editorRef.current.innerHTML = doc.html;
     }
-  }, [activeId, docs]);
+  }, [activeId, docs, save]);
 
-  // Update editor when switching to an already-loaded tab
-  useEffect(() => {
-    if (!editorRef.current || !activeId) return;
-    const doc = docs.find(d => d.id === activeId);
-    if (doc?.loaded) editorRef.current.innerHTML = doc.html;
-  }, [activeId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Save ──────────────────────────────────────────────────────────────────
 
