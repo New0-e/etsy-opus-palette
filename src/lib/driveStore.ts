@@ -348,26 +348,58 @@ export const driveStore = {
     }
   },
 
-  /** Legacy save — kept for compatibility */
+  /** Save a GDoc — handles both tabbed and non-tabbed documents */
   async saveDoc(docId: string, text: string): Promise<boolean> {
     if (!_token) return false;
     try {
+      // includeTabsContent=true to support Google Docs with internal tabs
       const res = await fetch(
-        `https://docs.googleapis.com/v1/documents/${docId}`,
+        `https://docs.googleapis.com/v1/documents/${docId}?includeTabsContent=true`,
         { headers: { Authorization: `Bearer ${_token}` } }
       );
-      if (!res.ok) return false;
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        console.error(`[Docs] saveDoc GET → ${res.status}`, body);
+        return false;
+      }
       const doc = await res.json();
-      const endIndex: number = doc.body?.content?.at(-1)?.endIndex ?? 1;
+
+      // Si le doc a des onglets internes Google Docs, utiliser le premier onglet
+      const tabs: any[] = doc.tabs ?? [];
+      const tabId: string | undefined = tabs[0]?.tabProperties?.tabId;
+      const content: any[] = tabId
+        ? (tabs[0]?.documentTab?.body?.content ?? [])
+        : (doc.body?.content ?? []);
+      const endIndex: number = content.at(-1)?.endIndex ?? 1;
+
       const requests: object[] = [];
-      if (endIndex > 1) requests.push({ deleteContentRange: { range: { startIndex: 1, endIndex: endIndex - 1 } } });
-      if (text) requests.push({ insertText: { location: { index: 1 }, text } });
+      if (endIndex > 1) {
+        const range: Record<string, unknown> = { startIndex: 1, endIndex: endIndex - 1 };
+        if (tabId) range.tabId = tabId;
+        requests.push({ deleteContentRange: { range } });
+      }
+      if (text) {
+        const location: Record<string, unknown> = { index: 1 };
+        if (tabId) location.tabId = tabId;
+        requests.push({ insertText: { location, text } });
+      }
+      if (requests.length === 0) return true;
+
       const saveRes = await fetch(
         `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`,
-        { method: "POST", headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" }, body: JSON.stringify({ requests }) }
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ requests }),
+        }
       );
+      if (!saveRes.ok) {
+        const body = await saveRes.text().catch(() => "");
+        console.error(`[Docs] saveDoc batchUpdate → ${saveRes.status}`, body);
+      }
       return saveRes.ok;
-    } catch {
+    } catch (e) {
+      console.error("[Docs] saveDoc error", e);
       return false;
     }
   },
