@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Send, FlaskConical, Clock, CheckCheck, AlertCircle, X, RefreshCw, ListOrdered, Pencil } from "lucide-react";
+import { Loader2, Send, FlaskConical, Clock, CheckCheck, AlertCircle, X, RefreshCw, ListOrdered, Pencil, PauseCircle } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore, type DriveFolder } from "@/lib/driveStore";
 import { queueStore, type QueueItem, type FicheFormData } from "@/lib/queueStore";
@@ -117,6 +117,7 @@ export default function CreationFichePage() {
   const [boutiques, setBoutiques] = useState<DriveFolder[]>([]);
   const [form, setForm] = useState<FicheFormData>(EMPTY_FORM);
   const [queue, setQueue] = useState<QueueItem[]>(queueStore.getQueue());
+  const [paused, setPaused] = useState(queueStore.isPaused());
 
   useEffect(() => {
     driveStore.fetchRootFolders().then(setBoutiques);
@@ -124,7 +125,10 @@ export default function CreationFichePage() {
 
   // Sync with global store + listen for toast notifications
   useEffect(() => {
-    const unsub = queueStore.subscribe(() => setQueue([...queueStore.getQueue()]));
+    const unsub = queueStore.subscribe(() => {
+      setQueue([...queueStore.getQueue()]);
+      setPaused(queueStore.isPaused());
+    });
     const unsubEvent = queueStore.onEvent(({ type, item }) => {
       if (type === "done") toast.success(`✓ "${item.label}" créée avec succès !`);
       else toast.error(`Erreur lors de la création de "${item.label}"`);
@@ -261,7 +265,13 @@ export default function CreationFichePage() {
                   En cours…
                 </span>
               )}
-              {!isProcessing && pendingCount > 0 && (
+              {paused && (
+                <span className="flex items-center gap-1 text-xs text-destructive">
+                  <PauseCircle className="h-3 w-3" />
+                  En pause
+                </span>
+              )}
+              {!isProcessing && !paused && pendingCount > 0 && (
                 <span className="text-xs text-muted-foreground">{pendingCount} en attente</span>
               )}
             </div>
@@ -274,6 +284,31 @@ export default function CreationFichePage() {
               </button>
             )}
           </div>
+
+          {/* Bannière pause sur erreur */}
+          {paused && (() => {
+            const errorItem = queue.find(i => i.status === "error");
+            return errorItem ? (
+              <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg border border-destructive/30 bg-destructive/10 mb-3">
+                <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium text-destructive">File arrêtée suite à une erreur</p>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {errorItem.errorMessage ?? `"${errorItem.label}" a échoué`}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="gap-1.5 flex-shrink-0 h-7 text-xs"
+                  onClick={() => queueStore.retryItem(errorItem.id)}
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Relancer
+                </Button>
+              </div>
+            ) : null;
+          })()}
           <div className="space-y-2">
             {queue.map(item => (
               <QueueRow

@@ -31,6 +31,7 @@ export type QueueEvent = { type: "done" | "error"; item: QueueItem };
 let _queue: QueueItem[] = [];
 let _processing = false;
 let _cooldown = false;
+let _paused = false;
 const _stateListeners: Array<() => void> = [];
 const _eventListeners: Array<(e: QueueEvent) => void> = [];
 
@@ -44,7 +45,7 @@ function _scheduleNext() {
 }
 
 function _process() {
-  if (_processing || _cooldown) return;
+  if (_processing || _cooldown || _paused) return;
   const pending = _queue.find(i => i.status === "pending");
   if (!pending) return;
 
@@ -81,17 +82,18 @@ function _process() {
 
       const updated: QueueItem = { ...pending, status, errorMessage };
       _queue = _queue.map(i => i.id === pending.id ? updated : i);
+      if (hasBodyError) _paused = true;
       _notify();
       _eventListeners.forEach(fn => fn({ type: status as "done" | "error", item: updated }));
-      _scheduleNext();
+      if (!hasBodyError) _scheduleNext();
     })
     .catch(() => {
       _processing = false;
       const updated: QueueItem = { ...pending, status: "error", errorMessage: "Erreur de connexion" };
       _queue = _queue.map(i => i.id === pending.id ? updated : i);
+      _paused = true;
       _notify();
       _eventListeners.forEach(fn => fn({ type: "error", item: updated }));
-      _scheduleNext();
     });
 }
 
@@ -106,8 +108,11 @@ export const queueStore = {
     _process();
   },
 
+  isPaused: (): boolean => _paused,
+
   retryItem(id: string) {
     _queue = _queue.map(i => i.id === id ? { ...i, status: "pending" as QueueStatus } : i);
+    _paused = false;
     _notify();
     _process();
   },
