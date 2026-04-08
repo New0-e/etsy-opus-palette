@@ -373,7 +373,7 @@ export const driveStore = {
       const endIndex: number = content.at(-1)?.endIndex ?? 1;
 
       const requests: object[] = [];
-      if (endIndex > 1) {
+      if (endIndex > 2) {
         const range: Record<string, unknown> = { startIndex: 1, endIndex: endIndex - 1 };
         if (tabId) range.tabId = tabId;
         requests.push({ deleteContentRange: { range } });
