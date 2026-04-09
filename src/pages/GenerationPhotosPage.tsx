@@ -156,7 +156,7 @@ export default function GenerationPhotosPage() {
   const [customAcc, setCustomAcc] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageCount, setImageCount] = useState("3");
-  const [generationModel, setGenerationModel] = useState("gemini-2.0-flash-preview-image-generation");
+  const [generationModel, setGenerationModel] = useState("gemini-2.5-flash-preview-image-generation");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<string[]>([]);
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
@@ -271,12 +271,12 @@ export default function GenerationPhotosPage() {
           <Select value={generationModel} onValueChange={setGenerationModel}>
             <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="gemini-2.5-flash-preview-04-17">Gemini 2.5 Flash</SelectItem>
-              <SelectItem value="gemini-2.5-pro-preview-03-25">Gemini 2.5 Pro</SelectItem>
-              <SelectItem value="gemini-2.0-flash-preview-image-generation">Gemini 2.0 Flash</SelectItem>
-              <SelectItem value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</SelectItem>
-              <SelectItem value="imagen-3.0-generate-001">Imagen 3</SelectItem>
-              <SelectItem value="imagen-3.0-fast-generate-001">Imagen 3 Fast</SelectItem>
+              <SelectItem value="gemini-2.5-flash-preview-image-generation">Nano Banana (Gemini 2.5 Flash Preview Image)</SelectItem>
+              <SelectItem value="gemini-3-pro-image-generation">Nano Banana Pro (Gemini 3 Pro Image)</SelectItem>
+              <SelectItem value="gemini-3.1-flash-image-generation">Nano Banana 2 (Gemini 3.1 Flash Image)</SelectItem>
+              <SelectItem value="imagen-4.0-generate-001">Imagen 4 Generate</SelectItem>
+              <SelectItem value="imagen-4.0-ultra-generate-001">Imagen 4 Ultra Generate</SelectItem>
+              <SelectItem value="imagen-4.0-fast-generate-001">Imagen 4 Fast Generate</SelectItem>
             </SelectContent>
           </Select>
         </div>
