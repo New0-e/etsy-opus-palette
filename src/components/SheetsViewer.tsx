@@ -579,8 +579,8 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                       width: 32,
                       minWidth: 32,
                       height: isExpanded ? undefined : CELL_HEIGHT,
-                      backgroundColor: isRowSelected ? "#fde047" : "#f1f3f4",
-                      color: isRowSelected ? "#713f12" : "#444746",
+                      backgroundColor: isRowSelected ? "#7c3aed" : "#f1f3f4",
+                      color: isRowSelected ? "#ffffff" : "#444746",
                       fontSize: 10,
                       fontWeight: isRowSelected ? 700 : 400,
                     }}
@@ -598,7 +598,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                     const cellStyle = {
                       width: colWidths[ci] ?? DEFAULT_COL,
                       maxWidth: colWidths[ci] ?? DEFAULT_COL,
-                      backgroundColor: isRowSelected ? "#fef9c3" : (cellBg ?? "#ffffff"),
+                      backgroundColor: isRowSelected ? "#ede9fe" : (cellBg ?? "#ffffff"),
                       color: meta.textColor ?? "#000000",
                       outline: selectedCell?.ri === ri && selectedCell?.ci === ci ? "2px solid hsl(var(--primary))" : undefined,
                     };
