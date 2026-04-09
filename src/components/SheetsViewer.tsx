@@ -209,6 +209,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
   const [fmtText, setFmtText] = useState("#000000");
   const [fmtApplying, setFmtApplying] = useState(false);
   const [favorites, setFavorites] = useState<string[]>(() => getFavorites());
+  const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
 
   const { spreadsheetId: urlSid, gid: urlGid } = useMemo(() => extractIds(url), [url]);
@@ -538,6 +539,10 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
         <table className="text-xs border-collapse" style={{ tableLayout: "fixed", width: "max-content" }}>
           <thead className="sticky top-0 z-10">
             <tr>
+              <th
+                className="border border-border select-none"
+                style={{ width: 32, minWidth: 32, height: CELL_HEIGHT, backgroundColor: "#f1f3f4" }}
+              />
               {allHeaders.map((h, i) => (
                 <th
                   key={i}
@@ -560,12 +565,30 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
               const isExpanded = expandedRows.has(ri);
               // Check if any cell in this row has text content worth expanding
               const hasLongText = row.some(v => v && !isUrl(v) && v.length > 14);
+              const isRowSelected = selectedRow === ri;
 
               return (
                 <tr
                   key={ri}
-                  className={`hover:bg-secondary/30 transition-colors group/row ${isEmpty ? "opacity-50 hover:opacity-100" : ""}`}
+                  className={`transition-colors group/row ${isEmpty ? "opacity-50 hover:opacity-100" : ""} ${!isRowSelected ? "hover:bg-secondary/30" : ""}`}
                 >
+                  {/* Numéro de ligne — clic pour sélectionner */}
+                  <td
+                    className="border border-border text-center cursor-pointer select-none"
+                    style={{
+                      width: 32,
+                      minWidth: 32,
+                      height: isExpanded ? undefined : CELL_HEIGHT,
+                      backgroundColor: isRowSelected ? "#fde047" : "#f1f3f4",
+                      color: isRowSelected ? "#713f12" : "#444746",
+                      fontSize: 10,
+                      fontWeight: isRowSelected ? 700 : 400,
+                    }}
+                    onClick={() => setSelectedRow(prev => prev === ri ? null : ri)}
+                    title={isRowSelected ? "Désélectionner la ligne" : "Sélectionner la ligne"}
+                  >
+                    {isEmpty ? "" : ri + 1}
+                  </td>
                   {allHeaders.map((_, ci) => {
                     const val = row[ci] ?? "";
                     const key = `${ri}-${ci}`;
@@ -575,7 +598,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                     const cellStyle = {
                       width: colWidths[ci] ?? DEFAULT_COL,
                       maxWidth: colWidths[ci] ?? DEFAULT_COL,
-                      backgroundColor: cellBg ?? "#ffffff",
+                      backgroundColor: isRowSelected ? "#fef9c3" : (cellBg ?? "#ffffff"),
                       color: meta.textColor ?? "#000000",
                       outline: selectedCell?.ri === ri && selectedCell?.ci === ci ? "2px solid hsl(var(--primary))" : undefined,
                     };
