@@ -271,10 +271,12 @@ export default function GenerationPhotosPage() {
           <Select value={generationModel} onValueChange={setGenerationModel}>
             <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="gemini-2.0-flash-preview-image-generation">Gemini 2.0 Flash (image gen)</SelectItem>
+              <SelectItem value="gemini-2.5-flash-preview-04-17">Gemini 2.5 Flash</SelectItem>
+              <SelectItem value="gemini-2.5-pro-preview-03-25">Gemini 2.5 Pro</SelectItem>
+              <SelectItem value="gemini-2.0-flash-preview-image-generation">Gemini 2.0 Flash</SelectItem>
               <SelectItem value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</SelectItem>
-              <SelectItem value="imagen-3.0-generate-001">Imagen 3 (qualité)</SelectItem>
-              <SelectItem value="imagen-3.0-fast-generate-001">Imagen 3 Fast (rapide)</SelectItem>
+              <SelectItem value="imagen-3.0-generate-001">Imagen 3</SelectItem>
+              <SelectItem value="imagen-3.0-fast-generate-001">Imagen 3 Fast</SelectItem>
             </SelectContent>
           </Select>
         </div>
