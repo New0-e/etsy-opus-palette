@@ -156,6 +156,7 @@ export default function GenerationPhotosPage() {
   const [customAcc, setCustomAcc] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageCount, setImageCount] = useState("3");
+  const [generationModel, setGenerationModel] = useState("gemini-2.0-flash-preview-image-generation");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<string[]>([]);
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
@@ -177,6 +178,7 @@ export default function GenerationPhotosPage() {
       compressedModels.forEach((f) => formData.append("model_images", f));
       formData.append("mode", currentMode);
       formData.append("image_count", imageCount);
+      formData.append("generation_model", generationModel);
       if (instructions) formData.append("instructions", instructions);
       if (currentMode === "manuel") {
         if (categorie) formData.append("categorie", categorie);
@@ -216,7 +218,7 @@ export default function GenerationPhotosPage() {
     } finally {
       setLoading(false);
     }
-  }, [mode, productImages, bgImages, modelImages, imageCount, instructions, categorie, selectedEnv, selectedEcl, selectedAngle, selectedAcc, testMode]);
+  }, [mode, productImages, bgImages, modelImages, imageCount, instructions, categorie, selectedEnv, selectedEcl, selectedAngle, selectedAcc, testMode, generationModel]);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -261,6 +263,20 @@ export default function GenerationPhotosPage() {
         <div className="space-y-2">
           <Label>Instructions manuelles</Label>
           <Textarea value={instructions} onChange={(e) => setInstructions(e.target.value)} rows={3} placeholder="Instructions supplémentaires..." />
+        </div>
+
+        {/* Modèle de génération */}
+        <div className="space-y-2">
+          <Label>Modèle de génération</Label>
+          <Select value={generationModel} onValueChange={setGenerationModel}>
+            <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="gemini-2.0-flash-preview-image-generation">Gemini 2.0 Flash (image gen)</SelectItem>
+              <SelectItem value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</SelectItem>
+              <SelectItem value="imagen-3.0-generate-001">Imagen 3 (qualité)</SelectItem>
+              <SelectItem value="imagen-3.0-fast-generate-001">Imagen 3 Fast (rapide)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Image Count */}
