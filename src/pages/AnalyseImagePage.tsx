@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Upload, Tags, FlaskConical, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore } from "@/lib/driveStore";
+import { getPageState, setPageState } from "@/lib/pageStore";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
@@ -41,14 +42,23 @@ function TagSection({ title, tags, color, copied, onCopy }: {
   );
 }
 
+type AnalyseResult = { descriptive_keywords: string[]; buying_intent: string[]; search_queries: string[] };
+const PAGE_KEY = "analyse-image";
+type PageState = { result: AnalyseResult | null; testMode: boolean };
+const defaults: PageState = { result: null, testMode: false };
+
 export default function AnalyseImagePage() {
+  const saved = getPageState<PageState>(PAGE_KEY, defaults);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ descriptive_keywords: string[]; buying_intent: string[]; search_queries: string[] } | null>(null);
+  const [result, setResultRaw] = useState<AnalyseResult | null>(saved.result);
   const [dragOver, setDragOver] = useState(false);
-  const [testMode, setTestMode] = useState(false);
+  const [testMode, setTestModeRaw] = useState(saved.testMode);
   const [copied, setCopied] = useState<string | null>(null);
+
+  const setResult = (v: AnalyseResult | null) => { setResultRaw(v); setPageState<PageState>(PAGE_KEY, { result: v }); };
+  const setTestMode = (v: boolean) => { setTestModeRaw(v); setPageState<PageState>(PAGE_KEY, { testMode: v }); };
 
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();

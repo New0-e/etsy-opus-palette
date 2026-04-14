@@ -29,6 +29,10 @@ function naturalSort(a: DriveItem, b: DriveItem): number {
   const af = a.mimeType === MIME_FOLDER;
   const bf = b.mimeType === MIME_FOLDER;
   if (af !== bf) return af ? -1 : 1;
+  if (af && bf) {
+    // Folders: descending order (largest number first)
+    return b.name.localeCompare(a.name, undefined, { numeric: true, sensitivity: "base" });
+  }
   return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
 }
 

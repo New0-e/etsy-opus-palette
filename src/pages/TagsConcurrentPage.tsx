@@ -5,15 +5,25 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, UserSearch, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
+import { getPageState, setPageState } from "@/lib/pageStore";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/221b037d-2a18-4def-a350-0cdf5323197f";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/221b037d-2a18-4def-a350-0cdf5323197f";
 
+const PAGE_KEY = "tags-concurrent";
+type PageState = { lien: string; result: string; testMode: boolean };
+const defaults: PageState = { lien: "", result: "", testMode: false };
+
 export default function TagsConcurrentPage() {
-  const [lien, setLien] = useState("");
+  const saved = getPageState<PageState>(PAGE_KEY, defaults);
+  const [lien, setLienRaw] = useState(saved.lien);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState("");
-  const [testMode, setTestMode] = useState(false);
+  const [result, setResultRaw] = useState(saved.result);
+  const [testMode, setTestModeRaw] = useState(saved.testMode);
+
+  const setLien = (v: string) => { setLienRaw(v); setPageState<PageState>(PAGE_KEY, { lien: v }); };
+  const setResult = (v: string) => { setResultRaw(v); setPageState<PageState>(PAGE_KEY, { result: v }); };
+  const setTestMode = (v: boolean) => { setTestModeRaw(v); setPageState<PageState>(PAGE_KEY, { testMode: v }); };
 
   const handleAnalyse = async () => {
     if (!lien.trim()) return;

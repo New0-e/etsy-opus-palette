@@ -4,17 +4,25 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, ImageIcon, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore } from "@/lib/driveStore";
+import { getPageState, setPageState } from "@/lib/pageStore";
 
 // Remplacer par l'URL réelle du webhook n8n
 const WEBHOOK_URL = "https://n8n.srv1196541.hstgr.cloud/webhook/descriptif-image";
 
+const PAGE_KEY = "descriptif-image";
+type PageState = { result: string };
+const defaults: PageState = { result: "" };
+
 export default function DescriptifImagePage() {
+  const saved = getPageState<PageState>(PAGE_KEY, defaults);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState("");
+  const [result, setResultRaw] = useState(saved.result);
   const [dragOver, setDragOver] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const setResult = (v: string) => { setResultRaw(v); setPageState<PageState>(PAGE_KEY, { result: v }); };
 
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();

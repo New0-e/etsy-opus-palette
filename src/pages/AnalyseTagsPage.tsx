@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, BarChart3, FlaskConical, Copy, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { getPageState, setPageState } from "@/lib/pageStore";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/43af0a2f-2584-4327-8527-ac204967a1cc";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/43af0a2f-2584-4327-8527-ac204967a1cc";
@@ -40,13 +41,22 @@ function TagPill({ tag, color, copied, onCopy }: {
   );
 }
 
+const PAGE_KEY = "analyse-tags";
+type PageState = { tags: string; result: TagResult | null; testMode: boolean };
+const defaults: PageState = { tags: "", result: null, testMode: false };
+
 export default function AnalyseTagsPage() {
-  const [tags, setTags] = useState("");
+  const saved = getPageState<PageState>(PAGE_KEY, defaults);
+  const [tags, setTagsRaw] = useState(saved.tags);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<TagResult | null>(null);
-  const [testMode, setTestMode] = useState(false);
+  const [result, setResultRaw] = useState<TagResult | null>(saved.result);
+  const [testMode, setTestModeRaw] = useState(saved.testMode);
   const [copied, setCopied] = useState<string | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
+
+  const setTags = (v: string) => { setTagsRaw(v); setPageState<PageState>(PAGE_KEY, { tags: v }); };
+  const setResult = (v: TagResult | null) => { setResultRaw(v); setPageState<PageState>(PAGE_KEY, { result: v }); };
+  const setTestMode = (v: boolean) => { setTestModeRaw(v); setPageState<PageState>(PAGE_KEY, { testMode: v }); };
 
   const copy = (t: string) => {
     navigator.clipboard.writeText(t);
