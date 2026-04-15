@@ -209,22 +209,34 @@ export default function GenerationPhotosPage() {
         const arr = Array.isArray(json) ? json : [json];
 
         const toDataUrl = (item: any): string | null => {
-          // base64 brut avec mimeType (format Gemini/Imagen via n8n)
-          if (item.data && item.mimeType) return `data:${item.mimeType};base64,${item.data}`;
-          if (item.b64_json) return `data:image/jpeg;base64,${item.b64_json}`;
-          if (item.base64) return `data:image/jpeg;base64,${item.base64}`;
-          if (item.image && !item.image.startsWith("http")) return `data:image/jpeg;base64,${item.image}`;
+          // Format binaire n8n : item.binary.data.data + item.binary.data.mimeType
+          if (item?.binary?.data?.data) {
+            const mime = item.binary.data.mimeType ?? "image/png";
+            return `data:${mime};base64,${item.binary.data.data}`;
+          }
+          // Plusieurs champs binaires (ex: binary.image, binary.result...)
+          if (item?.binary) {
+            for (const key of Object.keys(item.binary)) {
+              const b = item.binary[key];
+              if (b?.data) return `data:${b.mimeType ?? "image/png"};base64,${b.data}`;
+            }
+          }
+          // base64 brut avec mimeType (format Gemini/Imagen direct)
+          if (item?.data && item?.mimeType) return `data:${item.mimeType};base64,${item.data}`;
+          if (item?.b64_json) return `data:image/jpeg;base64,${item.b64_json}`;
+          if (item?.base64) return `data:image/jpeg;base64,${item.base64}`;
+          if (item?.image && !item.image.startsWith("http")) return `data:image/jpeg;base64,${item.image}`;
           return null;
         };
 
         const urls = arr.flatMap((item: any) => {
           // URLs directes
-          const directUrls: string[] = (item.image_urls ?? item.urls ?? item.images ?? (item.url ? [item.url] : []));
+          const directUrls: string[] = (item.image_urls ?? item.urls ?? (item.url ? [item.url] : []));
           if (directUrls.length) return directUrls;
-          // base64 au niveau racine
+          // base64 au niveau racine ou format binaire n8n
           const b64 = toDataUrl(item);
           if (b64) return [b64];
-          // tableau imbriqué d'images base64 (ex: item.images = [{data, mimeType}])
+          // tableau imbriqué d'images base64
           if (Array.isArray(item.images)) return item.images.map(toDataUrl).filter(Boolean);
           return [];
         }).filter(Boolean);
