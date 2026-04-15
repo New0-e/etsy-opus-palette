@@ -157,7 +157,7 @@ export default function GenerationPhotosPage() {
   const [customAcc, setCustomAcc] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageCount, setImageCount] = useState("3");
-  const [generationModel, setGenerationModel] = useState("gemini-2.5-flash-preview-image-generation");
+  const [generationModel, setGenerationModel] = useState("gemini-2.5-flash-image");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<string[]>([]);
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
@@ -332,12 +332,14 @@ export default function GenerationPhotosPage() {
           <Select value={generationModel} onValueChange={setGenerationModel}>
             <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="gemini-2.5-flash-preview-image-generation">Nano Banana (Gemini 2.5 Flash Preview Image)</SelectItem>
-              <SelectItem value="gemini-3-pro-image-generation">Nano Banana Pro (Gemini 3 Pro Image)</SelectItem>
-              <SelectItem value="gemini-3.1-flash-image-generation">Nano Banana 2 (Gemini 3.1 Flash Image)</SelectItem>
-              <SelectItem value="imagen-4.0-generate-001">Imagen 4 Generate</SelectItem>
-              <SelectItem value="imagen-4.0-ultra-generate-001">Imagen 4 Ultra Generate</SelectItem>
-              <SelectItem value="imagen-4.0-fast-generate-001">Imagen 4 Fast Generate</SelectItem>
+              <SelectItem value="gemini-2.5-flash-image" title="Idéal pour la génération standard et le traitement multimodal. Bon équilibre vitesse/qualité pour un usage quotidien.">Nano Banana</SelectItem>
+              <SelectItem value="gemini-3-pro-image-preview" title="Recommandé pour les créations artistiques et les rendus haute qualité. Parfait pour les photos de produits Etsy exigeantes.">Nano Banana Pro</SelectItem>
+              <SelectItem value="gemini-3.1-flash-image-preview" title="Dernière génération standard (fév. 2026). Meilleur choix pour une qualité élevée avec un bon temps de réponse.">Nano Banana 2</SelectItem>
+              <SelectItem value="gemini-3-ultra" title="Performances maximales pour les compositions complexes et les scènes détaillées. À utiliser pour les projets les plus ambitieux.">Nano Banana Ultra</SelectItem>
+              <SelectItem value="gemini-2-flash" title="Ancienne version, optimisée pour la rapidité et le traitement basique. À utiliser uniquement si les modèles récents posent problème.">Nano Banana (Ancien)</SelectItem>
+              <SelectItem value="imagen-4.0-generate-001" title="Génération polyvalente haute fidélité. Idéal pour des visuels réalistes et variés à usage général.">Imagen 4 Génération</SelectItem>
+              <SelectItem value="imagen-4.0-ultra-generate-001" title="Qualité premium avec un niveau de détail et de réalisme extrême. Recommandé pour les rendus professionnels finaux.">Imagen 4 Ultra Génération</SelectItem>
+              <SelectItem value="imagen-4.0-fast-generate-001" title="Génération rapide pour les flux de travail en volume ou en temps réel. Idéal pour tester et itérer rapidement.">Imagen 4 Génération Rapide</SelectItem>
             </SelectContent>
           </Select>
         </div>
