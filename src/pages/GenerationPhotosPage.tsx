@@ -205,9 +205,28 @@ export default function GenerationPhotosPage() {
       try {
         const json = JSON.parse(text);
         const arr = Array.isArray(json) ? json : [json];
-        const urls = arr.flatMap((item: any) =>
-          item.image_urls ?? item.urls ?? item.images ?? (item.url ? [item.url] : [])
-        ).filter(Boolean);
+
+        const toDataUrl = (item: any): string | null => {
+          // base64 brut avec mimeType (format Gemini/Imagen via n8n)
+          if (item.data && item.mimeType) return `data:${item.mimeType};base64,${item.data}`;
+          if (item.b64_json) return `data:image/jpeg;base64,${item.b64_json}`;
+          if (item.base64) return `data:image/jpeg;base64,${item.base64}`;
+          if (item.image && !item.image.startsWith("http")) return `data:image/jpeg;base64,${item.image}`;
+          return null;
+        };
+
+        const urls = arr.flatMap((item: any) => {
+          // URLs directes
+          const directUrls: string[] = (item.image_urls ?? item.urls ?? item.images ?? (item.url ? [item.url] : []));
+          if (directUrls.length) return directUrls;
+          // base64 au niveau racine
+          const b64 = toDataUrl(item);
+          if (b64) return [b64];
+          // tableau imbriqué d'images base64 (ex: item.images = [{data, mimeType}])
+          if (Array.isArray(item.images)) return item.images.map(toDataUrl).filter(Boolean);
+          return [];
+        }).filter(Boolean);
+
         if (urls.length) { setResults(urls); toast.success("Génération terminée !"); }
         else { toast.success("Workflow lancé — les images seront disponibles sous peu."); }
       } catch {
