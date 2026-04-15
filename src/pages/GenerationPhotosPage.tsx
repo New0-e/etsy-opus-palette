@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical } from "lucide-react";
+import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 
 const PROXY_URL = "/api/n8n-proxy";
@@ -161,6 +161,32 @@ export default function GenerationPhotosPage() {
   const [results, setResults] = useState<string[]>([]);
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
   const [testMode, setTestMode] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const downloadImage = useCallback((url: string, index: number) => {
+    const ext = url.startsWith("data:image/png") ? "png" : "jpg";
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `generated-${index + 1}.${ext}`;
+    a.click();
+  }, []);
+
+  const downloadSelected = useCallback(() => {
+    selectedResults.forEach((url, i) => {
+      setTimeout(() => downloadImage(url, results.indexOf(url)), i * 150);
+    });
+  }, [selectedResults, results, downloadImage]);
+
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") setLightboxIndex((i) => i !== null ? Math.min(i + 1, results.length - 1) : null);
+      if (e.key === "ArrowLeft") setLightboxIndex((i) => i !== null ? Math.max(i - 1, 0) : null);
+      if (e.key === "Escape") setLightboxIndex(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [lightboxIndex, results.length]);
 
   const handleGenerate = useCallback(async (currentMode: "auto" | "manuel" = mode) => {
     if (productImages.length === 0) { toast.error("Ajoutez au moins une image produit"); return; }
@@ -337,25 +363,69 @@ export default function GenerationPhotosPage() {
         {/* Results */}
         {results.length > 0 && (
           <div className="space-y-4 pt-4 border-t border-border">
-            <Label>Résultats</Label>
+            <div className="flex items-center justify-between">
+              <Label>Résultats ({results.length})</Label>
+              <button onClick={() => setSelectedResults(selectedResults.length === results.length ? [] : [...results])}
+                className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+                {selectedResults.length === results.length ? "Tout désélectionner" : "Tout sélectionner"}
+              </button>
+            </div>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               {results.map((url, i) => (
-                <button key={i} onClick={() => setSelectedResults((prev) => prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url])}
-                  className={`relative rounded-lg overflow-hidden border-2 transition-all ${selectedResults.includes(url) ? "border-primary glow-primary" : "border-border"}`}
-                >
-                  <img src={url} className="w-full aspect-square object-cover" />
-                  {selectedResults.includes(url) && (
-                    <div className="absolute top-2 right-2 bg-primary rounded-full p-1">
-                      <Check className="h-3 w-3 text-primary-foreground" />
-                    </div>
-                  )}
-                </button>
+                <div key={i} className={`relative rounded-lg overflow-hidden border-2 transition-all group ${selectedResults.includes(url) ? "border-primary glow-primary" : "border-border"}`}>
+                  <img src={url} className="w-full aspect-square object-cover cursor-pointer" onClick={() => setLightboxIndex(i)} />
+                  {/* Overlay agrandir */}
+                  <button onClick={() => setLightboxIndex(i)}
+                    className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all opacity-0 group-hover:opacity-100">
+                    <ZoomIn className="h-8 w-8 text-white drop-shadow" />
+                  </button>
+                  {/* Checkbox sélection */}
+                  <button onClick={() => setSelectedResults((prev) => prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url])}
+                    className={`absolute top-2 left-2 h-5 w-5 rounded border-2 flex items-center justify-center transition-all z-10 ${selectedResults.includes(url) ? "bg-primary border-primary" : "bg-black/40 border-white/60 opacity-0 group-hover:opacity-100"}`}>
+                    {selectedResults.includes(url) && <Check className="h-3 w-3 text-primary-foreground" />}
+                  </button>
+                  {/* Bouton télécharger individuel */}
+                  <button onClick={() => downloadImage(url, i)}
+                    className="absolute top-2 right-2 bg-black/50 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-black/80">
+                    <Download className="h-3 w-3 text-white" />
+                  </button>
+                </div>
               ))}
             </div>
-            <Button variant="outline" disabled={selectedResults.length === 0} className="gap-2">
+            <Button variant="outline" disabled={selectedResults.length === 0} onClick={downloadSelected} className="gap-2">
               <Download className="h-4 w-4" />
               Télécharger ({selectedResults.length})
             </Button>
+          </div>
+        )}
+
+        {/* Lightbox */}
+        {lightboxIndex !== null && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90" onClick={() => setLightboxIndex(null)}>
+            <button onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
+              className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors">
+              <X className="h-5 w-5 text-white" />
+            </button>
+            <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => i !== null ? Math.max(i - 1, 0) : null); }}
+              disabled={lightboxIndex === 0}
+              className="absolute left-4 bg-white/10 hover:bg-white/20 disabled:opacity-20 rounded-full p-3 transition-colors">
+              <ChevronLeft className="h-6 w-6 text-white" />
+            </button>
+            <img src={results[lightboxIndex]} onClick={(e) => e.stopPropagation()}
+              className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain shadow-2xl" />
+            <button onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => i !== null ? Math.min(i + 1, results.length - 1) : null); }}
+              disabled={lightboxIndex === results.length - 1}
+              className="absolute right-4 bg-white/10 hover:bg-white/20 disabled:opacity-20 rounded-full p-3 transition-colors">
+              <ChevronRight className="h-6 w-6 text-white" />
+            </button>
+            <div className="absolute bottom-4 flex items-center gap-3">
+              <span className="text-white/60 text-sm">{lightboxIndex + 1} / {results.length}</span>
+              <button onClick={(e) => { e.stopPropagation(); downloadImage(results[lightboxIndex], lightboxIndex); }}
+                className="flex items-center gap-1.5 bg-white/10 hover:bg-white/20 rounded-full px-3 py-1.5 text-white text-sm transition-colors">
+                <Download className="h-4 w-4" />
+                Télécharger
+              </button>
+            </div>
           </div>
         )}
       </div>
