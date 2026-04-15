@@ -9,7 +9,8 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
 import { toast } from "sonner";
 
-const PROXY_URL = "/api/n8n-proxy";
+const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/edc44347-0c53-473e-8047-956afd36b4f4";
+const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/edc44347-0c53-473e-8047-956afd36b4f4";
 
 async function compressImage(file: File, maxPx = 1500, quality = 0.82): Promise<File> {
   return new Promise((resolve) => {
@@ -214,9 +215,8 @@ export default function GenerationPhotosPage() {
         if (selectedAcc.length) formData.append("accessoires", selectedAcc.join(", "));
       }
 
-      const res = await fetch(PROXY_URL, {
+      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
         method: "POST",
-        headers: { "x-test-mode": testMode ? "1" : "0" },
         body: formData,
       });
 
@@ -379,15 +379,15 @@ export default function GenerationPhotosPage() {
                     className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all opacity-0 group-hover:opacity-100">
                     <ZoomIn className="h-8 w-8 text-white drop-shadow" />
                   </button>
-                  {/* Checkbox sélection */}
-                  <button onClick={() => setSelectedResults((prev) => prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url])}
-                    className={`absolute top-2 left-2 h-5 w-5 rounded border-2 flex items-center justify-center transition-all z-10 ${selectedResults.includes(url) ? "bg-primary border-primary" : "bg-black/40 border-white/60 opacity-0 group-hover:opacity-100"}`}>
-                    {selectedResults.includes(url) && <Check className="h-3 w-3 text-primary-foreground" />}
-                  </button>
                   {/* Bouton télécharger individuel */}
                   <button onClick={() => downloadImage(url, i)}
-                    className="absolute top-2 right-2 bg-black/50 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-black/80">
+                    className="absolute top-2 left-2 bg-black/50 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-black/80">
                     <Download className="h-3 w-3 text-white" />
+                  </button>
+                  {/* Checkbox sélection */}
+                  <button onClick={() => setSelectedResults((prev) => prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url])}
+                    className={`absolute bottom-2 right-2 h-5 w-5 rounded border-2 flex items-center justify-center transition-all z-10 ${selectedResults.includes(url) ? "bg-primary border-primary" : "bg-black/40 border-white/60 opacity-0 group-hover:opacity-100"}`}>
+                    {selectedResults.includes(url) && <Check className="h-3 w-3 text-primary-foreground" />}
                   </button>
                 </div>
               ))}
