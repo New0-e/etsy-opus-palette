@@ -381,7 +381,7 @@ export default function GenerationPhotosPage() {
                   </button>
                   {/* Bouton télécharger individuel */}
                   <button onClick={() => downloadImage(url, i)}
-                    className="absolute top-2 left-2 bg-black/50 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-black/80">
+                    className="absolute top-2 right-2 bg-black/50 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-black/80">
                     <Download className="h-3 w-3 text-white" />
                   </button>
                   {/* Checkbox sélection */}
