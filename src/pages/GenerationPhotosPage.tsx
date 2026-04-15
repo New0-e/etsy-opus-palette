@@ -202,8 +202,10 @@ export default function GenerationPhotosPage() {
       }
 
       const text = await res.text();
+      console.log("[GenerationPhotos] raw response:", text.slice(0, 2000));
       try {
         const json = JSON.parse(text);
+        console.log("[GenerationPhotos] parsed JSON:", JSON.stringify(json, null, 2).slice(0, 2000));
         const arr = Array.isArray(json) ? json : [json];
 
         const toDataUrl = (item: any): string | null => {
