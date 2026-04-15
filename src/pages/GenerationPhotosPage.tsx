@@ -208,24 +208,26 @@ export default function GenerationPhotosPage() {
         console.log("[GenerationPhotos] parsed JSON:", JSON.stringify(json, null, 2).slice(0, 2000));
         const arr = Array.isArray(json) ? json : [json];
 
+        const cleanB64 = (s: string) => s.replace(/\s+/g, "").replace(/^data:[^,]+,/, "");
+
         const toDataUrl = (item: any): string | null => {
           // Format binaire n8n : item.binary.data.data + item.binary.data.mimeType
           if (item?.binary?.data?.data) {
             const mime = item.binary.data.mimeType ?? "image/png";
-            return `data:${mime};base64,${item.binary.data.data}`;
+            return `data:${mime};base64,${cleanB64(item.binary.data.data)}`;
           }
           // Plusieurs champs binaires (ex: binary.image, binary.result...)
           if (item?.binary) {
             for (const key of Object.keys(item.binary)) {
               const b = item.binary[key];
-              if (b?.data) return `data:${b.mimeType ?? "image/png"};base64,${b.data}`;
+              if (b?.data) return `data:${b.mimeType ?? "image/png"};base64,${cleanB64(b.data)}`;
             }
           }
           // base64 brut avec mimeType (format Gemini/Imagen direct)
-          if (item?.data && item?.mimeType) return `data:${item.mimeType};base64,${item.data}`;
-          if (item?.b64_json) return `data:image/jpeg;base64,${item.b64_json}`;
-          if (item?.base64) return `data:image/jpeg;base64,${item.base64}`;
-          if (item?.image && !item.image.startsWith("http")) return `data:image/jpeg;base64,${item.image}`;
+          if (item?.data && item?.mimeType) return `data:${item.mimeType};base64,${cleanB64(item.data)}`;
+          if (item?.b64_json) return `data:image/jpeg;base64,${cleanB64(item.b64_json)}`;
+          if (item?.base64) return `data:image/jpeg;base64,${cleanB64(item.base64)}`;
+          if (item?.image && !item.image.startsWith("http")) return `data:image/jpeg;base64,${cleanB64(item.image)}`;
           return null;
         };
 
