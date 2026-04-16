@@ -106,30 +106,28 @@ export default function GenerationModelePage() {
     setLoading(true);
     setResults([]);
     try {
-      const payload: Record<string, string> = {
-        genre,
-        age: String(age[0]),
-        taille: `${taille[0]} cm`,
-        poids: `${poids[0]} kg`,
-        image_count: imageCount,
-        generation_model: generationModel,
-      };
-      if (morphologie) payload.morphologie = morphologie;
-      if (couleurCheveux) payload.couleur_cheveux = couleurCheveux;
-      if (longueur) payload.longueur_cheveux = longueur;
-      if (couleurYeux) payload.couleur_yeux = couleurYeux;
-      if (carnation) payload.carnation = carnation;
-      if (origine) payload.origine = origine;
-      if (genre === "femme" && poitrine) payload.poitrine = poitrine;
-      if (fesse) payload.fesses = fesse;
-      if (pose) payload.pose = pose;
-      if (tenue) payload.tenue = tenue;
-      if (instructions) payload.instructions = instructions;
+      const formData = new FormData();
+      formData.append("genre", genre);
+      formData.append("age", String(age[0]));
+      formData.append("taille", `${taille[0]} cm`);
+      formData.append("poids", `${poids[0]} kg`);
+      formData.append("image_count", imageCount);
+      formData.append("generation_model", generationModel);
+      if (morphologie) formData.append("morphologie", morphologie);
+      if (couleurCheveux) formData.append("couleur_cheveux", couleurCheveux);
+      if (longueur) formData.append("longueur_cheveux", longueur);
+      if (couleurYeux) formData.append("couleur_yeux", couleurYeux);
+      if (carnation) formData.append("carnation", carnation);
+      if (origine) formData.append("origine", origine);
+      if (genre === "femme" && poitrine) formData.append("poitrine", poitrine);
+      if (fesse) formData.append("fesses", fesse);
+      if (pose) formData.append("pose", pose);
+      if (tenue) formData.append("tenue", tenue);
+      if (instructions) formData.append("instructions", instructions);
 
       const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       if (!res.ok) {
