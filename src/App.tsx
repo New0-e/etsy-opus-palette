@@ -8,6 +8,7 @@ import HomePage from "@/pages/HomePage";
 import CreationFichePage from "@/pages/CreationFichePage";
 import DownloadImagesPage from "@/pages/DownloadImagesPage";
 import GenerationPhotosPage from "@/pages/GenerationPhotosPage";
+import GenerationModelePage from "@/pages/GenerationModelePage";
 import AnalyseImagePage from "@/pages/AnalyseImagePage";
 import AnalyseTagsPage from "@/pages/AnalyseTagsPage";
 import TagsConcurrentPage from "@/pages/TagsConcurrentPage";
@@ -53,6 +54,7 @@ const App = () => (
             <Route path="/creation-fiche" element={<CreationFichePage />} />
             <Route path="/download-images" element={<DownloadImagesPage />} />
             <Route path="/generation-photos" element={<GenerationPhotosPage />} />
+            <Route path="/generation-modele" element={<GenerationModelePage />} />
             <Route path="/analyse-image" element={<AnalyseImagePage />} />
             <Route path="/analyse-tags" element={<AnalyseTagsPage />} />
             <Route path="/tags-concurrent" element={<TagsConcurrentPage />} />
