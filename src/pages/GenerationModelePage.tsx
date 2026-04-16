@@ -8,8 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Loader2, Sparkles, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, User } from "lucide-react";
 import { toast } from "sonner";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/0075596e-85d8-4549-bb28-80ba00a727b9";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/0075596e-85d8-4549-bb28-80ba00a727b9";
+const PROXY_URL = "/api/n8n-proxy-modele";
 
 const couleursCheveux = ["Blond", "Brun", "Noir", "Châtain", "Roux", "Gris", "Blanc", "Platine", "Blond vénitien"];
 const longueurCheveux = ["Très court", "Court", "Mi-long", "Long", "Très long", "Bouclé court", "Bouclé long"];
@@ -125,8 +124,9 @@ export default function GenerationModelePage() {
       if (tenue) formData.append("tenue", tenue);
       if (instructions) formData.append("instructions", instructions);
 
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
+      const res = await fetch(PROXY_URL, {
         method: "POST",
+        headers: { "X-Test-Mode": testMode ? "1" : "0" },
         body: formData,
       });
 
