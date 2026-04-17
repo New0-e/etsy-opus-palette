@@ -19,11 +19,12 @@ const origines = ["Européenne", "Africaine", "Asiatique", "Latine", "Moyen-Orie
 const morphologies = ["Mince", "Athlétique", "Normale", "Ronde", "Musclée"];
 const poitrines = ["Petite (A/B)", "Moyenne (C)", "Généreuse (D/E)", "Très généreuse (F+)"];
 const fesses = ["Plates", "Normales", "Rondes", "Pulpeuses", "Très pulpeuses"];
-const poses = [
-  "Debout face", "Debout profil", "Debout trois-quarts", "Assise",
-  "Marchant", "Bras croisés", "Mains dans les poches", "Regardant au loin",
-];
-const tenues = ["Casual", "Élégante", "Sportive", "Soirée", "Business", "Décontractée", "Été", "Hiver"];
+const formesVisage = ["Ovale", "Rond", "Carré", "Cœur", "Allongé", "Losange", "Triangulaire"];
+const formesBouche = ["Fine", "Normale", "Pulpeuse", "Très pulpeuse", "Bouche en arc", "Lèvres asymétriques"];
+const formesNez = ["Petit", "Fin", "Droit", "Retroussé", "Large", "Aquilin", "Épaté"];
+const formesOreilles = ["Petites", "Grandes", "Décollées", "Collées", "Lobules épais", "Lobules fins"];
+const sourcils = ["Fins", "Épais", "Arqués", "Droits", "Broussailleux", "Séparés", "Rapprochés"];
+const machoires = ["Fine", "Carrée", "Proéminente", "Douce", "Forte"];
 const generationModels = [
   { value: "gemini-2.5-flash-image", label: "Nano Banana", tooltip: "Idéal pour la génération standard. Bon équilibre vitesse/qualité." },
   { value: "gemini-3-pro-image-preview", label: "Nano Banana Pro", tooltip: "Haute qualité pour les rendus détaillés et réalistes." },
@@ -66,8 +67,12 @@ export default function GenerationModelePage() {
   const [origine, setOrigine] = useState("");
   const [poitrine, setPoitrine] = useState("");
   const [fesse, setFesse] = useState("");
-  const [pose, setPose] = useState("");
-  const [tenue, setTenue] = useState("");
+  const [formeVisage, setFormeVisage] = useState("");
+  const [formeBouche, setFormeBouche] = useState("");
+  const [formeNez, setFormeNez] = useState("");
+  const [formeOreilles, setFormeOreilles] = useState("");
+  const [sourcil, setSourcil] = useState("");
+  const [machoire, setMachoire] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageCount, setImageCount] = useState("3");
   const [generationModel, setGenerationModel] = useState("gemini-2.5-flash-image");
@@ -121,8 +126,12 @@ export default function GenerationModelePage() {
       if (origine) formData.append("origine", origine);
       if (genre === "femme" && poitrine) formData.append("poitrine", poitrine);
       if (fesse) formData.append("fesses", fesse);
-      if (pose) formData.append("pose", pose);
-      if (tenue) formData.append("tenue", tenue);
+      if (formeVisage) formData.append("forme_visage", formeVisage);
+      if (formeBouche) formData.append("forme_bouche", formeBouche);
+      if (formeNez) formData.append("forme_nez", formeNez);
+      if (formeOreilles) formData.append("forme_oreilles", formeOreilles);
+      if (sourcil) formData.append("sourcils", sourcil);
+      if (machoire) formData.append("machoire", machoire);
       if (instructions) formData.append("instructions", instructions);
 
       const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
@@ -181,7 +190,7 @@ export default function GenerationModelePage() {
     } finally {
       setLoading(false);
     }
-  }, [genre, age, taille, poids, morphologie, couleurCheveux, longueur, couleurYeux, carnation, origine, poitrine, fesse, pose, tenue, instructions, imageCount, generationModel, testMode]);
+  }, [genre, age, taille, poids, morphologie, couleurCheveux, longueur, couleurYeux, carnation, origine, poitrine, fesse, formeVisage, formeBouche, formeNez, formeOreilles, sourcil, machoire, instructions, imageCount, generationModel, testMode]);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -269,8 +278,18 @@ export default function GenerationModelePage() {
         )}
 
         <ChipSelect label="Fesses" options={fesses} value={fesse} onChange={setFesse} />
-        <ChipSelect label="Pose" options={poses} value={pose} onChange={setPose} />
-        <ChipSelect label="Tenue" options={tenues} value={tenue} onChange={setTenue} />
+
+        <div className="border-t border-border pt-4">
+          <Label className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 block">Visage</Label>
+          <div className="space-y-4">
+            <ChipSelect label="Forme du visage" options={formesVisage} value={formeVisage} onChange={setFormeVisage} />
+            <ChipSelect label="Bouche / Lèvres" options={formesBouche} value={formeBouche} onChange={setFormeBouche} />
+            <ChipSelect label="Nez" options={formesNez} value={formeNez} onChange={setFormeNez} />
+            <ChipSelect label="Oreilles" options={formesOreilles} value={formeOreilles} onChange={setFormeOreilles} />
+            <ChipSelect label="Sourcils" options={sourcils} value={sourcil} onChange={setSourcil} />
+            <ChipSelect label="Mâchoire" options={machoires} value={machoire} onChange={setMachoire} />
+          </div>
+        </div>
 
         {/* Instructions */}
         <div className="space-y-2">
@@ -292,9 +311,9 @@ export default function GenerationModelePage() {
           </Select>
         </div>
 
-        {/* Nombre d'images */}
+        {/* Nombre de Modèle */}
         <div className="space-y-2">
-          <Label>Nombre d'images</Label>
+          <Label>Nombre de Modèle</Label>
           <Select value={imageCount} onValueChange={setImageCount}>
             <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
             <SelectContent>
