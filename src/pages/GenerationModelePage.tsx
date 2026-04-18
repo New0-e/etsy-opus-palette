@@ -25,6 +25,7 @@ const formesNez = ["Petit", "Fin", "Droit", "Retroussé", "Large", "Aquilin", "�
 const formesOreilles = ["Petites", "Grandes", "Décollées", "Collées", "Lobules épais", "Lobules fins"];
 const sourcils = ["Fins", "Épais", "Arqués", "Droits", "Broussailleux", "Séparés", "Rapprochés"];
 const machoires = ["Fine", "Carrée", "Proéminente", "Douce", "Forte"];
+const couleursFond = ["Blanc", "Noir", "Gris clair", "Gris foncé", "Beige", "Crème", "Bleu ciel", "Rose pâle", "Vert sauge", "Jaune doux", "Dégradé blanc", "Fond studio"];
 const generationModels = [
   { value: "gemini-2.5-flash-image", label: "Nano Banana", tooltip: "Idéal pour la génération standard. Bon équilibre vitesse/qualité." },
   { value: "gemini-3-pro-image-preview", label: "Nano Banana Pro", tooltip: "Haute qualité pour les rendus détaillés et réalistes." },
@@ -73,6 +74,7 @@ export default function GenerationModelePage() {
   const [formeOreilles, setFormeOreilles] = useState("");
   const [sourcil, setSourcil] = useState("");
   const [machoire, setMachoire] = useState("");
+  const [couleurFond, setCouleurFond] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageCount, setImageCount] = useState("3");
   const [generationModel, setGenerationModel] = useState("gemini-2.5-flash-image");
@@ -132,6 +134,7 @@ export default function GenerationModelePage() {
       if (formeOreilles) formData.append("forme_oreilles", formeOreilles);
       if (sourcil) formData.append("sourcils", sourcil);
       if (machoire) formData.append("machoire", machoire);
+      if (couleurFond) formData.append("couleur_fond", couleurFond);
       if (instructions) formData.append("instructions", instructions);
 
       const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
@@ -190,7 +193,7 @@ export default function GenerationModelePage() {
     } finally {
       setLoading(false);
     }
-  }, [genre, age, taille, poids, morphologie, couleurCheveux, longueur, couleurYeux, carnation, origine, poitrine, fesse, formeVisage, formeBouche, formeNez, formeOreilles, sourcil, machoire, instructions, imageCount, generationModel, testMode]);
+  }, [genre, age, taille, poids, morphologie, couleurCheveux, longueur, couleurYeux, carnation, origine, poitrine, fesse, formeVisage, formeBouche, formeNez, formeOreilles, sourcil, machoire, couleurFond, instructions, imageCount, generationModel, testMode]);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -290,6 +293,8 @@ export default function GenerationModelePage() {
             <ChipSelect label="Mâchoire" options={machoires} value={machoire} onChange={setMachoire} />
           </div>
         </div>
+
+        <ChipSelect label="Couleur du fond" options={couleursFond} value={couleurFond} onChange={setCouleurFond} />
 
         {/* Instructions */}
         <div className="space-y-2">
