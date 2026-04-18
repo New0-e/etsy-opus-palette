@@ -26,6 +26,53 @@ const formesOreilles = ["Petites", "Grandes", "Décollées", "Collées", "Lobule
 const sourcils = ["Fins", "Épais", "Arqués", "Droits", "Broussailleux", "Séparés", "Rapprochés"];
 const machoires = ["Fine", "Carrée", "Proéminente", "Douce", "Forte"];
 const couleursFond = ["Blanc", "Noir", "Gris clair", "Gris foncé", "Beige", "Crème", "Bleu ciel", "Rose pâle", "Vert sauge", "Jaune doux", "Dégradé blanc", "Fond studio"];
+
+const tr: Record<string, string> = {
+  // Genre
+  "femme": "woman", "homme": "man",
+  // Morphologie
+  "Mince": "slim", "Athlétique": "athletic", "Normale": "normal", "Ronde": "curvy", "Musclée": "muscular",
+  // Origines
+  "Européenne": "European", "Africaine": "African", "Asiatique": "Asian", "Latine": "Latin",
+  "Moyen-Orientale": "Middle Eastern", "Métissée": "mixed", "Scandinave": "Scandinavian",
+  // Carnations
+  "Très clair": "very fair", "Clair": "fair", "Médium": "medium", "Hâlé": "tan", "Foncé": "dark", "Très foncé": "very dark",
+  // Couleurs cheveux
+  "Blond": "blonde", "Brun": "brown", "Noir": "black", "Châtain": "chestnut", "Roux": "red",
+  "Gris": "grey", "Blanc": "white", "Platine": "platinum", "Blond vénitien": "strawberry blonde",
+  // Longueur cheveux
+  "Très court": "very short", "Court": "short", "Mi-long": "medium length", "Long": "long",
+  "Très long": "very long", "Bouclé court": "short curly", "Bouclé long": "long curly",
+  // Couleurs yeux
+  "Marron": "brown", "Bleu": "blue", "Vert": "green", "Noisette": "hazel",
+  "Gris": "grey", "Noir": "black", "Bleu-vert": "teal",
+  // Poitrine
+  "Petite (A/B)": "small (A/B)", "Moyenne (C)": "medium (C)", "Généreuse (D/E)": "large (D/E)", "Très généreuse (F+)": "very large (F+)",
+  // Fesses
+  "Plates": "flat", "Normales": "normal", "Rondes": "round", "Pulpeuses": "full", "Très pulpeuses": "very full",
+  // Forme visage
+  "Ovale": "oval", "Rond": "round", "Carré": "square", "Cœur": "heart", "Allongé": "oblong", "Losange": "diamond", "Triangulaire": "triangular",
+  // Bouche
+  "Fine": "thin", "Normale": "normal", "Pulpeuse": "full", "Très pulpeuse": "very full",
+  "Bouche en arc": "bow-shaped", "Lèvres asymétriques": "asymmetric lips",
+  // Nez
+  "Petit": "small", "Fin": "thin", "Droit": "straight", "Retroussé": "upturned",
+  "Large": "wide", "Aquilin": "aquiline", "Épaté": "broad",
+  // Oreilles
+  "Petites": "small", "Grandes": "large", "Décollées": "protruding", "Collées": "close-set",
+  "Lobules épais": "thick lobes", "Lobules fins": "thin lobes",
+  // Sourcils
+  "Fins": "thin", "Épais": "thick", "Arqués": "arched", "Droits": "straight",
+  "Broussailleux": "bushy", "Séparés": "separated", "Rapprochés": "close together",
+  // Mâchoire
+  "Carrée": "square", "Proéminente": "prominent", "Douce": "soft", "Forte": "strong",
+  // Couleurs fond
+  "Gris clair": "light grey", "Gris foncé": "dark grey", "Beige": "beige", "Crème": "cream",
+  "Bleu ciel": "sky blue", "Rose pâle": "pale pink", "Vert sauge": "sage green",
+  "Jaune doux": "soft yellow", "Dégradé blanc": "white gradient", "Fond studio": "studio backdrop",
+};
+
+const t = (v: string) => tr[v] ?? v;
 const generationModels = [
   { value: "gemini-2.5-flash-image", label: "Nano Banana", tooltip: "Idéal pour la génération standard. Bon équilibre vitesse/qualité." },
   { value: "gemini-3-pro-image-preview", label: "Nano Banana Pro", tooltip: "Haute qualité pour les rendus détaillés et réalistes." },
@@ -114,27 +161,27 @@ export default function GenerationModelePage() {
     setResults([]);
     try {
       const formData = new FormData();
-      formData.append("genre", genre);
+      formData.append("genre", t(genre));
       formData.append("age", String(age[0]));
       formData.append("taille", `${taille[0]} cm`);
       formData.append("poids", `${poids[0]} kg`);
       formData.append("image_count", imageCount);
       formData.append("generation_model", generationModel);
-      if (morphologie) formData.append("morphologie", morphologie);
-      if (couleurCheveux) formData.append("couleur_cheveux", couleurCheveux);
-      if (longueur) formData.append("longueur_cheveux", longueur);
-      if (couleurYeux) formData.append("couleur_yeux", couleurYeux);
-      if (carnation) formData.append("carnation", carnation);
-      if (origine) formData.append("origine", origine);
-      if (genre === "femme" && poitrine) formData.append("poitrine", poitrine);
-      if (fesse) formData.append("fesses", fesse);
-      if (formeVisage) formData.append("forme_visage", formeVisage);
-      if (formeBouche) formData.append("forme_bouche", formeBouche);
-      if (formeNez) formData.append("forme_nez", formeNez);
-      if (formeOreilles) formData.append("forme_oreilles", formeOreilles);
-      if (sourcil) formData.append("sourcils", sourcil);
-      if (machoire) formData.append("machoire", machoire);
-      if (couleurFond) formData.append("couleur_fond", couleurFond);
+      if (morphologie) formData.append("morphologie", t(morphologie));
+      if (couleurCheveux) formData.append("couleur_cheveux", t(couleurCheveux));
+      if (longueur) formData.append("longueur_cheveux", t(longueur));
+      if (couleurYeux) formData.append("couleur_yeux", t(couleurYeux));
+      if (carnation) formData.append("carnation", t(carnation));
+      if (origine) formData.append("origine", t(origine));
+      if (genre === "femme" && poitrine) formData.append("poitrine", t(poitrine));
+      if (fesse) formData.append("fesses", t(fesse));
+      if (formeVisage) formData.append("forme_visage", t(formeVisage));
+      if (formeBouche) formData.append("forme_bouche", t(formeBouche));
+      if (formeNez) formData.append("forme_nez", t(formeNez));
+      if (formeOreilles) formData.append("forme_oreilles", t(formeOreilles));
+      if (sourcil) formData.append("sourcils", t(sourcil));
+      if (machoire) formData.append("machoire", t(machoire));
+      if (couleurFond) formData.append("couleur_fond", t(couleurFond));
       if (instructions) formData.append("instructions", instructions);
 
       const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
