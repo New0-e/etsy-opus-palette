@@ -100,7 +100,10 @@ const badgeColors: Record<string, string> = {
 function extractLevel(contenu: string): { level: string; explication: string } | null {
   for (const lvl of LEVELS) {
     if (contenu.startsWith(lvl)) {
-      const rest = contenu.slice(lvl.length).replace(/^\s*[—–-]\s*/, "").trim();
+      const after = contenu[lvl.length];
+      // Vérifie que le niveau est complet (suivi d'un espace, tiret, ou fin de chaîne)
+      if (after !== undefined && !/[\s—–\-]/.test(after)) continue;
+      const rest = contenu.slice(lvl.length).replace(/^\s*[—–\-]\s*/, "").trim();
       return { level: lvl, explication: rest };
     }
   }
