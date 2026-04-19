@@ -85,30 +85,20 @@ function parseSousNiches(markdown: string): SousNiche[] {
   });
 }
 
-// Niveaux reconnus pour les badges (Concurrence / Rentabilité)
-// Du plus long au plus court pour éviter que "Élevé" matche avant "Élevée"
-const LEVELS = ["Très élevée", "Très élevé", "Élevée", "Élevé", "Moyenne", "Moyen", "Faible"];
-const badgeColors: Record<string, string> = {
-  Faible:       "bg-green-400/10 text-green-400 border-green-400/20",
-  Moyen:        "bg-amber-400/10 text-amber-400 border-amber-400/20",
-  Moyenne:      "bg-amber-400/10 text-amber-400 border-amber-400/20",
-  Élevé:        "bg-primary/10 text-primary border-primary/20",
-  Élevée:       "bg-primary/10 text-primary border-primary/20",
-  "Très élevé": "bg-primary/10 text-primary border-primary/20",
-  "Très élevée":"bg-primary/10 text-primary border-primary/20",
-};
+function getBadgeColor(level: string): string {
+  const l = level.toLowerCase();
+  if (l.includes("très élevé")) return "bg-primary/10 text-primary border-primary/20";
+  if (l.includes("élevé"))      return "bg-primary/10 text-primary border-primary/20";
+  if (l.includes("moyen"))      return "bg-amber-400/10 text-amber-400 border-amber-400/20";
+  if (l.includes("faible"))     return "bg-green-400/10 text-green-400 border-green-400/20";
+  return "bg-secondary text-muted-foreground border-border";
+}
 
-function extractLevel(contenu: string): { level: string; explication: string } | null {
-  for (const lvl of LEVELS) {
-    if (contenu.startsWith(lvl)) {
-      const after = contenu[lvl.length];
-      // Vérifie que le niveau est complet (suivi d'un espace, tiret, ou fin de chaîne)
-      if (after !== undefined && !/[\s—–\-]/.test(after)) continue;
-      const rest = contenu.slice(lvl.length).replace(/^\s*[—–\-]\s*/, "").trim();
-      return { level: lvl, explication: rest };
-    }
-  }
-  return null;
+// Sépare le niveau (avant " — ") de l'explication (après)
+function extractLevel(contenu: string): { level: string; explication: string } {
+  const match = contenu.match(/^(.+?)\s*[—–]\s(.+)$/s);
+  if (match) return { level: match[1].trim(), explication: match[2].trim() };
+  return { level: contenu, explication: "" };
 }
 
 const isBadgeLabel = (label: string) => {
@@ -153,7 +143,8 @@ function SousNicheCard({ niche, index }: { niche: SousNiche; index: number }) {
 
       <div className="p-4 space-y-3">
         {niche.blocs.map((bloc, i) => {
-          const lvl = isBadgeLabel(bloc.label) ? extractLevel(bloc.contenu) : null;
+          const isBadge = isBadgeLabel(bloc.label);
+          const lvl = isBadge ? extractLevel(bloc.contenu) : null;
           return (
             <div key={i}>
               <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -161,7 +152,7 @@ function SousNicheCard({ niche, index }: { niche: SousNiche; index: number }) {
               </span>
               {lvl ? (
                 <div className="mt-1 space-y-1">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded border text-xs font-medium ${badgeColors[lvl.level] ?? "bg-secondary text-muted-foreground border-border"}`}>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded border text-xs font-medium ${getBadgeColor(lvl.level)}`}>
                     {lvl.level}
                   </span>
                   {lvl.explication && (
