@@ -1,4 +1,4 @@
-import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus, Tags, BarChart3, UserSearch, FileImage } from "lucide-react";
+import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus, Tags, BarChart3, UserSearch, FileImage, PersonStanding, Layers } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -12,10 +12,12 @@ const tools = [
 ];
 
 const secondaryTools = [
+  { title: "Modèle", desc: "Générer des photos de modèle avec IA", icon: PersonStanding, url: "/generation-modele", color: "text-orange-400" },
   { title: "Analyse Image", desc: "Extraire les tags depuis une image", icon: Tags, url: "/analyse-image", color: "text-blue-400" },
   { title: "Analyse Tags", desc: "Analyser et optimiser vos tags", icon: BarChart3, url: "/analyse-tags", color: "text-purple-400" },
   { title: "Tags Concurrent", desc: "Espionner les tags des concurrents", icon: UserSearch, url: "/tags-concurrent", color: "text-pink-400" },
   { title: "Descriptif Image", desc: "Générer un descriptif depuis une image", icon: FileImage, url: "/descriptif-image", color: "text-teal-400" },
+  { title: "Idées sous Niche", desc: "Générer des idées de sous-niches", icon: Layers, url: "/generation-idee-sous-niche", color: "text-cyan-400" },
 ];
 
 const sheets = [
@@ -63,7 +65,7 @@ export default function HomePage() {
 
       {/* Secondary Tools */}
       <section>
-        <h2 className="font-display text-lg font-semibold mb-4">Outils Secondaires</h2>
+        <h2 className="font-display text-lg font-semibold mb-4">Tools</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {secondaryTools.map((tool) => (
             <button

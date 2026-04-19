@@ -15,10 +15,10 @@ const mainTools = [
   { title: "Gen Fiches Produits", url: "/creation-fiche", icon: FileText },
   { title: "Téléchargement Images", url: "/download-images", icon: ImageDown },
   { title: "Gen Images", url: "/generation-photos", icon: Camera },
-  { title: "Modèle", url: "/generation-modele", icon: PersonStanding },
 ];
 
 const secondaryTools = [
+  { title: "Modèle", url: "/generation-modele", icon: PersonStanding },
   { title: "Analyse Image", url: "/analyse-image", icon: Tags },
   { title: "Analyse Tags", url: "/analyse-tags", icon: BarChart3 },
   { title: "Tags Concurrent", url: "/tags-concurrent", icon: UserSearch },
@@ -64,7 +64,7 @@ export function AppSidebar() {
 
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground">
-            Outils Secondaires
+            Tools
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
