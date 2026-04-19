@@ -7,8 +7,8 @@ import { Loader2, Lightbulb, Copy, Check, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { getPageState, setPageState } from "@/lib/pageStore";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/etsy-sous-niches";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/etsy-sous-niches";
+const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/749aeccd-3a6d-473d-b31a-756b5d7a702f";
+const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/749aeccd-3a6d-473d-b31a-756b5d7a702f";
 
 const PAGE_KEY = "generation-idee-sous-niche";
 type PageState = { input: string; result: string; testMode: boolean };
