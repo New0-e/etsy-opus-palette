@@ -31,9 +31,10 @@ export default function GenerationIdeeSousNichePage() {
     setLoading(true);
     setResult("");
     try {
-      const base = testMode ? WEBHOOK_TEST : WEBHOOK_PROD;
-      const url = `${base}?niche=${encodeURIComponent(input)}`;
-      const res = await fetch(url, { method: "GET" });
+      const url = testMode ? WEBHOOK_TEST : WEBHOOK_PROD;
+      const formData = new FormData();
+      formData.append("niche", input);
+      const res = await fetch(url, { method: "POST", body: formData });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       try {
