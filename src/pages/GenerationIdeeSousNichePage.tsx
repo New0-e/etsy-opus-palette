@@ -20,10 +20,12 @@ interface SousNiche {
 }
 
 function parseSousNiches(markdown: string): SousNiche[] {
-  const sections = markdown.split(/^## \d+\.\s+/m).filter(Boolean);
+  // Split on "## N." anywhere in the text (avec ou sans saut de ligne avant)
+  const parts = markdown.split(/##\s+\d+\.\s+/);
+  const sections = parts.filter(Boolean).map(s => s.trim()).filter(Boolean);
   return sections.map((section) => {
-    const lines = section.trim().split("\n");
-    const titre = lines[0].trim();
+    const lines = section.split("\n");
+    const titre = lines[0].replace(/^#+\s*/, "").trim();
     const blocs: SousNiche["blocs"] = [];
     let currentLabel = "";
     let currentLines: string[] = [];
@@ -156,7 +158,8 @@ export default function GenerationIdeeSousNichePage() {
       const text = await res.text();
       try {
         const json = JSON.parse(text);
-        setResult(json.sous_niches ?? json.text ?? json.output ?? json.result ?? JSON.stringify(json, null, 2));
+        const data = Array.isArray(json) ? json[0] : json;
+        setResult(data.sous_niches ?? data.text ?? data.output ?? data.result ?? text);
       } catch {
         setResult(text);
       }
