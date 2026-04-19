@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Upload, ImageIcon, Copy, Check, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
@@ -61,7 +60,11 @@ export default function DescriptifImagePage() {
       const text = await res.text();
       try {
         const json = JSON.parse(text);
-        setResult(json.text ?? json.description ?? json.output ?? JSON.stringify(json, null, 2));
+        const extracted =
+          json.content?.parts?.[0]?.text ??
+          json.text ?? json.description ?? json.output ??
+          JSON.stringify(json, null, 2);
+        setResult(extracted);
       } catch {
         setResult(text);
       }
@@ -85,10 +88,8 @@ export default function DescriptifImagePage() {
         <h1 className="font-display text-2xl font-bold">Descriptif Image</h1>
         <div className="flex items-center gap-2">
           <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
-          <Switch checked={testMode} onCheckedChange={setTestMode} id="test-mode" />
-          <Label htmlFor="test-mode" className="text-sm text-muted-foreground cursor-pointer">
-            {testMode ? "Test" : "Prod"}
-          </Label>
+          <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
+          <Switch checked={testMode} onCheckedChange={setTestMode} />
         </div>
       </div>
 
