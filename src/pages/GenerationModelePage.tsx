@@ -245,7 +245,7 @@ export default function GenerationModelePage() {
   return (
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-bold">Gen Modele</h1>
+        <h1 className="font-display text-2xl font-bold">Modèle</h1>
         <div className="flex items-center gap-2">
           <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
           <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>

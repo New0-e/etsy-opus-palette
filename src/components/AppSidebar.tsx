@@ -15,7 +15,7 @@ const mainTools = [
   { title: "Gen Fiches Produits", url: "/creation-fiche", icon: FileText },
   { title: "Téléchargement Images", url: "/download-images", icon: ImageDown },
   { title: "Gen Images", url: "/generation-photos", icon: Camera },
-  { title: "Gen Modele", url: "/generation-modele", icon: PersonStanding },
+  { title: "Modèle", url: "/generation-modele", icon: PersonStanding },
 ];
 
 const secondaryTools = [
