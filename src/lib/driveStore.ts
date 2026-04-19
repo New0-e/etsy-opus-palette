@@ -78,7 +78,9 @@ export const driveStore = {
   async checkTokenScopes(): Promise<string | null> {
     if (!_token) return null;
     try {
-      const res = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${_token}`);
+      const res = await fetch("https://www.googleapis.com/oauth2/v1/tokeninfo", {
+        headers: { Authorization: `Bearer ${_token}` },
+      });
       const data = await res.json();
       return data.scope ?? null;
     } catch { return null; }

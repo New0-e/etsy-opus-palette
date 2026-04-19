@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import type { IncomingMessage } from "http";
+import { setCorsHeaders } from "./_cors";
 
 export const config = { api: { bodyParser: false } };
 
@@ -16,7 +17,7 @@ function getRawBody(req: IncomingMessage): Promise<Buffer> {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  setCorsHeaders(res);
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Test-Mode");
 
