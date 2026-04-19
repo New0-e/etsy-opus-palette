@@ -1,13 +1,16 @@
 import { useState, useCallback, useEffect } from "react";
 import { driveStore } from "@/lib/driveStore";
 import { usePageState } from "@/lib/usePageState";
+import { useOptionsList } from "@/lib/useOptionsList";
+import { useFavorites } from "@/lib/useFavorites";
+import { useModelsList } from "@/lib/useModelsList";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn } from "lucide-react";
+import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, Plus, Star, Trash2, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/edc44347-0c53-473e-8047-956afd36b4f4";
@@ -33,26 +36,34 @@ async function compressImage(file: File, maxPx = 1500, quality = 0.82): Promise<
   });
 }
 
-const environments = [
+const DEFAULT_ENVIRONMENTS = [
   "Studio minimaliste fond blanc", "Studio marbre luxueux", "Salon boheme",
   "Cuisine moderne ensoleilee", "Chambre cocooning", "Salle de bain luxueuse",
   "Bureau scandinave", "Terrasse cafe parisien", "Jardin verdoyant",
   "Flat lay table bois rustique", "Flat lay draps lin froisse",
 ];
-const eclairages = [
+const DEFAULT_ECLAIRAGES = [
   "Golden Hour lumiere chaude", "Lumiere naturelle fenetre",
   "Studio Softbox pro", "Cinematique moody contraste",
 ];
-const angles = [
+const DEFAULT_ANGLES = [
   "Macro close-up details", "Eye-level vue standard",
   "Top-down flat lay 90 degres", "Trois quarts dynamique",
 ];
-const accessoires = [
+const DEFAULT_ACCESSOIRES = [
   "Plantes Monstera et Eucalyptus", "Livres et tasse cafe fumante",
   "Tissus soie et petales de fleurs", "Miroirs vintage et gouttes eau",
   "Clavier mecanique et plante grasse", "Tapis moelleux",
   "Nourriture et ingredients cuisine",
 ];
+
+type PhotosFav = {
+  categorie: string;
+  env: string[];
+  ecl: string[];
+  angle: string[];
+  acc: string[];
+};
 
 function DropZone({ label, files, onFiles }: { label: string; files: File[]; onFiles: (f: File[]) => void }) {
   const [dragOver, setDragOver] = useState(false);
@@ -60,7 +71,6 @@ function DropZone({ label, files, onFiles }: { label: string; files: File[]; onF
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setDragOver(false);
-
     const driveId = e.dataTransfer.getData("drive-item-id");
     const driveName = e.dataTransfer.getData("drive-item-name");
     if (driveId) {
@@ -68,7 +78,6 @@ function DropZone({ label, files, onFiles }: { label: string; files: File[]; onF
       if (f) onFiles([...files, f]);
       return;
     }
-
     const dropped = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith("image/"));
     onFiles([...files, ...dropped]);
   }, [files, onFiles]);
@@ -107,12 +116,27 @@ function DropZone({ label, files, onFiles }: { label: string; files: File[]; onF
   );
 }
 
-function MultiSelect({ label, options, selected, onChange, customValue, onCustomChange }: {
+function MultiSelect({ label, options, selected, onChange, onAdd, onRemove }: {
   label: string; options: string[]; selected: string[]; onChange: (s: string[]) => void;
-  customValue: string; onCustomChange: (v: string) => void;
+  onAdd: (opt: string) => void; onRemove: (opt: string) => void;
 }) {
+  const [inputVal, setInputVal] = useState("");
+
   const toggle = (opt: string) => {
-    onChange(selected.includes(opt) ? selected.filter((s) => s !== opt) : [...selected, opt]);
+    onChange(selected.includes(opt) ? selected.filter(s => s !== opt) : [...selected, opt]);
+  };
+
+  const handleRemove = (opt: string) => {
+    onRemove(opt);
+    if (selected.includes(opt)) onChange(selected.filter(s => s !== opt));
+  };
+
+  const handleAdd = () => {
+    const v = inputVal.trim();
+    if (!v) return;
+    onAdd(v);
+    if (!selected.includes(v)) onChange([...selected, v]);
+    setInputVal("");
   };
 
   return (
@@ -120,24 +144,38 @@ function MultiSelect({ label, options, selected, onChange, customValue, onCustom
       <Label>{label}</Label>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
-          <button key={opt} type="button" onClick={() => toggle(opt)}
-            className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
-              selected.includes(opt) ? "bg-primary text-primary-foreground border-primary" : "bg-secondary text-secondary-foreground border-border hover:border-muted-foreground"
-            }`}
-          >
-            {opt}
-          </button>
+          <div key={opt} className="relative group/chip flex items-center">
+            <button type="button" onClick={() => toggle(opt)}
+              className={`px-3 py-1.5 rounded-full text-xs border transition-all pr-6 ${
+                selected.includes(opt)
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-secondary text-secondary-foreground border-border hover:border-muted-foreground"
+              }`}
+            >
+              {opt}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); handleRemove(opt); }}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover/chip:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+            >
+              <X className="h-2.5 w-2.5" />
+            </button>
+          </div>
         ))}
       </div>
-      <Input placeholder="Ajouter une option personnalisée..." value={customValue} onChange={(e) => onCustomChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && customValue.trim()) {
-            e.preventDefault();
-            onChange([...selected, customValue.trim()]);
-            onCustomChange("");
-          }
-        }}
-      />
+      <div className="flex gap-2">
+        <Input
+          placeholder="Ajouter une option..."
+          value={inputVal}
+          onChange={(e) => setInputVal(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
+          className="text-sm"
+        />
+        <Button type="button" variant="outline" size="icon" onClick={handleAdd} className="shrink-0">
+          <Plus className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }
@@ -153,13 +191,9 @@ export default function GenerationPhotosPage() {
   const [modelImages, setModelImages] = useState<File[]>([]);
   const [categorie, setCategorie] = useState("");
   const [selectedEnv, setSelectedEnv] = useState<string[]>([]);
-  const [customEnv, setCustomEnv] = useState("");
   const [selectedEcl, setSelectedEcl] = useState<string[]>([]);
-  const [customEcl, setCustomEcl] = useState("");
   const [selectedAngle, setSelectedAngle] = useState<string[]>([]);
-  const [customAngle, setCustomAngle] = useState("");
   const [selectedAcc, setSelectedAcc] = useState<string[]>([]);
-  const [customAcc, setCustomAcc] = useState("");
   const [instructions, setInstructions] = useState("");
   const [imageCount, setImageCount] = useState("3");
   const [generationModel, setGenerationModel] = useState("gemini-2.5-flash-image");
@@ -168,6 +202,47 @@ export default function GenerationPhotosPage() {
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
   const [testMode, setTestMode] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // Option lists avec persistance
+  const envList = useOptionsList("gen-photos-env", DEFAULT_ENVIRONMENTS);
+  const eclList = useOptionsList("gen-photos-ecl", DEFAULT_ECLAIRAGES);
+  const angleList = useOptionsList("gen-photos-angle", DEFAULT_ANGLES);
+  const accList = useOptionsList("gen-photos-acc", DEFAULT_ACCESSOIRES);
+
+  // Favoris / presets de sélection
+  const { favs: photoFavs, saveFav: savePhotoFav, removeFav: removePhotoFav } = useFavorites<PhotosFav>("gen-photos");
+  const [savingFav, setSavingFav] = useState(false);
+  const [favName, setFavName] = useState("");
+
+  // Gestion des modèles IA
+  const { models, addModel, removeModel, isCustom } = useModelsList();
+  const [showModelEdit, setShowModelEdit] = useState(false);
+  const [newModelValue, setNewModelValue] = useState("");
+  const [newModelLabel, setNewModelLabel] = useState("");
+
+  // Si le modèle sélectionné n'existe plus dans la liste, prendre le premier disponible
+  useEffect(() => {
+    if (models.length > 0 && !models.some(m => m.value === generationModel)) {
+      setGenerationModel(models[0].value);
+    }
+  }, [models, generationModel]);
+
+  const handleSaveFav = () => {
+    const name = favName.trim();
+    if (!name) return;
+    savePhotoFav(name, { categorie, env: selectedEnv, ecl: selectedEcl, angle: selectedAngle, acc: selectedAcc });
+    setFavName("");
+    setSavingFav(false);
+    toast.success("Favori enregistré !");
+  };
+
+  const applyFav = (data: PhotosFav) => {
+    setCategorie(data.categorie);
+    setSelectedEnv(data.env);
+    setSelectedEcl(data.ecl);
+    setSelectedAngle(data.angle);
+    setSelectedAcc(data.acc);
+  };
 
   const downloadImage = useCallback((url: string, index: number) => {
     const ext = url.startsWith("data:image/png") ? "png" : "jpg";
@@ -241,19 +316,16 @@ export default function GenerationPhotosPage() {
         const cleanB64 = (s: string) => s.replace(/\s+/g, "").replace(/^data:[^,]+,/, "");
 
         const toDataUrl = (item: any): string | null => {
-          // Format binaire n8n : item.binary.data.data + item.binary.data.mimeType
           if (item?.binary?.data?.data) {
             const mime = item.binary.data.mimeType ?? "image/png";
             return `data:${mime};base64,${cleanB64(item.binary.data.data)}`;
           }
-          // Plusieurs champs binaires (ex: binary.image, binary.result...)
           if (item?.binary) {
             for (const key of Object.keys(item.binary)) {
               const b = item.binary[key];
               if (b?.data) return `data:${b.mimeType ?? "image/png"};base64,${cleanB64(b.data)}`;
             }
           }
-          // base64 brut avec mimeType (format Gemini/Imagen direct)
           if (item?.data && item?.mimeType) return `data:${item.mimeType};base64,${cleanB64(item.data)}`;
           if (item?.b64_json) return `data:image/jpeg;base64,${cleanB64(item.b64_json)}`;
           if (item?.base64) return `data:image/jpeg;base64,${cleanB64(item.base64)}`;
@@ -262,13 +334,10 @@ export default function GenerationPhotosPage() {
         };
 
         const urls = arr.flatMap((item: any) => {
-          // URLs directes
           const directUrls: string[] = (item.image_urls ?? item.urls ?? (item.url ? [item.url] : []));
           if (directUrls.length) return directUrls;
-          // base64 au niveau racine ou format binaire n8n
           const b64 = toDataUrl(item);
           if (b64) return [b64];
-          // tableau imbriqué d'images base64
           if (Array.isArray(item.images)) return item.images.map(toDataUrl).filter(Boolean);
           return [];
         }).filter(Boolean);
@@ -311,16 +380,106 @@ export default function GenerationPhotosPage() {
 
         {mode === "manuel" && (
           <>
+            {/* Favoris */}
+            <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-1.5">
+                  <Star className="h-3.5 w-3.5 text-amber-400" />
+                  <span className="text-sm font-medium">Favoris</span>
+                </div>
+                {!savingFav ? (
+                  <button
+                    type="button"
+                    onClick={() => setSavingFav(true)}
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Enregistrer la sélection
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Input
+                      value={favName}
+                      onChange={(e) => setFavName(e.target.value)}
+                      placeholder="Nom du favori..."
+                      className="h-7 text-xs w-36"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveFav();
+                        if (e.key === "Escape") { setSavingFav(false); setFavName(""); }
+                      }}
+                    />
+                    <Button type="button" size="sm" className="h-7 text-xs px-2" onClick={handleSaveFav}>OK</Button>
+                    <button type="button" onClick={() => { setSavingFav(false); setFavName(""); }} className="text-muted-foreground hover:text-foreground transition-colors">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
+              {photoFavs.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Aucun favori — sélectionnez des options et enregistrez.</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {photoFavs.map((fav) => (
+                    <div key={fav.id} className="relative group/fav">
+                      <button
+                        type="button"
+                        onClick={() => applyFav(fav.data)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs border border-amber-400/40 bg-amber-400/10 hover:bg-amber-400/20 text-amber-600 dark:text-amber-300 transition-all pr-6"
+                      >
+                        <Star className="h-2.5 w-2.5" />
+                        {fav.name}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removePhotoFav(fav.id)}
+                        className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover/fav:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      >
+                        <X className="h-2.5 w-2.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="space-y-2">
               <Label>Catégorie</Label>
               <Input value={categorie} onChange={(e) => setCategorie(e.target.value)} placeholder="Ex: Bijoux, Décoration..." />
             </div>
 
-            {/* Selections */}
-            <MultiSelect label="Environnement" options={environments} selected={selectedEnv} onChange={setSelectedEnv} customValue={customEnv} onCustomChange={setCustomEnv} />
-            <MultiSelect label="Éclairage" options={eclairages} selected={selectedEcl} onChange={setSelectedEcl} customValue={customEcl} onCustomChange={setCustomEcl} />
-            <MultiSelect label="Angle de vue" options={angles} selected={selectedAngle} onChange={setSelectedAngle} customValue={customAngle} onCustomChange={setCustomAngle} />
-            <MultiSelect label="Accessoires" options={accessoires} selected={selectedAcc} onChange={setSelectedAcc} customValue={customAcc} onCustomChange={setCustomAcc} />
+            <MultiSelect
+              label="Environnement"
+              options={envList.options}
+              selected={selectedEnv}
+              onChange={setSelectedEnv}
+              onAdd={envList.addOption}
+              onRemove={(opt) => { envList.removeOption(opt); setSelectedEnv(p => p.filter(s => s !== opt)); }}
+            />
+            <MultiSelect
+              label="Éclairage"
+              options={eclList.options}
+              selected={selectedEcl}
+              onChange={setSelectedEcl}
+              onAdd={eclList.addOption}
+              onRemove={(opt) => { eclList.removeOption(opt); setSelectedEcl(p => p.filter(s => s !== opt)); }}
+            />
+            <MultiSelect
+              label="Angle de vue"
+              options={angleList.options}
+              selected={selectedAngle}
+              onChange={setSelectedAngle}
+              onAdd={angleList.addOption}
+              onRemove={(opt) => { angleList.removeOption(opt); setSelectedAngle(p => p.filter(s => s !== opt)); }}
+            />
+            <MultiSelect
+              label="Accessoires"
+              options={accList.options}
+              selected={selectedAcc}
+              onChange={setSelectedAcc}
+              onAdd={accList.addOption}
+              onRemove={(opt) => { accList.removeOption(opt); setSelectedAcc(p => p.filter(s => s !== opt)); }}
+            />
           </>
         )}
 
@@ -332,18 +491,95 @@ export default function GenerationPhotosPage() {
 
         {/* Modèle de génération */}
         <div className="space-y-2">
-          <Label>Modèle de génération</Label>
+          <div className="flex items-center justify-between">
+            <Label>Modèle de génération</Label>
+            <button
+              type="button"
+              onClick={() => setShowModelEdit(!showModelEdit)}
+              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              <Settings className="h-3 w-3" />
+              Gérer
+            </button>
+          </div>
           <Select value={generationModel} onValueChange={setGenerationModel}>
             <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="gemini-2.5-flash-image" title="Idéal pour la génération standard et le traitement multimodal. Bon équilibre vitesse/qualité pour un usage quotidien.">Nano Banana</SelectItem>
-              <SelectItem value="gemini-3-pro-image-preview" title="Recommandé pour les créations artistiques et les rendus haute qualité. Parfait pour les photos de produits Etsy exigeantes.">Nano Banana Pro</SelectItem>
-              <SelectItem value="gemini-3.1-flash-image-preview" title="Dernière génération standard (fév. 2026). Meilleur choix pour une qualité élevée avec un bon temps de réponse.">Nano Banana 2</SelectItem>
+              {models.map((m) => (
+                <SelectItem key={m.value} value={m.value} title={m.tooltip}>{m.label}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
+
+          {showModelEdit && (
+            <div className="border border-border rounded-lg p-3 space-y-3 bg-secondary/20">
+              <p className="text-xs font-medium text-muted-foreground">Modèles disponibles</p>
+              <div className="space-y-1">
+                {models.map((m) => (
+                  <div key={m.value} className="flex items-center justify-between py-1 text-xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-medium truncate">{m.label}</span>
+                      <span className="text-muted-foreground truncate hidden sm:inline">({m.value})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        removeModel(m.value);
+                        if (generationModel === m.value) {
+                          const remaining = models.filter(x => x.value !== m.value);
+                          if (remaining.length > 0) setGenerationModel(remaining[0].value);
+                        }
+                      }}
+                      className="text-muted-foreground hover:text-destructive transition-colors ml-2 shrink-0"
+                      title={isCustom(m.value) ? "Supprimer" : "Masquer"}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="pt-2 border-t border-border space-y-2">
+                <p className="text-xs text-muted-foreground">Ajouter un modèle</p>
+                <div className="flex gap-2">
+                  <Input
+                    value={newModelValue}
+                    onChange={(e) => setNewModelValue(e.target.value)}
+                    placeholder="ID du modèle..."
+                    className="text-xs h-8"
+                  />
+                  <Input
+                    value={newModelLabel}
+                    onChange={(e) => setNewModelLabel(e.target.value)}
+                    placeholder="Nom affiché..."
+                    className="text-xs h-8"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && newModelValue.trim() && newModelLabel.trim()) {
+                        addModel(newModelValue, newModelLabel);
+                        setNewModelValue("");
+                        setNewModelLabel("");
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    onClick={() => {
+                      addModel(newModelValue, newModelLabel);
+                      setNewModelValue("");
+                      setNewModelLabel("");
+                    }}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Image Count */}
+        {/* Nombre d'images */}
         <div className="space-y-2">
           <Label>Nombre d'images par image produit</Label>
           <Select value={imageCount} onValueChange={setImageCount}>
@@ -375,17 +611,14 @@ export default function GenerationPhotosPage() {
               {results.map((url, i) => (
                 <div key={i} className={`relative rounded-lg overflow-hidden border-2 transition-all group ${selectedResults.includes(url) ? "border-primary glow-primary" : "border-border"}`}>
                   <img src={url} className="w-full aspect-square object-cover cursor-pointer" onClick={() => setLightboxIndex(i)} />
-                  {/* Overlay agrandir */}
                   <button onClick={() => setLightboxIndex(i)}
                     className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all opacity-0 group-hover:opacity-100">
                     <ZoomIn className="h-8 w-8 text-white drop-shadow" />
                   </button>
-                  {/* Bouton télécharger individuel */}
                   <button onClick={() => downloadImage(url, i)}
                     className="absolute top-2 right-2 bg-black/50 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-black/80">
                     <Download className="h-3 w-3 text-white" />
                   </button>
-                  {/* Checkbox sélection */}
                   <button onClick={() => setSelectedResults((prev) => prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url])}
                     className={`absolute bottom-2 right-2 h-5 w-5 rounded border-2 flex items-center justify-center transition-all z-10 ${selectedResults.includes(url) ? "bg-primary border-primary" : "bg-black/40 border-white/60 opacity-0 group-hover:opacity-100"}`}>
                     {selectedResults.includes(url) && <Check className="h-3 w-3 text-primary-foreground" />}

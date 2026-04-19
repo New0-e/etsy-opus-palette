@@ -1,103 +1,139 @@
 import { useState, useCallback, useEffect } from "react";
 import { usePageState } from "@/lib/usePageState";
+import { useOptionsList } from "@/lib/useOptionsList";
+import { useFavorites } from "@/lib/useFavorites";
+import { useModelsList } from "@/lib/useModelsList";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, Sparkles, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, User } from "lucide-react";
+import { Loader2, Sparkles, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, User, Plus, Star, Trash2, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/0075596e-85d8-4549-bb28-80ba00a727b9";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/0075596e-85d8-4549-bb28-80ba00a727b9";
 
-const couleursCheveux = ["Blond", "Brun", "Noir", "Châtain", "Roux", "Gris", "Blanc", "Platine", "Blond vénitien"];
-const longueurCheveux = ["Très court", "Court", "Mi-long", "Long", "Très long", "Bouclé court", "Bouclé long"];
-const couleursYeux = ["Marron", "Bleu", "Vert", "Noisette", "Gris", "Noir", "Bleu-vert"];
-const carnations = ["Très clair", "Clair", "Médium", "Hâlé", "Foncé", "Très foncé"];
-const origines = ["Européenne", "Africaine", "Asiatique", "Latine", "Moyen-Orientale", "Métissée", "Scandinave"];
-const morphologies = ["Mince", "Athlétique", "Normale", "Ronde", "Musclée"];
-const poitrines = ["Petite (A/B)", "Moyenne (C)", "Généreuse (D/E)", "Très généreuse (F+)"];
-const fesses = ["Plates", "Normales", "Rondes", "Pulpeuses", "Très pulpeuses"];
-const formesVisage = ["Ovale", "Rond", "Carré", "Cœur", "Allongé", "Losange", "Triangulaire"];
-const formesBouche = ["Fine", "Normale", "Pulpeuse", "Très pulpeuse", "Bouche en arc", "Lèvres asymétriques"];
-const formesNez = ["Petit", "Fin", "Droit", "Retroussé", "Large", "Aquilin", "Épaté"];
-const formesOreilles = ["Petites", "Grandes", "Décollées", "Collées", "Lobules épais", "Lobules fins"];
-const sourcils = ["Fins", "Épais", "Arqués", "Droits", "Broussailleux", "Séparés", "Rapprochés"];
-const machoires = ["Fine", "Carrée", "Proéminente", "Douce", "Forte"];
-const couleursFond = ["Blanc", "Noir", "Gris clair", "Gris foncé", "Beige", "Crème", "Bleu ciel", "Rose pâle", "Vert sauge", "Jaune doux", "Dégradé blanc", "Fond studio"];
+const DEFAULT_COULEURS_CHEVEUX = ["Blond", "Brun", "Noir", "Châtain", "Roux", "Gris", "Blanc", "Platine", "Blond vénitien"];
+const DEFAULT_LONGUEUR_CHEVEUX = ["Très court", "Court", "Mi-long", "Long", "Très long", "Bouclé court", "Bouclé long"];
+const DEFAULT_COULEURS_YEUX = ["Marron", "Bleu", "Vert", "Noisette", "Gris", "Noir", "Bleu-vert"];
+const DEFAULT_CARNATIONS = ["Très clair", "Clair", "Médium", "Hâlé", "Foncé", "Très foncé"];
+const DEFAULT_ORIGINES = ["Européenne", "Africaine", "Asiatique", "Latine", "Moyen-Orientale", "Métissée", "Scandinave"];
+const DEFAULT_MORPHOLOGIES = ["Mince", "Athlétique", "Normale", "Ronde", "Musclée"];
+const DEFAULT_POITRINES = ["Petite (A/B)", "Moyenne (C)", "Généreuse (D/E)", "Très généreuse (F+)"];
+const DEFAULT_FESSES = ["Plates", "Normales", "Rondes", "Pulpeuses", "Très pulpeuses"];
+const DEFAULT_FORMES_VISAGE = ["Ovale", "Rond", "Carré", "Cœur", "Allongé", "Losange", "Triangulaire"];
+const DEFAULT_FORMES_BOUCHE = ["Fine", "Normale", "Pulpeuse", "Très pulpeuse", "Bouche en arc", "Lèvres asymétriques"];
+const DEFAULT_FORMES_NEZ = ["Petit", "Fin", "Droit", "Retroussé", "Large", "Aquilin", "Épaté"];
+const DEFAULT_FORMES_OREILLES = ["Petites", "Grandes", "Décollées", "Collées", "Lobules épais", "Lobules fins"];
+const DEFAULT_SOURCILS = ["Fins", "Épais", "Arqués", "Droits", "Broussailleux", "Séparés", "Rapprochés"];
+const DEFAULT_MACHOIRES = ["Fine", "Carrée", "Proéminente", "Douce", "Forte"];
+const DEFAULT_COULEURS_FOND = ["Blanc", "Noir", "Gris clair", "Gris foncé", "Beige", "Crème", "Bleu ciel", "Rose pâle", "Vert sauge", "Jaune doux", "Dégradé blanc", "Fond studio"];
 
 const tr: Record<string, string> = {
-  // Genre
   "femme": "woman", "homme": "man",
-  // Morphologie
   "Mince": "slim", "Athlétique": "athletic", "Normale": "normal", "Ronde": "curvy", "Musclée": "muscular",
-  // Origines
   "Européenne": "European", "Africaine": "African", "Asiatique": "Asian", "Latine": "Latin",
   "Moyen-Orientale": "Middle Eastern", "Métissée": "mixed", "Scandinave": "Scandinavian",
-  // Carnations
   "Très clair": "very fair", "Clair": "fair", "Médium": "medium", "Hâlé": "tan", "Foncé": "dark", "Très foncé": "very dark",
-  // Couleurs cheveux
   "Blond": "blonde", "Brun": "brown", "Noir": "black", "Châtain": "chestnut", "Roux": "red",
   "Gris": "grey", "Blanc": "white", "Platine": "platinum", "Blond vénitien": "strawberry blonde",
-  // Longueur cheveux
   "Très court": "very short", "Court": "short", "Mi-long": "medium length", "Long": "long",
   "Très long": "very long", "Bouclé court": "short curly", "Bouclé long": "long curly",
-  // Couleurs yeux
-  "Marron": "brown", "Bleu": "blue", "Vert": "green", "Noisette": "hazel",
-  "Gris": "grey", "Noir": "black", "Bleu-vert": "teal",
-  // Poitrine
+  "Marron": "brown", "Bleu": "blue", "Vert": "green", "Noisette": "hazel", "Bleu-vert": "teal",
   "Petite (A/B)": "small (A/B)", "Moyenne (C)": "medium (C)", "Généreuse (D/E)": "large (D/E)", "Très généreuse (F+)": "very large (F+)",
-  // Fesses
   "Plates": "flat", "Normales": "normal", "Rondes": "round", "Pulpeuses": "full", "Très pulpeuses": "very full",
-  // Forme visage
   "Ovale": "oval", "Rond": "round", "Carré": "square", "Cœur": "heart", "Allongé": "oblong", "Losange": "diamond", "Triangulaire": "triangular",
-  // Bouche
-  "Fine": "thin", "Normale": "normal", "Pulpeuse": "full", "Très pulpeuse": "very full",
+  "Fine": "thin", "Pulpeuse": "full", "Très pulpeuse": "very full",
   "Bouche en arc": "bow-shaped", "Lèvres asymétriques": "asymmetric lips",
-  // Nez
   "Petit": "small", "Fin": "thin", "Droit": "straight", "Retroussé": "upturned",
   "Large": "wide", "Aquilin": "aquiline", "Épaté": "broad",
-  // Oreilles
   "Petites": "small", "Grandes": "large", "Décollées": "protruding", "Collées": "close-set",
   "Lobules épais": "thick lobes", "Lobules fins": "thin lobes",
-  // Sourcils
   "Fins": "thin", "Épais": "thick", "Arqués": "arched", "Droits": "straight",
   "Broussailleux": "bushy", "Séparés": "separated", "Rapprochés": "close together",
-  // Mâchoire
   "Carrée": "square", "Proéminente": "prominent", "Douce": "soft", "Forte": "strong",
-  // Couleurs fond
   "Gris clair": "light grey", "Gris foncé": "dark grey", "Beige": "beige", "Crème": "cream",
   "Bleu ciel": "sky blue", "Rose pâle": "pale pink", "Vert sauge": "sage green",
   "Jaune doux": "soft yellow", "Dégradé blanc": "white gradient", "Fond studio": "studio backdrop",
 };
 
 const t = (v: string) => tr[v] ?? v;
-const generationModels = [
-  { value: "gemini-2.5-flash-image", label: "Nano Banana", tooltip: "Idéal pour la génération standard. Bon équilibre vitesse/qualité." },
-  { value: "gemini-3-pro-image-preview", label: "Nano Banana Pro", tooltip: "Haute qualité pour les rendus détaillés et réalistes." },
-  { value: "gemini-3.1-flash-image-preview", label: "Nano Banana 2", tooltip: "Dernière génération. Meilleur choix qualité/vitesse." },
-];
 
-function ChipSelect({ label, options, value, onChange }: {
+type ModeleFav = {
+  genre: "femme" | "homme";
+  age: number;
+  taille: number;
+  poids: number;
+  morphologie: string;
+  couleurCheveux: string;
+  longueur: string;
+  couleurYeux: string;
+  carnation: string;
+  origine: string;
+  poitrine: string;
+  fesse: string;
+  formeVisage: string;
+  formeBouche: string;
+  formeNez: string;
+  formeOreilles: string;
+  sourcil: string;
+  machoire: string;
+  couleurFond: string;
+};
+
+function ChipSelect({ label, options, value, onChange, onAdd, onRemove }: {
   label: string; options: string[]; value: string; onChange: (v: string) => void;
+  onAdd: (opt: string) => void; onRemove: (opt: string) => void;
 }) {
+  const [inputVal, setInputVal] = useState("");
+
+  const handleAdd = () => {
+    const v = inputVal.trim();
+    if (!v) return;
+    onAdd(v);
+    onChange(v);
+    setInputVal("");
+  };
+
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
-          <button key={opt} type="button" onClick={() => onChange(value === opt ? "" : opt)}
-            className={`px-3 py-1.5 rounded-full text-xs border transition-all ${
-              value === opt
-                ? "bg-primary text-primary-foreground border-primary"
-                : "bg-secondary text-secondary-foreground border-border hover:border-muted-foreground"
-            }`}
-          >
-            {opt}
-          </button>
+          <div key={opt} className="relative group/chip flex items-center">
+            <button type="button" onClick={() => onChange(value === opt ? "" : opt)}
+              className={`px-3 py-1.5 rounded-full text-xs border transition-all pr-6 ${
+                value === opt
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "bg-secondary text-secondary-foreground border-border hover:border-muted-foreground"
+              }`}
+            >
+              {opt}
+            </button>
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); onRemove(opt); if (value === opt) onChange(""); }}
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover/chip:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+            >
+              <X className="h-2.5 w-2.5" />
+            </button>
+          </div>
         ))}
+      </div>
+      <div className="flex gap-2">
+        <Input
+          placeholder="Ajouter une option..."
+          value={inputVal}
+          onChange={(e) => setInputVal(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
+          className="text-sm"
+        />
+        <Button type="button" variant="outline" size="icon" onClick={handleAdd} className="shrink-0">
+          <Plus className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
@@ -135,6 +171,77 @@ export default function GenerationModelePage() {
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
   const [testMode, setTestMode] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  // Option lists avec persistance
+  const morphologieList = useOptionsList("modele-morphologie", DEFAULT_MORPHOLOGIES);
+  const origineList = useOptionsList("modele-origine", DEFAULT_ORIGINES);
+  const carnationList = useOptionsList("modele-carnation", DEFAULT_CARNATIONS);
+  const chevList = useOptionsList("modele-cheveux", DEFAULT_COULEURS_CHEVEUX);
+  const longueurList = useOptionsList("modele-longueur", DEFAULT_LONGUEUR_CHEVEUX);
+  const yeuxList = useOptionsList("modele-yeux", DEFAULT_COULEURS_YEUX);
+  const poitrineList = useOptionsList("modele-poitrine", DEFAULT_POITRINES);
+  const fesseList = useOptionsList("modele-fesse", DEFAULT_FESSES);
+  const visageList = useOptionsList("modele-visage", DEFAULT_FORMES_VISAGE);
+  const boucheList = useOptionsList("modele-bouche", DEFAULT_FORMES_BOUCHE);
+  const nezList = useOptionsList("modele-nez", DEFAULT_FORMES_NEZ);
+  const oreillesList = useOptionsList("modele-oreilles", DEFAULT_FORMES_OREILLES);
+  const sourcilsList = useOptionsList("modele-sourcils", DEFAULT_SOURCILS);
+  const machoireList = useOptionsList("modele-machoire", DEFAULT_MACHOIRES);
+  const fondList = useOptionsList("modele-fond", DEFAULT_COULEURS_FOND);
+
+  // Favoris / presets de profil
+  const { favs: modelFavs, saveFav: saveModelFav, removeFav: removeModelFav } = useFavorites<ModeleFav>("gen-modele");
+  const [savingFav, setSavingFav] = useState(false);
+  const [favName, setFavName] = useState("");
+
+  // Gestion des modèles IA
+  const { models, addModel, removeModel, isCustom } = useModelsList();
+  const [showModelEdit, setShowModelEdit] = useState(false);
+  const [newModelValue, setNewModelValue] = useState("");
+  const [newModelLabel, setNewModelLabel] = useState("");
+
+  useEffect(() => {
+    if (models.length > 0 && !models.some(m => m.value === generationModel)) {
+      setGenerationModel(models[0].value);
+    }
+  }, [models, generationModel]);
+
+  const getCurrentFavData = (): ModeleFav => ({
+    genre, age: age[0], taille: taille[0], poids: poids[0],
+    morphologie, couleurCheveux, longueur, couleurYeux, carnation, origine,
+    poitrine, fesse, formeVisage, formeBouche, formeNez, formeOreilles, sourcil, machoire, couleurFond,
+  });
+
+  const applyFav = (data: ModeleFav) => {
+    setGenre(data.genre);
+    setAge([data.age]);
+    setTaille([data.taille]);
+    setPoids([data.poids]);
+    setMorphologie(data.morphologie);
+    setCouleurCheveux(data.couleurCheveux);
+    setLongueur(data.longueur);
+    setCouleurYeux(data.couleurYeux);
+    setCarnation(data.carnation);
+    setOrigine(data.origine);
+    setPoitrine(data.poitrine);
+    setFesse(data.fesse);
+    setFormeVisage(data.formeVisage);
+    setFormeBouche(data.formeBouche);
+    setFormeNez(data.formeNez);
+    setFormeOreilles(data.formeOreilles);
+    setSourcil(data.sourcil);
+    setMachoire(data.machoire);
+    setCouleurFond(data.couleurFond);
+  };
+
+  const handleSaveFav = () => {
+    const name = favName.trim();
+    if (!name) return;
+    saveModelFav(name, getCurrentFavData());
+    setFavName("");
+    setSavingFav(false);
+    toast.success("Favori enregistré !");
+  };
 
   const downloadImage = useCallback((url: string, index: number) => {
     const ext = url.startsWith("data:image/png") ? "png" : "jpg";
@@ -259,28 +366,81 @@ export default function GenerationModelePage() {
 
       <div className="tool-card space-y-6">
 
+        {/* Favoris de profil */}
+        <div className="rounded-lg border border-border bg-secondary/20 p-3 space-y-2">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-1.5">
+              <Star className="h-3.5 w-3.5 text-amber-400" />
+              <span className="text-sm font-medium">Profils favoris</span>
+            </div>
+            {!savingFav ? (
+              <button
+                type="button"
+                onClick={() => setSavingFav(true)}
+                className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+              >
+                <Plus className="h-3 w-3" />
+                Enregistrer ce profil
+              </button>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={favName}
+                  onChange={(e) => setFavName(e.target.value)}
+                  placeholder="Nom du profil..."
+                  className="h-7 text-xs w-36"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveFav();
+                    if (e.key === "Escape") { setSavingFav(false); setFavName(""); }
+                  }}
+                />
+                <Button type="button" size="sm" className="h-7 text-xs px-2" onClick={handleSaveFav}>OK</Button>
+                <button type="button" onClick={() => { setSavingFav(false); setFavName(""); }} className="text-muted-foreground hover:text-foreground transition-colors">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            )}
+          </div>
+          {modelFavs.length === 0 ? (
+            <p className="text-xs text-muted-foreground">Aucun profil — configurez votre modèle et enregistrez.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {modelFavs.map((fav) => (
+                <div key={fav.id} className="relative group/fav">
+                  <button
+                    type="button"
+                    onClick={() => applyFav(fav.data)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs border border-amber-400/40 bg-amber-400/10 hover:bg-amber-400/20 text-amber-600 dark:text-amber-300 transition-all pr-6"
+                  >
+                    <Star className="h-2.5 w-2.5" />
+                    {fav.name}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeModelFav(fav.id)}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 opacity-0 group-hover/fav:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                  >
+                    <X className="h-2.5 w-2.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Genre */}
         <div className="flex items-center gap-4">
           <Label>Genre :</Label>
-          <button
-            type="button"
-            onClick={() => setGenre("femme")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition-all ${
-              genre === "femme" ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border hover:border-muted-foreground"
-            }`}
+          <button type="button" onClick={() => setGenre("femme")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition-all ${genre === "femme" ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border hover:border-muted-foreground"}`}
           >
-            <User className="h-3.5 w-3.5" />
-            Femme
+            <User className="h-3.5 w-3.5" />Femme
           </button>
-          <button
-            type="button"
-            onClick={() => setGenre("homme")}
-            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition-all ${
-              genre === "homme" ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border hover:border-muted-foreground"
-            }`}
+          <button type="button" onClick={() => setGenre("homme")}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm border transition-all ${genre === "homme" ? "bg-primary text-primary-foreground border-primary" : "bg-secondary border-border hover:border-muted-foreground"}`}
           >
-            <User className="h-3.5 w-3.5" />
-            Homme
+            <User className="h-3.5 w-3.5" />Homme
           </button>
         </div>
 
@@ -320,32 +480,32 @@ export default function GenerationModelePage() {
           </div>
         </div>
 
-        <ChipSelect label="Morphologie" options={morphologies} value={morphologie} onChange={setMorphologie} />
-        <ChipSelect label="Origine" options={origines} value={origine} onChange={setOrigine} />
-        <ChipSelect label="Carnation" options={carnations} value={carnation} onChange={setCarnation} />
-        <ChipSelect label="Couleur des cheveux" options={couleursCheveux} value={couleurCheveux} onChange={setCouleurCheveux} />
-        <ChipSelect label="Longueur des cheveux" options={longueurCheveux} value={longueur} onChange={setLongueur} />
-        <ChipSelect label="Couleur des yeux" options={couleursYeux} value={couleurYeux} onChange={setCouleurYeux} />
+        <ChipSelect label="Morphologie" options={morphologieList.options} value={morphologie} onChange={setMorphologie} onAdd={morphologieList.addOption} onRemove={morphologieList.removeOption} />
+        <ChipSelect label="Origine" options={origineList.options} value={origine} onChange={setOrigine} onAdd={origineList.addOption} onRemove={origineList.removeOption} />
+        <ChipSelect label="Carnation" options={carnationList.options} value={carnation} onChange={setCarnation} onAdd={carnationList.addOption} onRemove={carnationList.removeOption} />
+        <ChipSelect label="Couleur des cheveux" options={chevList.options} value={couleurCheveux} onChange={setCouleurCheveux} onAdd={chevList.addOption} onRemove={chevList.removeOption} />
+        <ChipSelect label="Longueur des cheveux" options={longueurList.options} value={longueur} onChange={setLongueur} onAdd={longueurList.addOption} onRemove={longueurList.removeOption} />
+        <ChipSelect label="Couleur des yeux" options={yeuxList.options} value={couleurYeux} onChange={setCouleurYeux} onAdd={yeuxList.addOption} onRemove={yeuxList.removeOption} />
 
         {genre === "femme" && (
-          <ChipSelect label="Taille de poitrine" options={poitrines} value={poitrine} onChange={setPoitrine} />
+          <ChipSelect label="Taille de poitrine" options={poitrineList.options} value={poitrine} onChange={setPoitrine} onAdd={poitrineList.addOption} onRemove={poitrineList.removeOption} />
         )}
 
-        <ChipSelect label="Fesses" options={fesses} value={fesse} onChange={setFesse} />
+        <ChipSelect label="Fesses" options={fesseList.options} value={fesse} onChange={setFesse} onAdd={fesseList.addOption} onRemove={fesseList.removeOption} />
 
         <div className="border-t border-border pt-4">
           <Label className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 block">Visage</Label>
           <div className="space-y-4">
-            <ChipSelect label="Forme du visage" options={formesVisage} value={formeVisage} onChange={setFormeVisage} />
-            <ChipSelect label="Bouche / Lèvres" options={formesBouche} value={formeBouche} onChange={setFormeBouche} />
-            <ChipSelect label="Nez" options={formesNez} value={formeNez} onChange={setFormeNez} />
-            <ChipSelect label="Oreilles" options={formesOreilles} value={formeOreilles} onChange={setFormeOreilles} />
-            <ChipSelect label="Sourcils" options={sourcils} value={sourcil} onChange={setSourcil} />
-            <ChipSelect label="Mâchoire" options={machoires} value={machoire} onChange={setMachoire} />
+            <ChipSelect label="Forme du visage" options={visageList.options} value={formeVisage} onChange={setFormeVisage} onAdd={visageList.addOption} onRemove={visageList.removeOption} />
+            <ChipSelect label="Bouche / Lèvres" options={boucheList.options} value={formeBouche} onChange={setFormeBouche} onAdd={boucheList.addOption} onRemove={boucheList.removeOption} />
+            <ChipSelect label="Nez" options={nezList.options} value={formeNez} onChange={setFormeNez} onAdd={nezList.addOption} onRemove={nezList.removeOption} />
+            <ChipSelect label="Oreilles" options={oreillesList.options} value={formeOreilles} onChange={setFormeOreilles} onAdd={oreillesList.addOption} onRemove={oreillesList.removeOption} />
+            <ChipSelect label="Sourcils" options={sourcilsList.options} value={sourcil} onChange={setSourcil} onAdd={sourcilsList.addOption} onRemove={sourcilsList.removeOption} />
+            <ChipSelect label="Mâchoire" options={machoireList.options} value={machoire} onChange={setMachoire} onAdd={machoireList.addOption} onRemove={machoireList.removeOption} />
           </div>
         </div>
 
-        <ChipSelect label="Couleur du fond" options={couleursFond} value={couleurFond} onChange={setCouleurFond} />
+        <ChipSelect label="Couleur du fond" options={fondList.options} value={couleurFond} onChange={setCouleurFond} onAdd={fondList.addOption} onRemove={fondList.removeOption} />
 
         {/* Instructions */}
         <div className="space-y-2">
@@ -356,15 +516,92 @@ export default function GenerationModelePage() {
 
         {/* Modèle de génération */}
         <div className="space-y-2">
-          <Label>Modèle de génération</Label>
+          <div className="flex items-center justify-between">
+            <Label>Modèle de génération</Label>
+            <button
+              type="button"
+              onClick={() => setShowModelEdit(!showModelEdit)}
+              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+            >
+              <Settings className="h-3 w-3" />
+              Gérer
+            </button>
+          </div>
           <Select value={generationModel} onValueChange={setGenerationModel}>
             <SelectTrigger className="w-full max-w-xs"><SelectValue /></SelectTrigger>
             <SelectContent>
-              {generationModels.map((m) => (
+              {models.map((m) => (
                 <SelectItem key={m.value} value={m.value} title={m.tooltip}>{m.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
+
+          {showModelEdit && (
+            <div className="border border-border rounded-lg p-3 space-y-3 bg-secondary/20">
+              <p className="text-xs font-medium text-muted-foreground">Modèles disponibles</p>
+              <div className="space-y-1">
+                {models.map((m) => (
+                  <div key={m.value} className="flex items-center justify-between py-1 text-xs">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-medium truncate">{m.label}</span>
+                      <span className="text-muted-foreground truncate hidden sm:inline">({m.value})</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        removeModel(m.value);
+                        if (generationModel === m.value) {
+                          const remaining = models.filter(x => x.value !== m.value);
+                          if (remaining.length > 0) setGenerationModel(remaining[0].value);
+                        }
+                      }}
+                      className="text-muted-foreground hover:text-destructive transition-colors ml-2 shrink-0"
+                      title={isCustom(m.value) ? "Supprimer" : "Masquer"}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <div className="pt-2 border-t border-border space-y-2">
+                <p className="text-xs text-muted-foreground">Ajouter un modèle</p>
+                <div className="flex gap-2">
+                  <Input
+                    value={newModelValue}
+                    onChange={(e) => setNewModelValue(e.target.value)}
+                    placeholder="ID du modèle..."
+                    className="text-xs h-8"
+                  />
+                  <Input
+                    value={newModelLabel}
+                    onChange={(e) => setNewModelLabel(e.target.value)}
+                    placeholder="Nom affiché..."
+                    className="text-xs h-8"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && newModelValue.trim() && newModelLabel.trim()) {
+                        addModel(newModelValue, newModelLabel);
+                        setNewModelValue("");
+                        setNewModelLabel("");
+                      }
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 shrink-0"
+                    onClick={() => {
+                      addModel(newModelValue, newModelLabel);
+                      setNewModelValue("");
+                      setNewModelLabel("");
+                    }}
+                  >
+                    <Plus className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Nombre de Modèle */}
