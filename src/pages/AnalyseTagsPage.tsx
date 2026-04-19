@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, BarChart3, FlaskConical, Copy, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
-import { getPageState, setPageState } from "@/lib/pageStore";
+import { usePageState } from "@/lib/usePageState";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/43af0a2f-2584-4327-8527-ac204967a1cc";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/43af0a2f-2584-4327-8527-ac204967a1cc";
@@ -42,21 +42,14 @@ function TagPill({ tag, color, copied, onCopy }: {
 }
 
 const PAGE_KEY = "analyse-tags";
-type PageState = { tags: string; result: TagResult | null; testMode: boolean };
-const defaults: PageState = { tags: "", result: null, testMode: false };
+type PageState = { tags: string; result: TagResult | null; testMode: boolean; loading: boolean };
+const defaults: PageState = { tags: "", result: null, testMode: false, loading: false };
 
 export default function AnalyseTagsPage() {
-  const saved = getPageState<PageState>(PAGE_KEY, defaults);
-  const [tags, setTagsRaw] = useState(saved.tags);
-  const [loading, setLoading] = useState(false);
-  const [result, setResultRaw] = useState<TagResult | null>(saved.result);
-  const [testMode, setTestModeRaw] = useState(saved.testMode);
+  const [state, patch] = usePageState<PageState>(PAGE_KEY, defaults);
+  const { tags, result, testMode, loading } = state;
   const [copied, setCopied] = useState<string | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
-
-  const setTags = (v: string) => { setTagsRaw(v); setPageState<PageState>(PAGE_KEY, { tags: v }); };
-  const setResult = (v: TagResult | null) => { setResultRaw(v); setPageState<PageState>(PAGE_KEY, { result: v }); };
-  const setTestMode = (v: boolean) => { setTestModeRaw(v); setPageState<PageState>(PAGE_KEY, { testMode: v }); };
 
   const copy = (t: string) => {
     navigator.clipboard.writeText(t);
@@ -74,7 +67,7 @@ export default function AnalyseTagsPage() {
 
   const handleAnalyse = async () => {
     if (!tags.trim()) return;
-    setLoading(true);
+    patch({ loading: true });
     try {
       const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
         method: "POST",
@@ -95,12 +88,12 @@ export default function AnalyseTagsPage() {
         if (geminiText) text = geminiText;
         // Format n8n JSON structuré (new_tags / old_tags)
         else if (candidate?.new_tags || candidate?.old_tags) {
-          setResult({
+          patch({ result: {
             new_tags: Array.isArray(candidate?.new_tags) ? candidate.new_tags : [],
             old_tags: Array.isArray(candidate?.old_tags) ? candidate.old_tags : [],
             new_tags_string: candidate?.new_tags_string ?? "",
             changes: [],
-          });
+          }});
           toast.success("Analyse terminée !");
           return;
         }
@@ -120,17 +113,12 @@ export default function AnalyseTagsPage() {
       }
 
       const new_tags = changes.map(c => c.new);
-      setResult({
-        old_tags,
-        new_tags,
-        new_tags_string: new_tags.join(", "),
-        changes,
-      });
+      patch({ result: { old_tags, new_tags, new_tags_string: new_tags.join(", "), changes } });
       toast.success("Analyse terminée !");
     } catch {
       toast.error("Erreur lors de l'analyse");
     } finally {
-      setLoading(false);
+      patch({ loading: false });
     }
   };
 
@@ -141,7 +129,7 @@ export default function AnalyseTagsPage() {
         <div className="flex items-center gap-2">
           <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
           <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
-          <Switch checked={testMode} onCheckedChange={setTestMode} />
+          <Switch checked={testMode} onCheckedChange={(v) => patch({ testMode: v })} />
         </div>
       </div>
 
@@ -152,7 +140,7 @@ export default function AnalyseTagsPage() {
             rows={6}
             placeholder="Entrez vos tags, un par ligne ou séparés par des virgules..."
             value={tags}
-            onChange={(e) => setTags(e.target.value)}
+            onChange={(e) => patch({ tags: e.target.value })}
           />
         </div>
 

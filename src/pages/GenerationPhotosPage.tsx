@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { driveStore } from "@/lib/driveStore";
+import { usePageState } from "@/lib/usePageState";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -141,7 +142,11 @@ function MultiSelect({ label, options, selected, onChange, customValue, onCustom
   );
 }
 
+type PhotosPageState = { loading: boolean; results: string[] };
+const photosDefaults: PhotosPageState = { loading: false, results: [] };
+
 export default function GenerationPhotosPage() {
+  const [psState, psPatch] = usePageState<PhotosPageState>("generation-photos", photosDefaults);
   const [mode, setMode] = useState<"auto" | "manuel">("auto");
   const [productImages, setProductImages] = useState<File[]>([]);
   const [bgImages, setBgImages] = useState<File[]>([]);
@@ -158,8 +163,8 @@ export default function GenerationPhotosPage() {
   const [instructions, setInstructions] = useState("");
   const [imageCount, setImageCount] = useState("3");
   const [generationModel, setGenerationModel] = useState("gemini-2.5-flash-image");
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<string[]>([]);
+  const loading = psState.loading;
+  const results = psState.results;
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
   const [testMode, setTestMode] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -191,8 +196,7 @@ export default function GenerationPhotosPage() {
 
   const handleGenerate = useCallback(async (currentMode: "auto" | "manuel" = mode) => {
     if (productImages.length === 0) { toast.error("Ajoutez au moins une image produit"); return; }
-    setLoading(true);
-    setResults([]);
+    psPatch({ loading: true, results: [] });
     try {
       const [compressedProducts, compressedBg, compressedModels] = await Promise.all([
         Promise.all(productImages.map((f) => compressImage(f))),
@@ -269,7 +273,7 @@ export default function GenerationPhotosPage() {
           return [];
         }).filter(Boolean);
 
-        if (urls.length) { setResults(urls); toast.success("Génération terminée !"); }
+        if (urls.length) { psPatch({ results: urls }); toast.success("Génération terminée !"); }
         else { toast.success("Workflow lancé — les images seront disponibles sous peu."); }
       } catch {
         toast.success("Workflow lancé !");
@@ -277,9 +281,9 @@ export default function GenerationPhotosPage() {
     } catch {
       toast.error("Erreur de connexion au workflow");
     } finally {
-      setLoading(false);
+      psPatch({ loading: false });
     }
-  }, [mode, productImages, bgImages, modelImages, imageCount, instructions, categorie, selectedEnv, selectedEcl, selectedAngle, selectedAcc, testMode, generationModel]);
+  }, [mode, productImages, bgImages, modelImages, imageCount, instructions, categorie, selectedEnv, selectedEcl, selectedAngle, selectedAcc, testMode, generationModel, psPatch]);
 
   return (
     <div className="max-w-3xl mx-auto">

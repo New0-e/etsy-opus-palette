@@ -5,14 +5,14 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Upload, ImageIcon, Copy, Check, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore } from "@/lib/driveStore";
-import { getPageState, setPageState } from "@/lib/pageStore";
+import { usePageState } from "@/lib/usePageState";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/fa1722ae-5d4a-4b96-b50c-2ff5d22f9227";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/fa1722ae-5d4a-4b96-b50c-2ff5d22f9227";
 
 const PAGE_KEY = "descriptif-image";
-type PageState = { resultEn: string; resultFr: string };
-const defaults: PageState = { resultEn: "", resultFr: "" };
+type PageState = { resultEn: string; resultFr: string; loading: boolean; translating: boolean };
+const defaults: PageState = { resultEn: "", resultFr: "", loading: false, translating: false };
 
 async function translateToFrench(text: string): Promise<string> {
   const res = await fetch(
@@ -23,22 +23,13 @@ async function translateToFrench(text: string): Promise<string> {
 }
 
 export default function DescriptifImagePage() {
-  const saved = getPageState<PageState>(PAGE_KEY, defaults);
+  const [state, patch] = usePageState<PageState>(PAGE_KEY, defaults);
+  const { resultEn, resultFr, loading, translating } = state;
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [translating, setTranslating] = useState(false);
-  const [resultEn, setResultEnRaw] = useState(saved.resultEn);
-  const [resultFr, setResultFrRaw] = useState(saved.resultFr);
   const [dragOver, setDragOver] = useState(false);
   const [copiedEn, setCopiedEn] = useState(false);
   const [testMode, setTestMode] = useState(false);
-
-  const setResults = (en: string, fr: string) => {
-    setResultEnRaw(en);
-    setResultFrRaw(fr);
-    setPageState<PageState>(PAGE_KEY, { resultEn: en, resultFr: fr });
-  };
 
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -64,8 +55,7 @@ export default function DescriptifImagePage() {
 
   const handleAnalyse = async () => {
     if (!file) return;
-    setLoading(true);
-    setResults("", "");
+    patch({ loading: true, resultEn: "", resultFr: "" });
     try {
       const formData = new FormData();
       formData.append("image", file);
@@ -81,23 +71,19 @@ export default function DescriptifImagePage() {
           JSON.stringify(json, null, 2);
       } catch { /* texte brut */ }
 
-      setResultEnRaw(extracted);
-      setLoading(false);
+      patch({ resultEn: extracted, loading: false, translating: true });
 
-      setTranslating(true);
       try {
         const fr = await translateToFrench(extracted);
-        setResults(extracted, fr);
+        patch({ resultFr: fr, translating: false });
         toast.success("Analyse et traduction terminées !");
       } catch {
-        setResults(extracted, "");
+        patch({ translating: false });
         toast.success("Analyse terminée (traduction échouée)");
-      } finally {
-        setTranslating(false);
       }
     } catch {
       toast.error("Erreur lors de l'analyse");
-      setLoading(false);
+      patch({ loading: false, translating: false });
     }
   };
 

@@ -5,29 +5,22 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, UserSearch, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
-import { getPageState, setPageState } from "@/lib/pageStore";
+import { usePageState } from "@/lib/usePageState";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/221b037d-2a18-4def-a350-0cdf5323197f";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/221b037d-2a18-4def-a350-0cdf5323197f";
 
 const PAGE_KEY = "tags-concurrent";
-type PageState = { lien: string; result: string; testMode: boolean };
-const defaults: PageState = { lien: "", result: "", testMode: false };
+type PageState = { lien: string; result: string; testMode: boolean; loading: boolean };
+const defaults: PageState = { lien: "", result: "", testMode: false, loading: false };
 
 export default function TagsConcurrentPage() {
-  const saved = getPageState<PageState>(PAGE_KEY, defaults);
-  const [lien, setLienRaw] = useState(saved.lien);
-  const [loading, setLoading] = useState(false);
-  const [result, setResultRaw] = useState(saved.result);
-  const [testMode, setTestModeRaw] = useState(saved.testMode);
-
-  const setLien = (v: string) => { setLienRaw(v); setPageState<PageState>(PAGE_KEY, { lien: v }); };
-  const setResult = (v: string) => { setResultRaw(v); setPageState<PageState>(PAGE_KEY, { result: v }); };
-  const setTestMode = (v: boolean) => { setTestModeRaw(v); setPageState<PageState>(PAGE_KEY, { testMode: v }); };
+  const [state, patch] = usePageState<PageState>(PAGE_KEY, defaults);
+  const { lien, result, testMode, loading } = state;
 
   const handleAnalyse = async () => {
     if (!lien.trim()) return;
-    setLoading(true);
+    patch({ loading: true });
     try {
       const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
         method: "POST",
@@ -35,12 +28,12 @@ export default function TagsConcurrentPage() {
         body: JSON.stringify({ etsy_url: lien }),
       });
       const data = await res.text();
-      setResult(data);
+      patch({ result: data });
       toast.success("Analyse terminée !");
     } catch {
       toast.error("Erreur lors de l'analyse");
     } finally {
-      setLoading(false);
+      patch({ loading: false });
     }
   };
 
@@ -51,13 +44,13 @@ export default function TagsConcurrentPage() {
         <div className="flex items-center gap-2">
           <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
           <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
-          <Switch checked={testMode} onCheckedChange={setTestMode} />
+          <Switch checked={testMode} onCheckedChange={(v) => patch({ testMode: v })} />
         </div>
       </div>
       <div className="tool-card space-y-6">
         <div className="space-y-2">
           <Label>Lien Etsy du concurrent</Label>
-          <Input placeholder="https://www.etsy.com/listing/..." value={lien} onChange={(e) => setLien(e.target.value)} />
+          <Input placeholder="https://www.etsy.com/listing/..." value={lien} onChange={(e) => patch({ lien: e.target.value })} />
         </div>
 
         <Button onClick={handleAnalyse} disabled={!lien.trim() || loading} className="w-full gap-2">

@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { usePageState } from "@/lib/usePageState";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -102,7 +103,13 @@ function ChipSelect({ label, options, value, onChange }: {
   );
 }
 
+type ModelePageState = { loading: boolean; results: string[] };
+const modeleDefaults: ModelePageState = { loading: false, results: [] };
+
 export default function GenerationModelePage() {
+  const [psState, psPatch] = usePageState<ModelePageState>("generation-modele", modeleDefaults);
+  const loading = psState.loading;
+  const results = psState.results;
   const [genre, setGenre] = useState<"femme" | "homme">("femme");
   const [age, setAge] = useState([28]);
   const [taille, setTaille] = useState([168]);
@@ -125,8 +132,6 @@ export default function GenerationModelePage() {
   const [instructions, setInstructions] = useState("");
   const [imageCount, setImageCount] = useState("3");
   const [generationModel, setGenerationModel] = useState("gemini-2.5-flash-image");
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<string[]>([]);
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
   const [testMode, setTestMode] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -157,8 +162,7 @@ export default function GenerationModelePage() {
   }, [lightboxIndex, results.length]);
 
   const handleGenerate = useCallback(async () => {
-    setLoading(true);
-    setResults([]);
+    psPatch({ loading: true, results: [] });
     try {
       const formData = new FormData();
       formData.append("genre", t(genre));
@@ -230,7 +234,7 @@ export default function GenerationModelePage() {
           return [];
         }).filter(Boolean);
 
-        if (urls.length) { setResults(urls); toast.success("Génération terminée !"); }
+        if (urls.length) { psPatch({ results: urls }); toast.success("Génération terminée !"); }
         else { toast.success("Workflow lancé — les images seront disponibles sous peu."); }
       } catch {
         toast.success("Workflow lancé !");
@@ -238,9 +242,9 @@ export default function GenerationModelePage() {
     } catch {
       toast.error("Erreur de connexion au workflow");
     } finally {
-      setLoading(false);
+      psPatch({ loading: false });
     }
-  }, [genre, age, taille, poids, morphologie, couleurCheveux, longueur, couleurYeux, carnation, origine, poitrine, fesse, formeVisage, formeBouche, formeNez, formeOreilles, sourcil, machoire, couleurFond, instructions, imageCount, generationModel, testMode]);
+  }, [genre, age, taille, poids, morphologie, couleurCheveux, longueur, couleurYeux, carnation, origine, poitrine, fesse, formeVisage, formeBouche, formeNez, formeOreilles, sourcil, machoire, couleurFond, instructions, imageCount, generationModel, testMode, psPatch]);
 
   return (
     <div className="max-w-3xl mx-auto">

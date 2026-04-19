@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, Upload, Tags, FlaskConical, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
 import { driveStore } from "@/lib/driveStore";
-import { getPageState, setPageState } from "@/lib/pageStore";
+import { usePageState } from "@/lib/usePageState";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
@@ -44,21 +44,16 @@ function TagSection({ title, tags, color, copied, onCopy }: {
 
 type AnalyseResult = { descriptive_keywords: string[]; buying_intent: string[]; search_queries: string[] };
 const PAGE_KEY = "analyse-image";
-type PageState = { result: AnalyseResult | null; testMode: boolean };
-const defaults: PageState = { result: null, testMode: false };
+type PageState = { result: AnalyseResult | null; testMode: boolean; loading: boolean };
+const defaults: PageState = { result: null, testMode: false, loading: false };
 
 export default function AnalyseImagePage() {
-  const saved = getPageState<PageState>(PAGE_KEY, defaults);
+  const [state, patch] = usePageState<PageState>(PAGE_KEY, defaults);
+  const { result, testMode, loading } = state;
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [result, setResultRaw] = useState<AnalyseResult | null>(saved.result);
   const [dragOver, setDragOver] = useState(false);
-  const [testMode, setTestModeRaw] = useState(saved.testMode);
   const [copied, setCopied] = useState<string | null>(null);
-
-  const setResult = (v: AnalyseResult | null) => { setResultRaw(v); setPageState<PageState>(PAGE_KEY, { result: v }); };
-  const setTestMode = (v: boolean) => { setTestModeRaw(v); setPageState<PageState>(PAGE_KEY, { testMode: v }); };
 
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -86,7 +81,7 @@ export default function AnalyseImagePage() {
 
   const handleAnalyse = async () => {
     if (!file) return;
-    setLoading(true);
+    patch({ loading: true });
     try {
       const formData = new FormData();
       formData.append("image", file);
@@ -97,15 +92,15 @@ export default function AnalyseImagePage() {
       const text = await res.text();
       try {
         const json = JSON.parse(text);
-        setResult(json);
+        patch({ result: json });
       } catch {
-        setResult({ descriptive_keywords: [], buying_intent: [], search_queries: [text] });
+        patch({ result: { descriptive_keywords: [], buying_intent: [], search_queries: [text] } });
       }
       toast.success("Analyse terminée !");
     } catch {
       toast.error("Erreur lors de l'analyse");
     } finally {
-      setLoading(false);
+      patch({ loading: false });
     }
   };
 
@@ -116,7 +111,7 @@ export default function AnalyseImagePage() {
         <div className="flex items-center gap-2">
           <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
           <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
-          <Switch checked={testMode} onCheckedChange={setTestMode} />
+          <Switch checked={testMode} onCheckedChange={(v) => patch({ testMode: v })} />
         </div>
       </div>
       <div className="tool-card space-y-6">
