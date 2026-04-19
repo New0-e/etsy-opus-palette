@@ -176,7 +176,7 @@ export default function CreationFichePage() {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-bold">Génération Fiches Produits</h1>
+        <h1 className="font-display text-2xl font-bold">Gen Fiches Produits</h1>
         <div className="flex items-center gap-2">
           <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
           <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>

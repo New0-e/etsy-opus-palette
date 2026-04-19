@@ -6,9 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
 const tools = [
-  { title: "Génération Fiches Produits", desc: "Créer une nouvelle fiche produit Etsy", icon: FileText, url: "/creation-fiche", color: "text-primary" },
+  { title: "Gen Fiches Produits", desc: "Créer une nouvelle fiche produit Etsy", icon: FileText, url: "/creation-fiche", color: "text-primary" },
   { title: "Téléchargement Images", desc: "Télécharger les images scrapées", icon: ImageDown, url: "/download-images", color: "text-success" },
-  { title: "Génération Images", desc: "Générer des images produit avec IA", icon: Camera, url: "/generation-photos", color: "text-warning" },
+  { title: "Gen Images", desc: "Générer des images produit avec IA", icon: Camera, url: "/generation-photos", color: "text-warning" },
 ];
 
 const secondaryTools = [
