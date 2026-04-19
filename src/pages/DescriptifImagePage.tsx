@@ -32,7 +32,6 @@ export default function DescriptifImagePage() {
   const [resultFr, setResultFrRaw] = useState(saved.resultFr);
   const [dragOver, setDragOver] = useState(false);
   const [copiedEn, setCopiedEn] = useState(false);
-  const [copiedFr, setCopiedFr] = useState(false);
   const [testMode, setTestMode] = useState(false);
 
   const setResults = (en: string, fr: string) => {
@@ -175,12 +174,6 @@ export default function DescriptifImagePage() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Français</span>
-                {resultFr && (
-                  <button onClick={() => copy(resultFr, setCopiedFr)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                    {copiedFr ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                    {copiedFr ? "Copié !" : "Copier"}
-                  </button>
-                )}
               </div>
               <Textarea
                 value={translating ? "" : resultFr}
