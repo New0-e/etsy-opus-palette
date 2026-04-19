@@ -241,11 +241,7 @@ export default function GenerationIdeeSousNichePage() {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ex : bijoux artisanaux pour femmes minimalistes..."
             className="min-h-32 resize-none"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleGenerate();
-            }}
           />
-          <p className="text-xs text-muted-foreground">Ctrl+Entrée pour générer</p>
         </div>
 
         <Button onClick={handleGenerate} disabled={!input.trim() || loading} className="w-full gap-2">
