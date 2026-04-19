@@ -14,12 +14,129 @@ const PAGE_KEY = "generation-idee-sous-niche";
 type PageState = { input: string; result: string; testMode: boolean };
 const defaults: PageState = { input: "", result: "", testMode: false };
 
+interface SousNiche {
+  titre: string;
+  blocs: { label: string; contenu: string; liste?: string[] }[];
+}
+
+function parseSousNiches(markdown: string): SousNiche[] {
+  const sections = markdown.split(/^## \d+\.\s+/m).filter(Boolean);
+  return sections.map((section) => {
+    const lines = section.trim().split("\n");
+    const titre = lines[0].trim();
+    const blocs: SousNiche["blocs"] = [];
+    let currentLabel = "";
+    let currentLines: string[] = [];
+
+    const flush = () => {
+      if (!currentLabel) return;
+      const liste = currentLines.filter((l) => l.startsWith("- ")).map((l) => l.replace(/^-\s*/, ""));
+      const texte = currentLines.filter((l) => !l.startsWith("- ")).join(" ").trim();
+      blocs.push({ label: currentLabel, contenu: texte, liste: liste.length ? liste : undefined });
+      currentLines = [];
+    };
+
+    for (const line of lines.slice(1)) {
+      const bold = line.match(/^\*\*(.+?)\*\*\s*:?\s*(.*)/);
+      if (bold) {
+        flush();
+        currentLabel = bold[1].trim();
+        if (bold[2].trim()) currentLines.push(bold[2].trim());
+      } else if (line.trim()) {
+        currentLines.push(line.trim());
+      }
+    }
+    flush();
+    return { titre, blocs };
+  });
+}
+
+const badgeColors: Record<string, string> = {
+  "Faible":   "bg-green-400/10 text-green-400 border-green-400/20",
+  "Moyen":    "bg-amber-400/10 text-amber-400 border-amber-400/20",
+  "Élevé":    "bg-primary/10 text-primary border-primary/20",
+  "Très élevé": "bg-primary/10 text-primary border-primary/20",
+};
+
+function Badge({ value }: { value: string }) {
+  const cls = badgeColors[value] ?? "bg-secondary text-muted-foreground border-border";
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded border text-xs font-medium ${cls}`}>
+      {value}
+    </span>
+  );
+}
+
+const isBadgeLabel = (label: string) =>
+  label.toLowerCase().includes("concurrence") || label.toLowerCase().includes("rentabilité");
+
+function SousNicheCard({ niche, index }: { niche: SousNiche; index: number }) {
+  const [copied, setCopied] = useState(false);
+
+  const raw = [
+    `## ${index + 1}. ${niche.titre}`,
+    ...niche.blocs.map((b) => {
+      const items = b.liste ? b.liste.map((i) => `- ${i}`).join("\n") : "";
+      return `**${b.label}** : ${b.contenu}\n${items}`.trim();
+    }),
+  ].join("\n\n");
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(raw);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  return (
+    <div className="rounded-lg border border-border bg-secondary/30 overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 bg-secondary/60 border-b border-border">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 rounded px-1.5 py-0.5">
+            {index + 1}
+          </span>
+          <h3 className="text-sm font-semibold">{niche.titre}</h3>
+        </div>
+        <button
+          onClick={handleCopy}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+          {copied ? "Copié" : "Copier"}
+        </button>
+      </div>
+      <div className="p-4 space-y-3">
+        {niche.blocs.map((bloc, i) => (
+          <div key={i}>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+              {bloc.label}
+            </span>
+            {isBadgeLabel(bloc.label) && bloc.contenu ? (
+              <div className="mt-1"><Badge value={bloc.contenu} /></div>
+            ) : bloc.liste ? (
+              <ul className="mt-1 space-y-0.5">
+                {bloc.liste.map((item, j) => (
+                  <li key={j} className="flex items-start gap-1.5 text-xs text-foreground">
+                    <span className="text-primary mt-0.5">•</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-1 text-xs text-foreground">{bloc.contenu}</p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function GenerationIdeeSousNichePage() {
   const saved = getPageState<PageState>(PAGE_KEY, defaults);
   const [input, setInputRaw] = useState(saved.input);
   const [result, setResultRaw] = useState(saved.result);
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copiedAll, setCopiedAll] = useState(false);
   const [testMode, setTestModeRaw] = useState(saved.testMode);
 
   const setInput = (v: string) => { setInputRaw(v); setPageState<PageState>(PAGE_KEY, { input: v }); };
@@ -39,7 +156,7 @@ export default function GenerationIdeeSousNichePage() {
       const text = await res.text();
       try {
         const json = JSON.parse(text);
-        setResult(json.text ?? json.output ?? json.result ?? JSON.stringify(json, null, 2));
+        setResult(json.sous_niches ?? json.text ?? json.output ?? json.result ?? JSON.stringify(json, null, 2));
       } catch {
         setResult(text);
       }
@@ -51,11 +168,14 @@ export default function GenerationIdeeSousNichePage() {
     }
   };
 
-  const handleCopy = () => {
+  const handleCopyAll = () => {
     navigator.clipboard.writeText(result);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    setCopiedAll(true);
+    toast.success("Tout copié !");
+    setTimeout(() => setCopiedAll(false), 1500);
   };
+
+  const niches = result ? parseSousNiches(result) : [];
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -85,38 +205,36 @@ export default function GenerationIdeeSousNichePage() {
           <p className="text-xs text-muted-foreground">Ctrl+Entrée pour générer</p>
         </div>
 
-        <Button
-          onClick={handleGenerate}
-          disabled={!input.trim() || loading}
-          className="w-full gap-2"
-        >
+        <Button onClick={handleGenerate} disabled={!input.trim() || loading} className="w-full gap-2">
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lightbulb className="h-4 w-4" />}
           {loading ? "Génération en cours..." : "Générer des idées"}
         </Button>
-
-        {(result || loading) && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Idées de sous-niches</span>
-              {result && (
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                  {copied ? "Copié !" : "Copier"}
-                </button>
-              )}
-            </div>
-            <Textarea
-              value={loading ? "" : result}
-              readOnly
-              className="min-h-48 font-mono text-xs resize-none"
-              placeholder={loading ? "Génération en cours..." : "Les idées apparaîtront ici..."}
-            />
-          </div>
-        )}
       </div>
+
+      {loading && (
+        <div className="mt-6 flex items-center justify-center py-12 text-muted-foreground gap-2">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <span className="text-sm">Génération en cours...</span>
+        </div>
+      )}
+
+      {!loading && niches.length > 0 && (
+        <div className="mt-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-semibold">{niches.length} sous-niche{niches.length > 1 ? "s" : ""} générée{niches.length > 1 ? "s" : ""}</span>
+            <button
+              onClick={handleCopyAll}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {copiedAll ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+              {copiedAll ? "Copié !" : "Tout copier"}
+            </button>
+          </div>
+          {niches.map((niche, i) => (
+            <SousNicheCard key={i} niche={niche} index={i} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
