@@ -60,7 +60,7 @@ const tr: Record<string, string> = {
   "Jaune doux": "soft yellow", "Dégradé blanc": "white gradient", "Fond studio": "studio backdrop",
 };
 
-const t = (v: string) => tr[v] ?? v;
+const t = (v: string, customTr: Record<string, string> = {}) => customTr[v] ?? tr[v] ?? v;
 
 type ModeleFav = {
   genre: "femme" | "homme";
@@ -86,16 +86,18 @@ type ModeleFav = {
 
 function ChipSelect({ label, options, value, onChange, onAdd, onRemove }: {
   label: string; options: string[]; value: string; onChange: (v: string) => void;
-  onAdd: (opt: string) => void; onRemove: (opt: string) => void;
+  onAdd: (fr: string, en: string) => void; onRemove: (opt: string) => void;
 }) {
-  const [inputVal, setInputVal] = useState("");
+  const [inputFr, setInputFr] = useState("");
+  const [inputEn, setInputEn] = useState("");
 
   const handleAdd = () => {
-    const v = inputVal.trim();
-    if (!v) return;
-    onAdd(v);
-    onChange(v);
-    setInputVal("");
+    const fr = inputFr.trim();
+    if (!fr) return;
+    onAdd(fr, inputEn.trim());
+    onChange(fr);
+    setInputFr("");
+    setInputEn("");
   };
 
   return (
@@ -125,9 +127,16 @@ function ChipSelect({ label, options, value, onChange, onAdd, onRemove }: {
       </div>
       <div className="flex gap-2">
         <Input
-          placeholder="Ajouter une option..."
-          value={inputVal}
-          onChange={(e) => setInputVal(e.target.value)}
+          placeholder="Option (FR)..."
+          value={inputFr}
+          onChange={(e) => setInputFr(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
+          className="text-sm"
+        />
+        <Input
+          placeholder="English..."
+          value={inputEn}
+          onChange={(e) => setInputEn(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
           className="text-sm"
         />
@@ -188,6 +197,20 @@ export default function GenerationModelePage() {
   const sourcilsList = useOptionsList("modele-sourcils", DEFAULT_SOURCILS);
   const machoireList = useOptionsList("modele-machoire", DEFAULT_MACHOIRES);
   const fondList = useOptionsList("modele-fond", DEFAULT_COULEURS_FOND);
+
+  // Traductions custom (options ajoutées par l'utilisateur)
+  const [customTr, setCustomTr] = useState<Record<string, string>>(() => {
+    try { return JSON.parse(localStorage.getItem("modele-custom-tr") ?? "{}"); } catch { return {}; }
+  });
+  const addCustomTr = (fr: string, en: string) => {
+    if (!en) return;
+    setCustomTr(prev => {
+      const next = { ...prev, [fr]: en };
+      localStorage.setItem("modele-custom-tr", JSON.stringify(next));
+      return next;
+    });
+  };
+  const tAll = (v: string) => t(v, customTr);
 
   // Favoris / presets de profil
   const { favs: modelFavs, saveFav: saveModelFav, removeFav: removeModelFav } = useFavorites<ModeleFav>("gen-modele");
@@ -272,27 +295,27 @@ export default function GenerationModelePage() {
     psPatch({ loading: true, results: [] });
     try {
       const formData = new FormData();
-      formData.append("genre", t(genre));
+      formData.append("genre", tAll(genre));
       formData.append("age", String(age[0]));
       formData.append("taille", `${taille[0]} cm`);
       formData.append("poids", `${poids[0]} kg`);
       formData.append("image_count", imageCount);
       formData.append("generation_model", generationModel);
-      if (morphologie) formData.append("morphologie", t(morphologie));
-      if (couleurCheveux) formData.append("couleur_cheveux", t(couleurCheveux));
-      if (longueur) formData.append("longueur_cheveux", t(longueur));
-      if (couleurYeux) formData.append("couleur_yeux", t(couleurYeux));
-      if (carnation) formData.append("carnation", t(carnation));
-      if (origine) formData.append("origine", t(origine));
-      if (genre === "femme" && poitrine) formData.append("poitrine", t(poitrine));
-      if (fesse) formData.append("fesses", t(fesse));
-      if (formeVisage) formData.append("forme_visage", t(formeVisage));
-      if (formeBouche) formData.append("forme_bouche", t(formeBouche));
-      if (formeNez) formData.append("forme_nez", t(formeNez));
-      if (formeOreilles) formData.append("forme_oreilles", t(formeOreilles));
-      if (sourcil) formData.append("sourcils", t(sourcil));
-      if (machoire) formData.append("machoire", t(machoire));
-      if (couleurFond) formData.append("couleur_fond", t(couleurFond));
+      if (morphologie) formData.append("morphologie", tAll(morphologie));
+      if (couleurCheveux) formData.append("couleur_cheveux", tAll(couleurCheveux));
+      if (longueur) formData.append("longueur_cheveux", tAll(longueur));
+      if (couleurYeux) formData.append("couleur_yeux", tAll(couleurYeux));
+      if (carnation) formData.append("carnation", tAll(carnation));
+      if (origine) formData.append("origine", tAll(origine));
+      if (genre === "femme" && poitrine) formData.append("poitrine", tAll(poitrine));
+      if (fesse) formData.append("fesses", tAll(fesse));
+      if (formeVisage) formData.append("forme_visage", tAll(formeVisage));
+      if (formeBouche) formData.append("forme_bouche", tAll(formeBouche));
+      if (formeNez) formData.append("forme_nez", tAll(formeNez));
+      if (formeOreilles) formData.append("forme_oreilles", tAll(formeOreilles));
+      if (sourcil) formData.append("sourcils", tAll(sourcil));
+      if (machoire) formData.append("machoire", tAll(machoire));
+      if (couleurFond) formData.append("couleur_fond", tAll(couleurFond));
       if (instructions) formData.append("instructions", instructions);
 
       const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
@@ -480,32 +503,32 @@ export default function GenerationModelePage() {
           </div>
         </div>
 
-        <ChipSelect label="Morphologie" options={morphologieList.options} value={morphologie} onChange={setMorphologie} onAdd={morphologieList.addOption} onRemove={morphologieList.removeOption} />
-        <ChipSelect label="Origine" options={origineList.options} value={origine} onChange={setOrigine} onAdd={origineList.addOption} onRemove={origineList.removeOption} />
-        <ChipSelect label="Carnation" options={carnationList.options} value={carnation} onChange={setCarnation} onAdd={carnationList.addOption} onRemove={carnationList.removeOption} />
-        <ChipSelect label="Couleur des cheveux" options={chevList.options} value={couleurCheveux} onChange={setCouleurCheveux} onAdd={chevList.addOption} onRemove={chevList.removeOption} />
-        <ChipSelect label="Longueur des cheveux" options={longueurList.options} value={longueur} onChange={setLongueur} onAdd={longueurList.addOption} onRemove={longueurList.removeOption} />
-        <ChipSelect label="Couleur des yeux" options={yeuxList.options} value={couleurYeux} onChange={setCouleurYeux} onAdd={yeuxList.addOption} onRemove={yeuxList.removeOption} />
+        <ChipSelect label="Morphologie" options={morphologieList.options} value={morphologie} onChange={setMorphologie} onAdd={(fr, en) => { morphologieList.addOption(fr); addCustomTr(fr, en); }} onRemove={morphologieList.removeOption} />
+        <ChipSelect label="Origine" options={origineList.options} value={origine} onChange={setOrigine} onAdd={(fr, en) => { origineList.addOption(fr); addCustomTr(fr, en); }} onRemove={origineList.removeOption} />
+        <ChipSelect label="Carnation" options={carnationList.options} value={carnation} onChange={setCarnation} onAdd={(fr, en) => { carnationList.addOption(fr); addCustomTr(fr, en); }} onRemove={carnationList.removeOption} />
+        <ChipSelect label="Couleur des cheveux" options={chevList.options} value={couleurCheveux} onChange={setCouleurCheveux} onAdd={(fr, en) => { chevList.addOption(fr); addCustomTr(fr, en); }} onRemove={chevList.removeOption} />
+        <ChipSelect label="Longueur des cheveux" options={longueurList.options} value={longueur} onChange={setLongueur} onAdd={(fr, en) => { longueurList.addOption(fr); addCustomTr(fr, en); }} onRemove={longueurList.removeOption} />
+        <ChipSelect label="Couleur des yeux" options={yeuxList.options} value={couleurYeux} onChange={setCouleurYeux} onAdd={(fr, en) => { yeuxList.addOption(fr); addCustomTr(fr, en); }} onRemove={yeuxList.removeOption} />
 
         {genre === "femme" && (
-          <ChipSelect label="Taille de poitrine" options={poitrineList.options} value={poitrine} onChange={setPoitrine} onAdd={poitrineList.addOption} onRemove={poitrineList.removeOption} />
+          <ChipSelect label="Taille de poitrine" options={poitrineList.options} value={poitrine} onChange={setPoitrine} onAdd={(fr, en) => { poitrineList.addOption(fr); addCustomTr(fr, en); }} onRemove={poitrineList.removeOption} />
         )}
 
-        <ChipSelect label="Fesses" options={fesseList.options} value={fesse} onChange={setFesse} onAdd={fesseList.addOption} onRemove={fesseList.removeOption} />
+        <ChipSelect label="Fesses" options={fesseList.options} value={fesse} onChange={setFesse} onAdd={(fr, en) => { fesseList.addOption(fr); addCustomTr(fr, en); }} onRemove={fesseList.removeOption} />
 
         <div className="border-t border-border pt-4">
           <Label className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 block">Visage</Label>
           <div className="space-y-4">
-            <ChipSelect label="Forme du visage" options={visageList.options} value={formeVisage} onChange={setFormeVisage} onAdd={visageList.addOption} onRemove={visageList.removeOption} />
-            <ChipSelect label="Bouche / Lèvres" options={boucheList.options} value={formeBouche} onChange={setFormeBouche} onAdd={boucheList.addOption} onRemove={boucheList.removeOption} />
-            <ChipSelect label="Nez" options={nezList.options} value={formeNez} onChange={setFormeNez} onAdd={nezList.addOption} onRemove={nezList.removeOption} />
-            <ChipSelect label="Oreilles" options={oreillesList.options} value={formeOreilles} onChange={setFormeOreilles} onAdd={oreillesList.addOption} onRemove={oreillesList.removeOption} />
-            <ChipSelect label="Sourcils" options={sourcilsList.options} value={sourcil} onChange={setSourcil} onAdd={sourcilsList.addOption} onRemove={sourcilsList.removeOption} />
-            <ChipSelect label="Mâchoire" options={machoireList.options} value={machoire} onChange={setMachoire} onAdd={machoireList.addOption} onRemove={machoireList.removeOption} />
+            <ChipSelect label="Forme du visage" options={visageList.options} value={formeVisage} onChange={setFormeVisage} onAdd={(fr, en) => { visageList.addOption(fr); addCustomTr(fr, en); }} onRemove={visageList.removeOption} />
+            <ChipSelect label="Bouche / Lèvres" options={boucheList.options} value={formeBouche} onChange={setFormeBouche} onAdd={(fr, en) => { boucheList.addOption(fr); addCustomTr(fr, en); }} onRemove={boucheList.removeOption} />
+            <ChipSelect label="Nez" options={nezList.options} value={formeNez} onChange={setFormeNez} onAdd={(fr, en) => { nezList.addOption(fr); addCustomTr(fr, en); }} onRemove={nezList.removeOption} />
+            <ChipSelect label="Oreilles" options={oreillesList.options} value={formeOreilles} onChange={setFormeOreilles} onAdd={(fr, en) => { oreillesList.addOption(fr); addCustomTr(fr, en); }} onRemove={oreillesList.removeOption} />
+            <ChipSelect label="Sourcils" options={sourcilsList.options} value={sourcil} onChange={setSourcil} onAdd={(fr, en) => { sourcilsList.addOption(fr); addCustomTr(fr, en); }} onRemove={sourcilsList.removeOption} />
+            <ChipSelect label="Mâchoire" options={machoireList.options} value={machoire} onChange={setMachoire} onAdd={(fr, en) => { machoireList.addOption(fr); addCustomTr(fr, en); }} onRemove={machoireList.removeOption} />
           </div>
         </div>
 
-        <ChipSelect label="Couleur du fond" options={fondList.options} value={couleurFond} onChange={setCouleurFond} onAdd={fondList.addOption} onRemove={fondList.removeOption} />
+        <ChipSelect label="Couleur du fond" options={fondList.options} value={couleurFond} onChange={setCouleurFond} onAdd={(fr, en) => { fondList.addOption(fr); addCustomTr(fr, en); }} onRemove={fondList.removeOption} />
 
         {/* Instructions */}
         <div className="space-y-2">
