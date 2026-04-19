@@ -86,7 +86,8 @@ function parseSousNiches(markdown: string): SousNiche[] {
 }
 
 // Niveaux reconnus pour les badges (Concurrence / Rentabilité)
-const LEVELS = ["Faible", "Moyen", "Moyenne", "Élevé", "Élevée", "Très élevé", "Très élevée"];
+// Du plus long au plus court pour éviter que "Élevé" matche avant "Élevée"
+const LEVELS = ["Très élevée", "Très élevé", "Élevée", "Élevé", "Moyenne", "Moyen", "Faible"];
 const badgeColors: Record<string, string> = {
   Faible:       "bg-green-400/10 text-green-400 border-green-400/20",
   Moyen:        "bg-amber-400/10 text-amber-400 border-amber-400/20",
