@@ -9,7 +9,16 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(vercel --prod)",
-      "Bash(vercel --prod --force)"
+      "Bash(vercel --prod --force)",
+      "Bash(npx tsc:*)",
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(bun run:*)",
+      "Bash(~/.bun/bin/bun run:*)",
+      "Bash(./node_modules/.bin/tsc --noEmit)",
+      "Bash(node_modules/.bin/vite build *)",
+      "Read(//home/pc-newo/.bun/bin/**)",
+      "Bash(/home/pc-newo/.bun/bin/bun run *)",
+      "Bash(bun install *)"
     ]
   }
 }

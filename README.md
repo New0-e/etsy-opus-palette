@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Etsy Opus Palette
 
-TODO: Document your project here
+Outil de gestion et génération de fiches produit Etsy.
