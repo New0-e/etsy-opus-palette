@@ -15,15 +15,15 @@ const mainTools = [
   { title: "Gen Fiches Produits", url: "/creation-fiche", icon: FileText },
   { title: "Téléchargement Images", url: "/download-images", icon: ImageDown },
   { title: "Gen Images", url: "/generation-photos", icon: Camera },
-  { title: "Génération Modèle", url: "/generation-modele", icon: PersonStanding },
+  { title: "Gen Modele", url: "/generation-modele", icon: PersonStanding },
 ];
 
 const secondaryTools = [
-  { title: "Analyse Image → Tags", url: "/analyse-image", icon: Tags },
+  { title: "Analyse Image", url: "/analyse-image", icon: Tags },
   { title: "Analyse Tags", url: "/analyse-tags", icon: BarChart3 },
   { title: "Tags Concurrent", url: "/tags-concurrent", icon: UserSearch },
   { title: "Descriptif Image", url: "/descriptif-image", icon: FileImage },
-  { title: "Génération idée sous niche", url: "/generation-idee-sous-niche", icon: Layers },
+  { title: "Idées sous Niche", url: "/generation-idee-sous-niche", icon: Layers },
 ];
 
 export function AppSidebar() {

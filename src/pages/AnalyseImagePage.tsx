@@ -112,7 +112,7 @@ export default function AnalyseImagePage() {
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-2xl font-bold">Analyse Image → Tags</h1>
+        <h1 className="font-display text-2xl font-bold">Analyse Image</h1>
         <div className="flex items-center gap-2">
           <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
           <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
