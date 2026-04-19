@@ -120,7 +120,7 @@ export default function CreationFichePage() {
   const [paused, setPaused] = useState(queueStore.isPaused());
 
   useEffect(() => {
-    driveStore.fetchRootFolders().then(setBoutiques);
+    driveStore.fetchRootFolders().then(folders => setBoutiques(folders.filter(f => f.name !== "Stockage")));
   }, []);
 
   // Sync with global store + listen for toast notifications
