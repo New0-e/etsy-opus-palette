@@ -11,20 +11,35 @@ const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/fa1722ae-5d4a-4
 const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/fa1722ae-5d4a-4b96-b50c-2ff5d22f9227";
 
 const PAGE_KEY = "descriptif-image";
-type PageState = { result: string };
-const defaults: PageState = { result: "" };
+type PageState = { resultEn: string; resultFr: string };
+const defaults: PageState = { resultEn: "", resultFr: "" };
+
+async function translateToFrench(text: string): Promise<string> {
+  const res = await fetch(
+    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|fr`
+  );
+  const json = await res.json();
+  return json.responseData?.translatedText ?? text;
+}
 
 export default function DescriptifImagePage() {
   const saved = getPageState<PageState>(PAGE_KEY, defaults);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [loading, setLoading] = useState(false);
-  const [result, setResultRaw] = useState(saved.result);
+  const [translating, setTranslating] = useState(false);
+  const [resultEn, setResultEnRaw] = useState(saved.resultEn);
+  const [resultFr, setResultFrRaw] = useState(saved.resultFr);
   const [dragOver, setDragOver] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copiedEn, setCopiedEn] = useState(false);
+  const [copiedFr, setCopiedFr] = useState(false);
   const [testMode, setTestMode] = useState(false);
 
-  const setResult = (v: string) => { setResultRaw(v); setPageState<PageState>(PAGE_KEY, { result: v }); };
+  const setResults = (en: string, fr: string) => {
+    setResultEnRaw(en);
+    setResultFrRaw(fr);
+    setPageState<PageState>(PAGE_KEY, { resultEn: en, resultFr: fr });
+  };
 
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -51,36 +66,49 @@ export default function DescriptifImagePage() {
   const handleAnalyse = async () => {
     if (!file) return;
     setLoading(true);
-    setResult("");
+    setResults("", "");
     try {
       const formData = new FormData();
       formData.append("image", file);
       const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, { method: "POST", body: formData });
       if (res.status === 404) { toast.error("Webhook introuvable — en mode test, lancez d'abord un test dans n8n"); return; }
       const text = await res.text();
+      let extracted = text;
       try {
         const json = JSON.parse(text);
-        const extracted =
+        extracted =
           json.content?.parts?.[0]?.text ??
           json.text ?? json.description ?? json.output ??
           JSON.stringify(json, null, 2);
-        setResult(extracted);
+      } catch { /* texte brut */ }
+
+      setResultEnRaw(extracted);
+      setLoading(false);
+
+      setTranslating(true);
+      try {
+        const fr = await translateToFrench(extracted);
+        setResults(extracted, fr);
+        toast.success("Analyse et traduction terminées !");
       } catch {
-        setResult(text);
+        setResults(extracted, "");
+        toast.success("Analyse terminée (traduction échouée)");
+      } finally {
+        setTranslating(false);
       }
-      toast.success("Analyse terminée !");
     } catch {
       toast.error("Erreur lors de l'analyse");
-    } finally {
       setLoading(false);
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(result);
+  const copy = (text: string, setCopied: (v: boolean) => void) => {
+    navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+
+  const showResults = resultEn || loading || translating;
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -110,44 +138,57 @@ export default function DescriptifImagePage() {
                 <p className="text-sm text-muted-foreground">Glissez une image ici</p>
               </>
             )}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              id="descriptif-img"
-              onChange={onInput}
-            />
+            <input type="file" accept="image/*" className="hidden" id="descriptif-img" onChange={onInput} />
             <label htmlFor="descriptif-img" className="text-xs text-primary cursor-pointer hover:underline mt-2 inline-block">
               {preview ? "Changer l'image" : "Parcourir"}
             </label>
           </div>
         </div>
 
-        <Button onClick={handleAnalyse} disabled={!file || loading} className="w-full gap-2">
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
-          {loading ? "Analyse en cours..." : "Analyser"}
+        <Button onClick={handleAnalyse} disabled={!file || loading || translating} className="w-full gap-2">
+          {(loading || translating) ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
+          {loading ? "Analyse en cours..." : translating ? "Traduction en cours..." : "Analyser"}
         </Button>
 
-        {(result || loading) && (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Descriptif généré</span>
-              {result && (
-                <button
-                  onClick={handleCopy}
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                  {copied ? "Copié !" : "Copier"}
-                </button>
-              )}
+        {showResults && (
+          <div className="space-y-4">
+            {/* Anglais */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Anglais</span>
+                {resultEn && (
+                  <button onClick={() => copy(resultEn, setCopiedEn)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                    {copiedEn ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    {copiedEn ? "Copié !" : "Copier"}
+                  </button>
+                )}
+              </div>
+              <Textarea
+                value={loading ? "" : resultEn}
+                readOnly
+                className="min-h-28 font-mono text-xs resize-none"
+                placeholder={loading ? "Analyse en cours..." : ""}
+              />
             </div>
-            <Textarea
-              value={loading ? "" : result}
-              readOnly
-              className="min-h-40 font-mono text-xs resize-none"
-              placeholder={loading ? "Analyse en cours..." : "Le descriptif apparaîtra ici..."}
-            />
+
+            {/* Français */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Français</span>
+                {resultFr && (
+                  <button onClick={() => copy(resultFr, setCopiedFr)} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                    {copiedFr ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                    {copiedFr ? "Copié !" : "Copier"}
+                  </button>
+                )}
+              </div>
+              <Textarea
+                value={translating ? "" : resultFr}
+                readOnly
+                className="min-h-28 font-mono text-xs resize-none"
+                placeholder={translating ? "Traduction en cours..." : ""}
+              />
+            </div>
           </div>
         )}
       </div>
