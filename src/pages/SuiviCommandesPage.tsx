@@ -113,6 +113,8 @@ function StatusBadge({ value, map }: { value: string; map: Record<string, string
   );
 }
 
+const NONE = "__none__";
+
 function SelectField({ label, value, options, onChange }: {
   label: string; value: string; options: readonly string[] | string[];
   onChange: (v: string) => void;
@@ -120,10 +122,10 @@ function SelectField({ label, value, options, onChange }: {
   return (
     <div className="space-y-1">
       <Label className="text-xs">{label}</Label>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value || NONE} onValueChange={v => onChange(v === NONE ? "" : v)}>
         <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="—" /></SelectTrigger>
         <SelectContent>
-          <SelectItem value="">—</SelectItem>
+          <SelectItem value={NONE}>—</SelectItem>
           {options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
         </SelectContent>
       </Select>
@@ -578,12 +580,12 @@ export default function SuiviCommandesPage() {
                         </button>
                       )}
                     </div>
-                    <Select value={form.boutique} onValueChange={v => patch("boutique", v)}>
+                    <Select value={form.boutique || NONE} onValueChange={v => patch("boutique", v === NONE ? "" : v)}>
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder={loadingShops ? "Chargement…" : "Choisir"} />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">—</SelectItem>
+                        <SelectItem value={NONE}>—</SelectItem>
                         {shopList.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                       </SelectContent>
                     </Select>
