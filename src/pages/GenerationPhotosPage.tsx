@@ -100,6 +100,8 @@ type PhotosFav = {
 
 function DropZone({ label, files, onFiles }: { label: string; files: File[]; onFiles: (f: File[]) => void }) {
   const [dragOver, setDragOver] = useState(false);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const urls = files.map((f) => URL.createObjectURL(f));
 
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -119,6 +121,17 @@ function DropZone({ label, files, onFiles }: { label: string; files: File[]; onF
     if (e.target.files) onFiles([...files, ...Array.from(e.target.files)]);
   };
 
+  useEffect(() => {
+    if (previewIndex === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") setPreviewIndex((i) => i !== null ? Math.min(i + 1, files.length - 1) : null);
+      if (e.key === "ArrowLeft") setPreviewIndex((i) => i !== null ? Math.max(i - 1, 0) : null);
+      if (e.key === "Escape") setPreviewIndex(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [previewIndex, files.length]);
+
   return (
     <div>
       <Label className="mb-2 block">{label}</Label>
@@ -137,12 +150,63 @@ function DropZone({ label, files, onFiles }: { label: string; files: File[]; onF
         <div className="flex gap-2 mt-2 flex-wrap">
           {files.map((f, i) => (
             <div key={i} className="relative group">
-              <img src={URL.createObjectURL(f)} className="h-16 w-16 rounded-md object-cover border border-border" />
-              <button onClick={() => onFiles(files.filter((_, j) => j !== i))} className="absolute -top-1 -right-1 bg-destructive rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+              <img
+                src={urls[i]}
+                className="h-16 w-16 rounded-md object-cover border border-border cursor-pointer"
+                onClick={() => setPreviewIndex(i)}
+              />
+              <button
+                onClick={(e) => { e.stopPropagation(); onFiles(files.filter((_, j) => j !== i)); }}
+                className="absolute -top-1 -right-1 bg-destructive rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+              >
                 <X className="h-3 w-3 text-destructive-foreground" />
               </button>
+              <div
+                onClick={() => setPreviewIndex(i)}
+                className="absolute inset-0 flex items-center justify-center rounded-md bg-black/0 group-hover:bg-black/30 transition-all opacity-0 group-hover:opacity-100 cursor-pointer"
+              >
+                <ZoomIn className="h-5 w-5 text-white drop-shadow" />
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Lightbox aperçu */}
+      {previewIndex !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90" onClick={() => setPreviewIndex(null)}>
+          <button
+            onClick={(e) => { e.stopPropagation(); setPreviewIndex(null); }}
+            className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 rounded-full p-2 transition-colors"
+          >
+            <X className="h-5 w-5 text-white" />
+          </button>
+          {files.length > 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setPreviewIndex((i) => i !== null ? Math.max(i - 1, 0) : null); }}
+              disabled={previewIndex === 0}
+              className="absolute left-4 bg-white/10 hover:bg-white/20 disabled:opacity-20 rounded-full p-3 transition-colors"
+            >
+              <ChevronLeft className="h-6 w-6 text-white" />
+            </button>
+          )}
+          <img
+            src={urls[previewIndex]}
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain shadow-2xl"
+          />
+          {files.length > 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setPreviewIndex((i) => i !== null ? Math.min(i + 1, files.length - 1) : null); }}
+              disabled={previewIndex === files.length - 1}
+              className="absolute right-4 bg-white/10 hover:bg-white/20 disabled:opacity-20 rounded-full p-3 transition-colors"
+            >
+              <ChevronRight className="h-6 w-6 text-white" />
+            </button>
+          )}
+          <div className="absolute bottom-4 text-white/60 text-sm">
+            {files[previewIndex].name} — {previewIndex + 1} / {files.length}
+          </div>
         </div>
       )}
     </div>
