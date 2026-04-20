@@ -118,9 +118,10 @@ function DropZone({ label, files, onFiles }: { label: string; files: File[]; onF
 
 function MultiSelect({ label, options, selected, onChange, onAdd, onRemove }: {
   label: string; options: string[]; selected: string[]; onChange: (s: string[]) => void;
-  onAdd: (opt: string) => void; onRemove: (opt: string) => void;
+  onAdd: (fr: string, en: string) => void; onRemove: (opt: string) => void;
 }) {
-  const [inputVal, setInputVal] = useState("");
+  const [inputFr, setInputFr] = useState("");
+  const [inputEn, setInputEn] = useState("");
 
   const toggle = (opt: string) => {
     onChange(selected.includes(opt) ? selected.filter(s => s !== opt) : [...selected, opt]);
@@ -132,11 +133,12 @@ function MultiSelect({ label, options, selected, onChange, onAdd, onRemove }: {
   };
 
   const handleAdd = () => {
-    const v = inputVal.trim();
-    if (!v) return;
-    onAdd(v);
-    if (!selected.includes(v)) onChange([...selected, v]);
-    setInputVal("");
+    const fr = inputFr.trim();
+    if (!fr) return;
+    onAdd(fr, inputEn.trim());
+    if (!selected.includes(fr)) onChange([...selected, fr]);
+    setInputFr("");
+    setInputEn("");
   };
 
   return (
@@ -166,9 +168,16 @@ function MultiSelect({ label, options, selected, onChange, onAdd, onRemove }: {
       </div>
       <div className="flex gap-2">
         <Input
-          placeholder="Ajouter une option..."
-          value={inputVal}
-          onChange={(e) => setInputVal(e.target.value)}
+          placeholder="Option (FR)..."
+          value={inputFr}
+          onChange={(e) => setInputFr(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
+          className="text-sm"
+        />
+        <Input
+          placeholder="English..."
+          value={inputEn}
+          onChange={(e) => setInputEn(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
           className="text-sm"
         />
@@ -208,6 +217,20 @@ export default function GenerationPhotosPage() {
   const eclList = useOptionsList("gen-photos-ecl", DEFAULT_ECLAIRAGES);
   const angleList = useOptionsList("gen-photos-angle", DEFAULT_ANGLES);
   const accList = useOptionsList("gen-photos-acc", DEFAULT_ACCESSOIRES);
+
+  // Traductions custom (options ajoutées par l'utilisateur)
+  const [customTr, setCustomTr] = useState<Record<string, string>>(() => {
+    try { return JSON.parse(localStorage.getItem("photos-custom-tr") ?? "{}"); } catch { return {}; }
+  });
+  const addCustomTr = (fr: string, en: string) => {
+    if (!en) return;
+    setCustomTr(prev => {
+      const next = { ...prev, [fr]: en };
+      localStorage.setItem("photos-custom-tr", JSON.stringify(next));
+      return next;
+    });
+  };
+  const tAll = (v: string) => customTr[v] ?? v;
 
   // Favoris / presets de sélection
   const { favs: photoFavs, saveFav: savePhotoFav, removeFav: removePhotoFav } = useFavorites<PhotosFav>("gen-photos");
@@ -288,10 +311,10 @@ export default function GenerationPhotosPage() {
       if (instructions) formData.append("instructions", instructions);
       if (currentMode === "manuel") {
         if (categorie) formData.append("categorie", categorie);
-        if (selectedEnv.length) formData.append("environnement", selectedEnv.join(", "));
-        if (selectedEcl.length) formData.append("eclairage", selectedEcl.join(", "));
-        if (selectedAngle.length) formData.append("angle", selectedAngle.join(", "));
-        if (selectedAcc.length) formData.append("accessoires", selectedAcc.join(", "));
+        if (selectedEnv.length) formData.append("environnement", selectedEnv.map(tAll).join(", "));
+        if (selectedEcl.length) formData.append("eclairage", selectedEcl.map(tAll).join(", "));
+        if (selectedAngle.length) formData.append("angle", selectedAngle.map(tAll).join(", "));
+        if (selectedAcc.length) formData.append("accessoires", selectedAcc.map(tAll).join(", "));
       }
 
       const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
@@ -453,7 +476,7 @@ export default function GenerationPhotosPage() {
               options={envList.options}
               selected={selectedEnv}
               onChange={setSelectedEnv}
-              onAdd={envList.addOption}
+              onAdd={(fr, en) => { envList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { envList.removeOption(opt); setSelectedEnv(p => p.filter(s => s !== opt)); }}
             />
             <MultiSelect
@@ -461,7 +484,7 @@ export default function GenerationPhotosPage() {
               options={eclList.options}
               selected={selectedEcl}
               onChange={setSelectedEcl}
-              onAdd={eclList.addOption}
+              onAdd={(fr, en) => { eclList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { eclList.removeOption(opt); setSelectedEcl(p => p.filter(s => s !== opt)); }}
             />
             <MultiSelect
@@ -469,7 +492,7 @@ export default function GenerationPhotosPage() {
               options={angleList.options}
               selected={selectedAngle}
               onChange={setSelectedAngle}
-              onAdd={angleList.addOption}
+              onAdd={(fr, en) => { angleList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { angleList.removeOption(opt); setSelectedAngle(p => p.filter(s => s !== opt)); }}
             />
             <MultiSelect
@@ -477,7 +500,7 @@ export default function GenerationPhotosPage() {
               options={accList.options}
               selected={selectedAcc}
               onChange={setSelectedAcc}
-              onAdd={accList.addOption}
+              onAdd={(fr, en) => { accList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { accList.removeOption(opt); setSelectedAcc(p => p.filter(s => s !== opt)); }}
             />
           </>
