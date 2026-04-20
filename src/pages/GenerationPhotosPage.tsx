@@ -213,11 +213,10 @@ function DropZone({ label, files, onFiles }: { label: string; files: File[]; onF
   );
 }
 
-function MultiSelect({ label, options, selected, onChange, onAdd, onRemove }: {
+function MultiSelect({ label, options, selected, onChange, onAdd, onRemove, editMode }: {
   label: string; options: string[]; selected: string[]; onChange: (s: string[]) => void;
-  onAdd: (fr: string, en: string) => void; onRemove: (opt: string) => void;
+  onAdd: (fr: string, en: string) => void; onRemove: (opt: string) => void; editMode: boolean;
 }) {
-  const [editMode, setEditMode] = useState(false);
   const [inputFr, setInputFr] = useState("");
   const [inputEn, setInputEn] = useState("");
 
@@ -241,17 +240,7 @@ function MultiSelect({ label, options, selected, onChange, onAdd, onRemove }: {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label>{label}</Label>
-        <button
-          type="button"
-          onClick={() => setEditMode(!editMode)}
-          className={`text-xs flex items-center gap-1 transition-colors ${editMode ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-        >
-          <Settings className="h-3 w-3" />
-          {editMode ? "Terminer" : "Modifier"}
-        </button>
-      </div>
+      <Label>{label}</Label>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
           <div key={opt} className="relative flex items-center">
@@ -352,6 +341,7 @@ export default function GenerationPhotosPage() {
   // Gestion des modèles IA
   const { models, addModel, removeModel, isCustom } = useModelsList();
   const [showModelEdit, setShowModelEdit] = useState(false);
+  const [editOptions, setEditOptions] = useState(false);
   const [newModelValue, setNewModelValue] = useState("");
   const [newModelLabel, setNewModelLabel] = useState("");
 
@@ -583,6 +573,17 @@ export default function GenerationPhotosPage() {
               <Input value={categorie} onChange={(e) => setCategorie(e.target.value)} placeholder="Ex: Bijoux, Décoration..." />
             </div>
 
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setEditOptions(!editOptions)}
+                className={`text-xs flex items-center gap-1 transition-colors ${editOptions ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                <Settings className="h-3 w-3" />
+                {editOptions ? "Terminer" : "Modifier les options"}
+              </button>
+            </div>
+
             <MultiSelect
               label="Environnement"
               options={envList.options}
@@ -590,6 +591,7 @@ export default function GenerationPhotosPage() {
               onChange={setSelectedEnv}
               onAdd={(fr, en) => { envList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { envList.removeOption(opt); setSelectedEnv(p => p.filter(s => s !== opt)); }}
+              editMode={editOptions}
             />
             <MultiSelect
               label="Éclairage"
@@ -598,6 +600,7 @@ export default function GenerationPhotosPage() {
               onChange={setSelectedEcl}
               onAdd={(fr, en) => { eclList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { eclList.removeOption(opt); setSelectedEcl(p => p.filter(s => s !== opt)); }}
+              editMode={editOptions}
             />
             <MultiSelect
               label="Angle de vue"
@@ -606,6 +609,7 @@ export default function GenerationPhotosPage() {
               onChange={setSelectedAngle}
               onAdd={(fr, en) => { angleList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { angleList.removeOption(opt); setSelectedAngle(p => p.filter(s => s !== opt)); }}
+              editMode={editOptions}
             />
             <MultiSelect
               label="Accessoires"
@@ -614,6 +618,7 @@ export default function GenerationPhotosPage() {
               onChange={setSelectedAcc}
               onAdd={(fr, en) => { accList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { accList.removeOption(opt); setSelectedAcc(p => p.filter(s => s !== opt)); }}
+              editMode={editOptions}
             />
           </>
         )}

@@ -84,11 +84,10 @@ type ModeleFav = {
   couleurFond: string;
 };
 
-function ChipSelect({ label, options, value, onChange, onAdd, onRemove }: {
+function ChipSelect({ label, options, value, onChange, onAdd, onRemove, editMode }: {
   label: string; options: string[]; value: string; onChange: (v: string) => void;
-  onAdd: (fr: string, en: string) => void; onRemove: (opt: string) => void;
+  onAdd: (fr: string, en: string) => void; onRemove: (opt: string) => void; editMode: boolean;
 }) {
-  const [editMode, setEditMode] = useState(false);
   const [inputFr, setInputFr] = useState("");
   const [inputEn, setInputEn] = useState("");
 
@@ -103,17 +102,7 @@ function ChipSelect({ label, options, value, onChange, onAdd, onRemove }: {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <Label>{label}</Label>
-        <button
-          type="button"
-          onClick={() => setEditMode(!editMode)}
-          className={`text-xs flex items-center gap-1 transition-colors ${editMode ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
-        >
-          <Settings className="h-3 w-3" />
-          {editMode ? "Terminer" : "Modifier"}
-        </button>
-      </div>
+      <Label>{label}</Label>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
           <div key={opt} className="relative flex items-center">
@@ -189,6 +178,7 @@ export default function GenerationModelePage() {
   const [sourcil, setSourcil] = useState("");
   const [machoire, setMachoire] = useState("");
   const [couleurFond, setCouleurFond] = useState("");
+  const [editOptions, setEditOptions] = useState(false);
   const [instructions, setInstructions] = useState("");
   const [imageCount, setImageCount] = useState("3");
   const [generationModel, setGenerationModel] = useState("gemini-2.5-flash-image");
@@ -518,32 +508,43 @@ export default function GenerationModelePage() {
           </div>
         </div>
 
-        <ChipSelect label="Morphologie" options={morphologieList.options} value={morphologie} onChange={setMorphologie} onAdd={(fr, en) => { morphologieList.addOption(fr); addCustomTr(fr, en); }} onRemove={morphologieList.removeOption} />
-        <ChipSelect label="Origine" options={origineList.options} value={origine} onChange={setOrigine} onAdd={(fr, en) => { origineList.addOption(fr); addCustomTr(fr, en); }} onRemove={origineList.removeOption} />
-        <ChipSelect label="Carnation" options={carnationList.options} value={carnation} onChange={setCarnation} onAdd={(fr, en) => { carnationList.addOption(fr); addCustomTr(fr, en); }} onRemove={carnationList.removeOption} />
-        <ChipSelect label="Couleur des cheveux" options={chevList.options} value={couleurCheveux} onChange={setCouleurCheveux} onAdd={(fr, en) => { chevList.addOption(fr); addCustomTr(fr, en); }} onRemove={chevList.removeOption} />
-        <ChipSelect label="Longueur des cheveux" options={longueurList.options} value={longueur} onChange={setLongueur} onAdd={(fr, en) => { longueurList.addOption(fr); addCustomTr(fr, en); }} onRemove={longueurList.removeOption} />
-        <ChipSelect label="Couleur des yeux" options={yeuxList.options} value={couleurYeux} onChange={setCouleurYeux} onAdd={(fr, en) => { yeuxList.addOption(fr); addCustomTr(fr, en); }} onRemove={yeuxList.removeOption} />
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setEditOptions(!editOptions)}
+            className={`text-xs flex items-center gap-1 transition-colors ${editOptions ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <Settings className="h-3 w-3" />
+            {editOptions ? "Terminer" : "Modifier les options"}
+          </button>
+        </div>
+
+        <ChipSelect label="Morphologie" options={morphologieList.options} value={morphologie} onChange={setMorphologie} onAdd={(fr, en) => { morphologieList.addOption(fr); addCustomTr(fr, en); }} onRemove={morphologieList.removeOption} editMode={editOptions} />
+        <ChipSelect label="Origine" options={origineList.options} value={origine} onChange={setOrigine} onAdd={(fr, en) => { origineList.addOption(fr); addCustomTr(fr, en); }} onRemove={origineList.removeOption} editMode={editOptions} />
+        <ChipSelect label="Carnation" options={carnationList.options} value={carnation} onChange={setCarnation} onAdd={(fr, en) => { carnationList.addOption(fr); addCustomTr(fr, en); }} onRemove={carnationList.removeOption} editMode={editOptions} />
+        <ChipSelect label="Couleur des cheveux" options={chevList.options} value={couleurCheveux} onChange={setCouleurCheveux} onAdd={(fr, en) => { chevList.addOption(fr); addCustomTr(fr, en); }} onRemove={chevList.removeOption} editMode={editOptions} />
+        <ChipSelect label="Longueur des cheveux" options={longueurList.options} value={longueur} onChange={setLongueur} onAdd={(fr, en) => { longueurList.addOption(fr); addCustomTr(fr, en); }} onRemove={longueurList.removeOption} editMode={editOptions} />
+        <ChipSelect label="Couleur des yeux" options={yeuxList.options} value={couleurYeux} onChange={setCouleurYeux} onAdd={(fr, en) => { yeuxList.addOption(fr); addCustomTr(fr, en); }} onRemove={yeuxList.removeOption} editMode={editOptions} />
 
         {genre === "femme" && (
-          <ChipSelect label="Taille de poitrine" options={poitrineList.options} value={poitrine} onChange={setPoitrine} onAdd={(fr, en) => { poitrineList.addOption(fr); addCustomTr(fr, en); }} onRemove={poitrineList.removeOption} />
+          <ChipSelect label="Taille de poitrine" options={poitrineList.options} value={poitrine} onChange={setPoitrine} onAdd={(fr, en) => { poitrineList.addOption(fr); addCustomTr(fr, en); }} onRemove={poitrineList.removeOption} editMode={editOptions} />
         )}
 
-        <ChipSelect label="Fesses" options={fesseList.options} value={fesse} onChange={setFesse} onAdd={(fr, en) => { fesseList.addOption(fr); addCustomTr(fr, en); }} onRemove={fesseList.removeOption} />
+        <ChipSelect label="Fesses" options={fesseList.options} value={fesse} onChange={setFesse} onAdd={(fr, en) => { fesseList.addOption(fr); addCustomTr(fr, en); }} onRemove={fesseList.removeOption} editMode={editOptions} />
 
         <div className="border-t border-border pt-4">
           <Label className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4 block">Visage</Label>
           <div className="space-y-4">
-            <ChipSelect label="Forme du visage" options={visageList.options} value={formeVisage} onChange={setFormeVisage} onAdd={(fr, en) => { visageList.addOption(fr); addCustomTr(fr, en); }} onRemove={visageList.removeOption} />
-            <ChipSelect label="Bouche / Lèvres" options={boucheList.options} value={formeBouche} onChange={setFormeBouche} onAdd={(fr, en) => { boucheList.addOption(fr); addCustomTr(fr, en); }} onRemove={boucheList.removeOption} />
-            <ChipSelect label="Nez" options={nezList.options} value={formeNez} onChange={setFormeNez} onAdd={(fr, en) => { nezList.addOption(fr); addCustomTr(fr, en); }} onRemove={nezList.removeOption} />
-            <ChipSelect label="Oreilles" options={oreillesList.options} value={formeOreilles} onChange={setFormeOreilles} onAdd={(fr, en) => { oreillesList.addOption(fr); addCustomTr(fr, en); }} onRemove={oreillesList.removeOption} />
-            <ChipSelect label="Sourcils" options={sourcilsList.options} value={sourcil} onChange={setSourcil} onAdd={(fr, en) => { sourcilsList.addOption(fr); addCustomTr(fr, en); }} onRemove={sourcilsList.removeOption} />
-            <ChipSelect label="Mâchoire" options={machoireList.options} value={machoire} onChange={setMachoire} onAdd={(fr, en) => { machoireList.addOption(fr); addCustomTr(fr, en); }} onRemove={machoireList.removeOption} />
+            <ChipSelect label="Forme du visage" options={visageList.options} value={formeVisage} onChange={setFormeVisage} onAdd={(fr, en) => { visageList.addOption(fr); addCustomTr(fr, en); }} onRemove={visageList.removeOption} editMode={editOptions} />
+            <ChipSelect label="Bouche / Lèvres" options={boucheList.options} value={formeBouche} onChange={setFormeBouche} onAdd={(fr, en) => { boucheList.addOption(fr); addCustomTr(fr, en); }} onRemove={boucheList.removeOption} editMode={editOptions} />
+            <ChipSelect label="Nez" options={nezList.options} value={formeNez} onChange={setFormeNez} onAdd={(fr, en) => { nezList.addOption(fr); addCustomTr(fr, en); }} onRemove={nezList.removeOption} editMode={editOptions} />
+            <ChipSelect label="Oreilles" options={oreillesList.options} value={formeOreilles} onChange={setFormeOreilles} onAdd={(fr, en) => { oreillesList.addOption(fr); addCustomTr(fr, en); }} onRemove={oreillesList.removeOption} editMode={editOptions} />
+            <ChipSelect label="Sourcils" options={sourcilsList.options} value={sourcil} onChange={setSourcil} onAdd={(fr, en) => { sourcilsList.addOption(fr); addCustomTr(fr, en); }} onRemove={sourcilsList.removeOption} editMode={editOptions} />
+            <ChipSelect label="Mâchoire" options={machoireList.options} value={machoire} onChange={setMachoire} onAdd={(fr, en) => { machoireList.addOption(fr); addCustomTr(fr, en); }} onRemove={machoireList.removeOption} editMode={editOptions} />
           </div>
         </div>
 
-        <ChipSelect label="Couleur du fond" options={fondList.options} value={couleurFond} onChange={setCouleurFond} onAdd={(fr, en) => { fondList.addOption(fr); addCustomTr(fr, en); }} onRemove={fondList.removeOption} />
+        <ChipSelect label="Couleur du fond" options={fondList.options} value={couleurFond} onChange={setCouleurFond} onAdd={(fr, en) => { fondList.addOption(fr); addCustomTr(fr, en); }} onRemove={fondList.removeOption} editMode={editOptions} />
 
         {/* Instructions */}
         <div className="space-y-2">
