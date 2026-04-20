@@ -213,11 +213,13 @@ function DropZone({ label, files, onFiles }: { label: string; files: File[]; onF
   );
 }
 
-function MultiSelect({ label, options, selected, onChange, onRemove }: {
+function MultiSelect({ label, options, selected, onChange, onAdd, onRemove }: {
   label: string; options: string[]; selected: string[]; onChange: (s: string[]) => void;
-  onRemove: (opt: string) => void;
+  onAdd: (fr: string, en: string) => void; onRemove: (opt: string) => void;
 }) {
   const [editMode, setEditMode] = useState(false);
+  const [inputFr, setInputFr] = useState("");
+  const [inputEn, setInputEn] = useState("");
 
   const toggle = (opt: string) => {
     onChange(selected.includes(opt) ? selected.filter(s => s !== opt) : [...selected, opt]);
@@ -228,6 +230,15 @@ function MultiSelect({ label, options, selected, onChange, onRemove }: {
     if (selected.includes(opt)) onChange(selected.filter(s => s !== opt));
   };
 
+  const handleAdd = () => {
+    const fr = inputFr.trim();
+    if (!fr) return;
+    onAdd(fr, inputEn.trim());
+    if (!selected.includes(fr)) onChange([...selected, fr]);
+    setInputFr("");
+    setInputEn("");
+  };
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
@@ -235,10 +246,10 @@ function MultiSelect({ label, options, selected, onChange, onRemove }: {
         <button
           type="button"
           onClick={() => setEditMode(!editMode)}
-          className={`text-xs flex items-center gap-1 transition-colors ${editMode ? "text-destructive" : "text-muted-foreground hover:text-foreground"}`}
+          className={`text-xs flex items-center gap-1 transition-colors ${editMode ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
         >
-          <Trash2 className="h-3 w-3" />
-          {editMode ? "Terminer" : "Supprimer"}
+          <Settings className="h-3 w-3" />
+          {editMode ? "Terminer" : "Modifier"}
         </button>
       </div>
       <div className="flex flex-wrap gap-2">
@@ -265,6 +276,27 @@ function MultiSelect({ label, options, selected, onChange, onRemove }: {
           </div>
         ))}
       </div>
+      {editMode && (
+        <div className="flex gap-2">
+          <Input
+            placeholder="Option (FR)..."
+            value={inputFr}
+            onChange={(e) => setInputFr(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
+            className="text-sm"
+          />
+          <Input
+            placeholder="English..."
+            value={inputEn}
+            onChange={(e) => setInputEn(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleAdd(); } }}
+            className="text-sm"
+          />
+          <Button type="button" variant="outline" size="icon" onClick={handleAdd} className="shrink-0">
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
@@ -299,9 +331,17 @@ export default function GenerationPhotosPage() {
   const accList = useOptionsList("gen-photos-acc", DEFAULT_ACCESSOIRES);
 
   // Traductions custom (options ajoutées par l'utilisateur)
-  const [customTr] = useState<Record<string, string>>(() => {
+  const [customTr, setCustomTr] = useState<Record<string, string>>(() => {
     try { return JSON.parse(localStorage.getItem("photos-custom-tr") ?? "{}"); } catch { return {}; }
   });
+  const addCustomTr = (fr: string, en: string) => {
+    if (!en) return;
+    setCustomTr(prev => {
+      const next = { ...prev, [fr]: en };
+      localStorage.setItem("photos-custom-tr", JSON.stringify(next));
+      return next;
+    });
+  };
   const tAll = (v: string) => customTr[v] ?? trPhotos[v] ?? v;
 
   // Favoris / presets de sélection
@@ -548,6 +588,7 @@ export default function GenerationPhotosPage() {
               options={envList.options}
               selected={selectedEnv}
               onChange={setSelectedEnv}
+              onAdd={(fr, en) => { envList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { envList.removeOption(opt); setSelectedEnv(p => p.filter(s => s !== opt)); }}
             />
             <MultiSelect
@@ -555,6 +596,7 @@ export default function GenerationPhotosPage() {
               options={eclList.options}
               selected={selectedEcl}
               onChange={setSelectedEcl}
+              onAdd={(fr, en) => { eclList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { eclList.removeOption(opt); setSelectedEcl(p => p.filter(s => s !== opt)); }}
             />
             <MultiSelect
@@ -562,6 +604,7 @@ export default function GenerationPhotosPage() {
               options={angleList.options}
               selected={selectedAngle}
               onChange={setSelectedAngle}
+              onAdd={(fr, en) => { angleList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { angleList.removeOption(opt); setSelectedAngle(p => p.filter(s => s !== opt)); }}
             />
             <MultiSelect
@@ -569,6 +612,7 @@ export default function GenerationPhotosPage() {
               options={accList.options}
               selected={selectedAcc}
               onChange={setSelectedAcc}
+              onAdd={(fr, en) => { accList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { accList.removeOption(opt); setSelectedAcc(p => p.filter(s => s !== opt)); }}
             />
           </>
