@@ -37,25 +37,58 @@ async function compressImage(file: File, maxPx = 1500, quality = 0.82): Promise<
 }
 
 const DEFAULT_ENVIRONMENTS = [
-  "Studio minimaliste fond blanc", "Studio marbre luxueux", "Salon boheme",
-  "Cuisine moderne ensoleilee", "Chambre cocooning", "Salle de bain luxueuse",
-  "Bureau scandinave", "Terrasse cafe parisien", "Jardin verdoyant",
-  "Flat lay table bois rustique", "Flat lay draps lin froisse",
+  "Studio minimaliste fond blanc", "Studio marbre luxueux", "Salon bohème",
+  "Cuisine moderne ensoleillée", "Chambre cocooning", "Salle de bain luxueuse",
+  "Bureau scandinave", "Terrasse café parisien", "Jardin verdoyant",
+  "Flat lay table bois rustique", "Flat lay draps lin froissé",
 ];
 const DEFAULT_ECLAIRAGES = [
-  "Golden Hour lumiere chaude", "Lumiere naturelle fenetre",
-  "Studio Softbox pro", "Cinematique moody contraste",
+  "Heure dorée lumière chaude", "Lumière naturelle fenêtre",
+  "Studio Softbox pro", "Cinématique sombre contrasté",
 ];
 const DEFAULT_ANGLES = [
-  "Macro close-up details", "Eye-level vue standard",
-  "Top-down flat lay 90 degres", "Trois quarts dynamique",
+  "Macro gros plan détails", "Vue à hauteur des yeux",
+  "Vue du dessus 90 degrés", "Trois quarts dynamique",
 ];
 const DEFAULT_ACCESSOIRES = [
-  "Plantes Monstera et Eucalyptus", "Livres et tasse cafe fumante",
-  "Tissus soie et petales de fleurs", "Miroirs vintage et gouttes eau",
-  "Clavier mecanique et plante grasse", "Tapis moelleux",
-  "Nourriture et ingredients cuisine",
+  "Plantes Monstera et Eucalyptus", "Livres et tasse de café fumante",
+  "Tissus soie et pétales de fleurs", "Miroirs vintage et gouttes d'eau",
+  "Clavier mécanique et plante grasse", "Tapis moelleux",
+  "Nourriture et ingrédients cuisine",
 ];
+
+const trPhotos: Record<string, string> = {
+  // Environnements
+  "Studio minimaliste fond blanc": "minimalist white background studio",
+  "Studio marbre luxueux": "luxurious marble studio",
+  "Salon bohème": "bohemian living room",
+  "Cuisine moderne ensoleillée": "sunny modern kitchen",
+  "Chambre cocooning": "cozy bedroom",
+  "Salle de bain luxueuse": "luxurious bathroom",
+  "Bureau scandinave": "Scandinavian office",
+  "Terrasse café parisien": "Parisian café terrace",
+  "Jardin verdoyant": "lush green garden",
+  "Flat lay table bois rustique": "flat lay rustic wood table",
+  "Flat lay draps lin froissé": "flat lay wrinkled linen sheets",
+  // Éclairages
+  "Heure dorée lumière chaude": "golden hour warm light",
+  "Lumière naturelle fenêtre": "natural window light",
+  "Studio Softbox pro": "professional studio softbox lighting",
+  "Cinématique sombre contrasté": "cinematic moody contrast lighting",
+  // Angles
+  "Macro gros plan détails": "macro close-up details",
+  "Vue à hauteur des yeux": "eye-level standard view",
+  "Vue du dessus 90 degrés": "top-down flat lay 90 degrees",
+  "Trois quarts dynamique": "three-quarters dynamic angle",
+  // Accessoires
+  "Plantes Monstera et Eucalyptus": "Monstera and eucalyptus plants",
+  "Livres et tasse de café fumante": "books and steaming coffee cup",
+  "Tissus soie et pétales de fleurs": "silk fabrics and flower petals",
+  "Miroirs vintage et gouttes d'eau": "vintage mirrors and water droplets",
+  "Clavier mécanique et plante grasse": "mechanical keyboard and succulent plant",
+  "Tapis moelleux": "soft fluffy rug",
+  "Nourriture et ingrédients cuisine": "food and kitchen ingredients",
+};
 
 type PhotosFav = {
   categorie: string;
@@ -230,7 +263,7 @@ export default function GenerationPhotosPage() {
       return next;
     });
   };
-  const tAll = (v: string) => customTr[v] ?? v;
+  const tAll = (v: string) => customTr[v] ?? trPhotos[v] ?? v;
 
   // Favoris / presets de sélection
   const { favs: photoFavs, saveFav: savePhotoFav, removeFav: removePhotoFav } = useFavorites<PhotosFav>("gen-photos");
