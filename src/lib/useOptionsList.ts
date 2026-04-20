@@ -10,11 +10,15 @@ function loadLS<T>(key: string, fallback: T): T {
 export function useOptionsList(storageKey: string, defaults: string[]) {
   const [added, setAdded] = useState<string[]>(() => loadLS(`opts-added:${storageKey}`, []));
   const [hidden, setHidden] = useState<string[]>(() => loadLS(`opts-hidden:${storageKey}`, []));
+  const [customOrder, setCustomOrder] = useState<string[] | null>(() => loadLS(`opts-order:${storageKey}`, null));
 
-  const options = [
-    ...defaults.filter(o => !hidden.includes(o)),
-    ...added,
-  ];
+  const options = (() => {
+    const base = [...defaults.filter(o => !hidden.includes(o)), ...added];
+    if (!customOrder) return base;
+    const ordered = customOrder.filter(o => base.includes(o));
+    const newOnes = base.filter(o => !customOrder.includes(o));
+    return [...ordered, ...newOnes];
+  })();
 
   const addOption = useCallback((opt: string) => {
     const v = opt.trim();
@@ -44,5 +48,10 @@ export function useOptionsList(storageKey: string, defaults: string[]) {
     }
   }, [defaults, storageKey]);
 
-  return { options, addOption, removeOption };
+  const reorderOptions = useCallback((newOrder: string[]) => {
+    setCustomOrder(newOrder);
+    localStorage.setItem(`opts-order:${storageKey}`, JSON.stringify(newOrder));
+  }, [storageKey]);
+
+  return { options, addOption, removeOption, reorderOptions };
 }

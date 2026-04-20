@@ -213,12 +213,15 @@ function DropZone({ label, files, onFiles }: { label: string; files: File[]; onF
   );
 }
 
-function MultiSelect({ label, options, selected, onChange, onAdd, onRemove, editMode }: {
+function MultiSelect({ label, options, selected, onChange, onAdd, onRemove, onReorder, editMode }: {
   label: string; options: string[]; selected: string[]; onChange: (s: string[]) => void;
-  onAdd: (fr: string, en: string) => void; onRemove: (opt: string) => void; editMode: boolean;
+  onAdd: (fr: string, en: string) => void; onRemove: (opt: string) => void;
+  onReorder: (newOrder: string[]) => void; editMode: boolean;
 }) {
   const [inputFr, setInputFr] = useState("");
   const [inputEn, setInputEn] = useState("");
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const toggle = (opt: string) => {
     onChange(selected.includes(opt) ? selected.filter(s => s !== opt) : [...selected, opt]);
@@ -238,14 +241,33 @@ function MultiSelect({ label, options, selected, onChange, onAdd, onRemove, edit
     setInputEn("");
   };
 
+  const handleDrop = (e: React.DragEvent, i: number) => {
+    e.preventDefault();
+    if (dragIndex === null || dragIndex === i) { setDragIndex(null); setDragOverIndex(null); return; }
+    const next = [...options];
+    const [moved] = next.splice(dragIndex, 1);
+    next.splice(i, 0, moved);
+    onReorder(next);
+    setDragIndex(null);
+    setDragOverIndex(null);
+  };
+
   return (
     <div className="space-y-2">
       <Label>{label}</Label>
       <div className="flex flex-wrap gap-2">
-        {options.map((opt) => (
-          <div key={opt} className="relative flex items-center">
-            <button type="button" onClick={() => toggle(opt)}
-              className={`px-3 py-1.5 rounded-full text-xs border transition-all ${editMode ? "pr-6" : ""} ${
+        {options.map((opt, i) => (
+          <div
+            key={opt}
+            className={`relative flex items-center transition-opacity ${editMode && dragIndex === i ? "opacity-40" : ""} ${editMode && dragOverIndex === i && dragIndex !== i ? "ring-2 ring-primary rounded-full" : ""}`}
+            draggable={editMode}
+            onDragStart={() => setDragIndex(i)}
+            onDragOver={(e) => { if (!editMode) return; e.preventDefault(); setDragOverIndex(i); }}
+            onDrop={(e) => handleDrop(e, i)}
+            onDragEnd={() => { setDragIndex(null); setDragOverIndex(null); }}
+          >
+            <button type="button" onClick={() => !editMode && toggle(opt)}
+              className={`px-3 py-1.5 rounded-full text-xs border transition-all ${editMode ? "pr-6 cursor-grab active:cursor-grabbing" : ""} ${
                 selected.includes(opt)
                   ? "bg-primary text-primary-foreground border-primary"
                   : "bg-secondary text-secondary-foreground border-border hover:border-muted-foreground"
@@ -591,6 +613,7 @@ export default function GenerationPhotosPage() {
               onChange={setSelectedEnv}
               onAdd={(fr, en) => { envList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { envList.removeOption(opt); setSelectedEnv(p => p.filter(s => s !== opt)); }}
+              onReorder={envList.reorderOptions}
               editMode={editOptions}
             />
             <MultiSelect
@@ -600,6 +623,7 @@ export default function GenerationPhotosPage() {
               onChange={setSelectedEcl}
               onAdd={(fr, en) => { eclList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { eclList.removeOption(opt); setSelectedEcl(p => p.filter(s => s !== opt)); }}
+              onReorder={eclList.reorderOptions}
               editMode={editOptions}
             />
             <MultiSelect
@@ -609,6 +633,7 @@ export default function GenerationPhotosPage() {
               onChange={setSelectedAngle}
               onAdd={(fr, en) => { angleList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { angleList.removeOption(opt); setSelectedAngle(p => p.filter(s => s !== opt)); }}
+              onReorder={angleList.reorderOptions}
               editMode={editOptions}
             />
             <MultiSelect
@@ -618,6 +643,7 @@ export default function GenerationPhotosPage() {
               onChange={setSelectedAcc}
               onAdd={(fr, en) => { accList.addOption(fr); addCustomTr(fr, en); }}
               onRemove={(opt) => { accList.removeOption(opt); setSelectedAcc(p => p.filter(s => s !== opt)); }}
+              onReorder={accList.reorderOptions}
               editMode={editOptions}
             />
           </>
