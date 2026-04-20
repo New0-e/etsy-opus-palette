@@ -15,6 +15,7 @@ import TagsConcurrentPage from "@/pages/TagsConcurrentPage";
 import DescriptifImagePage from "@/pages/DescriptifImagePage";
 import GenerationIdeeSousNichePage from "@/pages/GenerationIdeeSousNichePage";
 import ViewerPage from "@/pages/ViewerPage";
+import SuiviCommandesPage from "@/pages/SuiviCommandesPage";
 import NotFound from "@/pages/NotFound";
 import { Component, type ReactNode } from "react";
 
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/descriptif-image" element={<DescriptifImagePage />} />
             <Route path="/generation-idee-sous-niche" element={<GenerationIdeeSousNichePage />} />
             <Route path="/viewer" element={<ViewerPage />} />
+            <Route path="/suivi-commandes" element={<SuiviCommandesPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

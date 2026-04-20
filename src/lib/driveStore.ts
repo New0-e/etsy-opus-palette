@@ -486,6 +486,137 @@ export const driveStore = {
     } catch { return false; }
   },
 
+  /** Creates a new Drive folder inside a parent. Returns the new folder ID or null. */
+  async createFolder(name: string, parentId: string): Promise<string | null> {
+    if (!_token) return null;
+    try {
+      const res = await fetch("https://www.googleapis.com/drive/v3/files", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ name, mimeType: "application/vnd.google-apps.folder", parents: [parentId] }),
+      });
+      if (!res.ok) return null;
+      return (await res.json()).id ?? null;
+    } catch { return null; }
+  },
+
+  /** Finds a folder by name inside a parent, creates it if it doesn't exist. */
+  async findOrCreateFolder(name: string, parentId: string): Promise<string | null> {
+    if (!_token) return null;
+    const q = `'${parentId}' in parents and name='${encodeURIComponent(name).replace(/%20/g, " ")}' and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+    try {
+      const res = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)&pageSize=1`,
+        { headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      const existing = data.files?.[0]?.id;
+      if (existing) return existing;
+      return driveStore.createFolder(name, parentId);
+    } catch { return null; }
+  },
+
+  /** Creates a new Google Spreadsheet in a folder. Returns the file ID or null. */
+  async createGSheet(name: string, folderId: string): Promise<string | null> {
+    if (!_token) return null;
+    try {
+      const res = await fetch("https://www.googleapis.com/drive/v3/files", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ name, mimeType: "application/vnd.google-apps.spreadsheet", parents: [folderId] }),
+      });
+      if (!res.ok) return null;
+      return (await res.json()).id ?? null;
+    } catch { return null; }
+  },
+
+  /** Uploads a local File to Drive using multipart upload. Returns the file ID or null. */
+  async uploadFileToDrive(file: File, name: string, folderId: string): Promise<string | null> {
+    if (!_token) return null;
+    try {
+      const metadata = JSON.stringify({ name, parents: [folderId] });
+      const form = new FormData();
+      form.append("metadata", new Blob([metadata], { type: "application/json" }));
+      form.append("file", file, name);
+      const res = await fetch(
+        "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+        { method: "POST", headers: { Authorization: `Bearer ${_token}` }, body: form }
+      );
+      if (!res.ok) return null;
+      return (await res.json()).id ?? null;
+    } catch { return null; }
+  },
+
+  /** Initialises a new suivi-commandes sheet: writes headers, formatting and dropdowns. */
+  async setupSuiviSheet(spreadsheetId: string): Promise<boolean> {
+    if (!_token) return false;
+    const headers = [
+      "Statut Commande","Date Limite Envoi","Statut Tracktacos",
+      "N° ETSY","N° ALIEXPRESS","N° TRACKTAGOS","Boutique",
+      "Ref Produit","Variante","Quantité","Info Client","Doc ETSY",
+      "Prix Produit","Prix Livraison","Frais Etsy","Prix Payé client","Estimation Bénéfice",
+    ];
+    try {
+      // Write headers row
+      const lastCol = String.fromCharCode(65 + headers.length - 1);
+      await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/A1:${lastCol}1?valueInputOption=RAW`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ values: [headers] }),
+        }
+      );
+      // Format + freeze + dropdowns
+      const requests = [
+        {
+          repeatCell: {
+            range: { sheetId: 0, startRowIndex: 0, endRowIndex: 1 },
+            cell: {
+              userEnteredFormat: {
+                backgroundColor: { red: 0.18, green: 0.28, blue: 0.48 },
+                textFormat: { foregroundColor: { red: 1, green: 1, blue: 1 }, bold: true, fontSize: 10 },
+                horizontalAlignment: "CENTER",
+                wrapStrategy: "CLIP",
+              },
+            },
+            fields: "userEnteredFormat(backgroundColor,textFormat,horizontalAlignment,wrapStrategy)",
+          },
+        },
+        {
+          updateSheetProperties: {
+            properties: { sheetId: 0, gridProperties: { frozenRowCount: 1 } },
+            fields: "gridProperties.frozenRowCount",
+          },
+        },
+        {
+          setDataValidation: {
+            range: { sheetId: 0, startRowIndex: 1, endRowIndex: 2000, startColumnIndex: 0, endColumnIndex: 1 },
+            rule: {
+              condition: { type: "ONE_OF_LIST", values: ["A traité","Attente Expédition","Expedier","Livré","Litige"].map(v => ({ userEnteredValue: v })) },
+              showCustomUi: true, strict: false,
+            },
+          },
+        },
+        {
+          setDataValidation: {
+            range: { sheetId: 0, startRowIndex: 1, endRowIndex: 2000, startColumnIndex: 2, endColumnIndex: 3 },
+            rule: {
+              condition: { type: "ONE_OF_LIST", values: ["A traité","Attente 8H","Numéro de Suivi à changer","Terminé"].map(v => ({ userEnteredValue: v })) },
+              showCustomUi: true, strict: false,
+            },
+          },
+        },
+      ];
+      const res = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}:batchUpdate`,
+        { method: "POST", headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" }, body: JSON.stringify({ requests }) }
+      );
+      return res.ok;
+    } catch { return false; }
+  },
+
   async fetchAsFile(id: string, name: string): Promise<File | null> {
     if (!_token) return null;
     try {

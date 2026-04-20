@@ -1,6 +1,6 @@
 import {
   FileText, ImageDown, Camera, Tags, BarChart3, UserSearch,
-  ExternalLink, FolderOpen, FileImage, PersonStanding, Layers,
+  ExternalLink, FolderOpen, FileImage, PersonStanding, Layers, ClipboardList,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -85,7 +85,13 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-0">
-        <div className="p-4 pt-2 border-t border-sidebar-border">
+        <div className="p-4 pt-2 border-t border-sidebar-border space-y-1.5">
+          <SidebarMenuButton asChild isActive={isActive("/suivi-commandes")} onClick={closeOnMobile}>
+            <NavLink to="/suivi-commandes" end activeClassName="bg-sidebar-accent text-primary font-medium">
+              <ClipboardList className="h-4 w-4" />
+              <span className="group-data-[collapsible=icon]:hidden">Suivi (TEST)</span>
+            </NavLink>
+          </SidebarMenuButton>
           <Button
             variant="outline"
             className="w-full justify-start gap-2 border-border hover:bg-secondary"
