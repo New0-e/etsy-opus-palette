@@ -731,10 +731,6 @@ export default function GenerationPhotosPage() {
               {results.map((url, i) => (
                 <div key={i} className={`relative rounded-lg overflow-hidden border-2 transition-all group ${selectedResults.includes(url) ? "border-primary glow-primary" : "border-border"}`}>
                   <img src={url} className="w-full aspect-square object-cover cursor-pointer" onClick={() => setLightboxIndex(i)} />
-                  <button onClick={() => setLightboxIndex(i)}
-                    className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all opacity-0 group-hover:opacity-100">
-                    <ZoomIn className="h-8 w-8 text-white drop-shadow" />
-                  </button>
                   <button onClick={() => downloadImage(url, i)}
                     className="absolute top-2 right-2 bg-black/50 rounded-full p-1 opacity-0 group-hover:opacity-100 transition-all z-10 hover:bg-black/80">
                     <Download className="h-3 w-3 text-white" />
