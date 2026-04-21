@@ -371,6 +371,9 @@ export default function SuiviCommandesPage() {
     setGenerating(true);
     try {
       const monthName = MOIS[parseInt(genMonth) - 1];
+      const monthIndex = parseInt(genMonth) - 1;
+      const yearNum = parseInt(genYear);
+
       const stockageId = await driveStore.resolveFolderPath(["Stockage"]);
       if (!stockageId) { toast.error("Dossier Stockage introuvable dans Drive"); return; }
       const suiviId = await driveStore.findOrCreateFolder("Suivi commande", stockageId);
@@ -382,12 +385,46 @@ export default function SuiviCommandesPage() {
       const sheetId = await driveStore.createGSheet(`Suivi commandes - ${monthName} ${genYear}`, monthId);
       if (!sheetId) { toast.error("Impossible de créer le tableau"); return; }
       await driveStore.setupSuiviSheet(sheetId);
-      toast.success(`Tableau créé : Suivi commandes - ${monthName} ${genYear}`, {
-        action: {
-          label: "Ouvrir",
-          onClick: () => window.open(`https://docs.google.com/spreadsheets/d/${sheetId}`, "_blank"),
-        },
+
+      // Filter commandes for the selected month/year (by createdAt)
+      const monthCommandes = commandes.filter(c => {
+        const d = new Date(c.createdAt);
+        return d.getMonth() === monthIndex && d.getFullYear() === yearNum;
       });
+
+      if (monthCommandes.length > 0) {
+        const rows = monthCommandes.map(c => [
+          c.statutCommande,
+          c.dateLimiteEnvoi,
+          c.statutTracktagos,
+          c.noEtsy,
+          c.noAliexpress,
+          c.noTracktagos,
+          c.boutique,
+          c.refProduit,
+          c.variante,
+          c.quantite,
+          c.infoClient,
+          c.docEtsyFileName || "",
+          c.prixProduit,
+          c.prixLivraison,
+          c.fraisEtsy,
+          c.prixPayeClient,
+          c.estimationBenefice,
+        ]);
+        await driveStore.writeSheetRows(sheetId, rows);
+      }
+
+      toast.success(
+        `Tableau créé : Suivi commandes - ${monthName} ${genYear}` +
+        (monthCommandes.length > 0 ? ` (${monthCommandes.length} commande${monthCommandes.length > 1 ? "s" : ""} exportée${monthCommandes.length > 1 ? "s" : ""})` : " (aucune commande ce mois)"),
+        {
+          action: {
+            label: "Ouvrir",
+            onClick: () => window.open(`https://docs.google.com/spreadsheets/d/${sheetId}`, "_blank"),
+          },
+        }
+      );
       setGenOpen(false);
     } finally {
       setGenerating(false);

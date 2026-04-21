@@ -617,6 +617,24 @@ export const driveStore = {
     } catch { return false; }
   },
 
+  /** Writes data rows to a sheet starting at row 2 (after header). */
+  async writeSheetRows(spreadsheetId: string, rows: string[][]): Promise<boolean> {
+    if (!_token || rows.length === 0) return false;
+    try {
+      const lastCol = String.fromCharCode(65 + rows[0].length - 1);
+      const lastRow = rows.length + 1;
+      const res = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/A2:${lastCol}${lastRow}?valueInputOption=RAW`,
+        {
+          method: "PUT",
+          headers: { Authorization: `Bearer ${_token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ values: rows }),
+        }
+      );
+      return res.ok;
+    } catch { return false; }
+  },
+
   async fetchAsFile(id: string, name: string): Promise<File | null> {
     if (!_token) return null;
     try {
