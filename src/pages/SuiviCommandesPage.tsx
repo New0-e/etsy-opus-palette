@@ -81,11 +81,18 @@ const ROW_BG: Record<string, string> = {
 // ── Storage ────────────────────────────────────────────────────────────────────
 
 const STORAGE_KEY = "suivi-commandes-v1";
+const TAUX_KEY = "suivi-taux-imposition";
 function loadCommandes(): Commande[] {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]"); } catch { return []; }
 }
 function saveCommandes(list: Commande[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+}
+function loadTaux(): string {
+  return localStorage.getItem(TAUX_KEY) ?? "";
+}
+function saveTaux(t: string) {
+  localStorage.setItem(TAUX_KEY, t);
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -189,6 +196,7 @@ export default function SuiviCommandesPage() {
   const [genYear] = useState(String(new Date().getFullYear()));
   const [generating, setGenerating] = useState(false);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [editingTaux, setEditingTaux] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetId = useRef<string | null>(null);
 
@@ -282,19 +290,22 @@ export default function SuiviCommandesPage() {
 
   const openAdd = () => {
     setEditId(null);
-    setForm({ ...EMPTY });
+    setForm({ ...EMPTY, tauxImposition: loadTaux() });
+    setEditingTaux(false);
     setModalOpen(true);
   };
 
   const openEdit = (c: Commande) => {
     setEditId(c.id);
     const { id: _i, createdAt: _c, ...rest } = c;
-    setForm(rest);
+    setForm({ ...rest, tauxImposition: rest.tauxImposition || loadTaux() });
+    setEditingTaux(false);
     setModalOpen(true);
   };
 
   const saveCommande = () => {
     const data = { ...form, estimationBenefice: calcBenef(form) || form.estimationBenefice };
+    if (form.tauxImposition !== loadTaux()) saveTaux(form.tauxImposition);
     let newList: Commande[];
     if (editId) {
       newList = commandes.map(c => c.id === editId ? { ...c, ...data } : c);
@@ -753,16 +764,44 @@ export default function SuiviCommandesPage() {
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Taux d'imposition (%)</Label>
-                  <Input
-                    value={form.tauxImposition}
-                    onChange={e => patch("tauxImposition", e.target.value)}
-                    placeholder="Ex: 30"
-                    type="number"
-                    min="0"
-                    max="100"
-                    className="h-8 text-xs"
-                  />
-                  <p className="text-[10px] text-muted-foreground">Laisser vide = pas d'impôts appliqués</p>
+                  {editingTaux ? (
+                    <div className="flex items-center gap-1.5">
+                      <Input
+                        value={form.tauxImposition}
+                        onChange={e => patch("tauxImposition", e.target.value)}
+                        placeholder="Ex: 30"
+                        type="number"
+                        min="0"
+                        max="100"
+                        className="h-8 text-xs"
+                        autoFocus
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 text-xs px-2 shrink-0"
+                        onClick={() => setEditingTaux(false)}
+                      >
+                        OK
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 h-8 px-2 rounded-md border border-border bg-secondary/30 text-xs">
+                      <span className={form.tauxImposition ? "text-foreground font-medium" : "text-muted-foreground"}>
+                        {form.tauxImposition ? `${form.tauxImposition}%` : "Non renseigné"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setEditingTaux(true)}
+                        className="ml-auto p-0.5 rounded text-muted-foreground hover:text-foreground transition-colors"
+                        title="Modifier le taux"
+                      >
+                        <Pencil className="h-3 w-3" />
+                      </button>
+                    </div>
+                  )}
+                  <p className="text-[10px] text-muted-foreground">Mémorisé pour les prochaines commandes</p>
                 </div>
                 <div className="p-3 rounded-lg border border-border bg-secondary/20 flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-emerald-500 flex-shrink-0" />
