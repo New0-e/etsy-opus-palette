@@ -885,7 +885,7 @@ export default function SuiviCommandesPage() {
         <Select value={filterStatut} onValueChange={setFilterStatut}>
           <SelectTrigger className="h-8 text-xs w-40"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous les statuts</SelectItem>
+            <SelectItem value="all">Statuts Commandes</SelectItem>
             {STATUTS_COMMANDE.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -899,7 +899,7 @@ export default function SuiviCommandesPage() {
         <Select value={filterTracktagos} onValueChange={setFilterTracktagos}>
           <SelectTrigger className="h-8 text-xs w-44"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">Tous Tracktacos</SelectItem>
+            <SelectItem value="all">Statuts Tracktacos</SelectItem>
             {STATUTS_TRACKTAGOS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
