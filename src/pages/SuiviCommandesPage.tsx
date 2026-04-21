@@ -546,7 +546,7 @@ export default function SuiviCommandesPage() {
     if (!driveStore.isAuthorized()) return;
     setLoadingShops(true);
     const folders = await driveStore.fetchRootFolders();
-    setShopList(folders.map(f => f.name).filter(n => n.toLowerCase() !== "stockage"));
+    setShopList(folders.map(f => f.name).filter(n => n.toLowerCase() !== "stockage" && !n.startsWith(".")));
     setLoadingShops(false);
   };
 
