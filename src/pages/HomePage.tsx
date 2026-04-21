@@ -1,7 +1,7 @@
-import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus, Tags, BarChart3, UserSearch, FileImage, PersonStanding, Layers } from "lucide-react";
+import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus, Tags, BarChart3, UserSearch, FileImage, PersonStanding, Layers, AlertTriangle, ArrowRight, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
@@ -26,10 +26,31 @@ const sheets = [
   { title: "Suivi Commande", icon: Package, url: "https://docs.google.com/spreadsheets/d/1exMlQ6dnfIGF7xsgUJskk57IRypVK29E/edit?gid=513162334#gid=513162334" },
 ];
 
+type CommandeAlert = {
+  id: string;
+  noEtsy: string;
+  refProduit: string;
+  boutique: string;
+  noTracktagos: string;
+  dateLimiteEnvoi: string;
+};
+
+function loadCommandesAChanger(): CommandeAlert[] {
+  try {
+    const all = JSON.parse(localStorage.getItem("suivi-commandes-v1") ?? "[]");
+    return all.filter((c: any) => c.statutTracktagos === "Numéro de Suivi à changer");
+  } catch { return []; }
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [newBoutiqueName, setNewBoutiqueName] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [commandesAlert, setCommandesAlert] = useState<CommandeAlert[]>([]);
+
+  useEffect(() => {
+    setCommandesAlert(loadCommandesAChanger());
+  }, []);
 
   const handleCreateBoutique = () => {
     if (!newBoutiqueName.trim()) return;
@@ -44,6 +65,66 @@ export default function HomePage() {
       <div>
         <h1 className="font-display text-3xl font-bold tracking-tight">Dashboard Etsy</h1>
       </div>
+
+      {/* Alerte — Numéros de suivi à changer */}
+      {commandesAlert.length > 0 && (
+        <section>
+          <div className="rounded-xl border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/30 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-orange-200 dark:border-orange-800">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 text-orange-500" />
+                <span className="font-semibold text-sm text-orange-700 dark:text-orange-400">
+                  {commandesAlert.length} numéro{commandesAlert.length > 1 ? "s" : ""} de suivi à changer
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCommandesAlert(loadCommandesAChanger())}
+                  className="text-orange-500 hover:text-orange-700 transition-colors"
+                  title="Rafraîchir"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => navigate("/suivi-commandes")}
+                  className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400 hover:text-orange-800 font-medium transition-colors"
+                >
+                  Voir tout <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+            <div className="divide-y divide-orange-100 dark:divide-orange-900/50">
+              {commandesAlert.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => navigate("/suivi-commandes")}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-orange-100/60 dark:hover:bg-orange-900/30 transition-colors text-left"
+                >
+                  <div className="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-0.5">
+                    <div>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wide">N° ETSY</p>
+                      <p className="text-xs font-mono font-medium truncate">{c.noEtsy || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Produit</p>
+                      <p className="text-xs font-medium truncate">{c.refProduit || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Boutique</p>
+                      <p className="text-xs truncate">{c.boutique || "—"}</p>
+                    </div>
+                    <div>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wide">N° Tracktagos actuel</p>
+                      <p className="text-xs font-mono truncate text-orange-600 dark:text-orange-400">{c.noTracktagos || "—"}</p>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-3.5 w-3.5 text-orange-400 shrink-0" />
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Main Tools */}
       <section>
