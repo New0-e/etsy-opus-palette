@@ -627,6 +627,57 @@ export const driveStore = {
     } catch { return false; }
   },
 
+  /** Finds a file in Drive by exact name. Returns {id, name} or null. */
+  async findFileByName(name: string, mimeType?: string): Promise<{ id: string; name: string } | null> {
+    if (!_token) return null;
+    try {
+      const conditions = [
+        `name='${name.replace(/'/g, "\\'")}'`,
+        "trashed=false",
+        ...(mimeType ? [`mimeType='${mimeType}'`] : []),
+      ];
+      const q = conditions.join(" and ");
+      const res = await fetch(
+        `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name)&pageSize=1`,
+        { headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.files?.[0] ?? null;
+    } catch { return null; }
+  },
+
+  /** Returns all tabs of a spreadsheet as [{sheetId, title}]. */
+  async getSheetTabs(spreadsheetId: string): Promise<{ sheetId: number; title: string }[] | null> {
+    if (!_token) return null;
+    try {
+      const res = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}?fields=sheets.properties`,
+        { headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      return (data.sheets ?? []).map((s: any) => ({
+        sheetId: s.properties.sheetId,
+        title: s.properties.title,
+      }));
+    } catch { return null; }
+  },
+
+  /** Reads values from a sheet range. Returns 2D array or null. */
+  async readSheetValues(spreadsheetId: string, range: string): Promise<string[][] | null> {
+    if (!_token) return null;
+    try {
+      const res = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(range)}`,
+        { headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.values ?? [];
+    } catch { return null; }
+  },
+
   /** Writes data rows to a sheet starting at row 2 (after header). */
   async writeSheetRows(spreadsheetId: string, rows: string[][]): Promise<boolean> {
     if (!_token || rows.length === 0) return false;

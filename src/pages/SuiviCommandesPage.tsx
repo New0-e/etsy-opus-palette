@@ -536,6 +536,9 @@ export default function SuiviCommandesPage() {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [editingTaux, setEditingTaux] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  // key = nom de l'onglet (boutique), value = liste de produits
+  const [produitsBoutique, setProduitsBoutique] = useState<Record<string, { num: string; nom: string }[]>>({});
+  const [loadingProduits, setLoadingProduits] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetId = useRef<string | null>(null);
 
@@ -547,7 +550,29 @@ export default function SuiviCommandesPage() {
     setLoadingShops(false);
   };
 
-  useEffect(() => { fetchShops(); }, []);
+  const fetchProduits = async () => {
+    if (!driveStore.isAuthorized()) return;
+    setLoadingProduits(true);
+    try {
+      const file = await driveStore.findFileByName("Liste Boutique", "application/vnd.google-apps.spreadsheet");
+      if (!file) return;
+      const tabs = await driveStore.getSheetTabs(file.id);
+      if (!tabs) return;
+      const result: Record<string, { num: string; nom: string }[]> = {};
+      for (const tab of tabs) {
+        const values = await driveStore.readSheetValues(file.id, `'${tab.title}'!A2:B1000`);
+        if (!values) continue;
+        result[tab.title] = values
+          .filter(row => row[0] || row[1])
+          .map(row => ({ num: row[0] ?? "", nom: row[1] ?? "" }));
+      }
+      setProduitsBoutique(result);
+    } finally {
+      setLoadingProduits(false);
+    }
+  };
+
+  useEffect(() => { fetchShops(); fetchProduits(); }, []);
 
   // Tick every second for countdown
   useEffect(() => {
@@ -1117,7 +1142,48 @@ export default function SuiviCommandesPage() {
                     </Select>
                   </div>
                 </div>
-                <TextField label="Ref Produit" value={form.refProduit} onChange={v => patch("refProduit", v)} />
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs">Ref Produit</Label>
+                    {loadingProduits && <Loader2 className="h-2.5 w-2.5 animate-spin text-muted-foreground" />}
+                  </div>
+                  {(() => {
+                    const produits = produitsBoutique[form.boutique] ?? [];
+                    if (produits.length === 0) {
+                      return (
+                        <Input
+                          value={form.refProduit}
+                          onChange={e => patch("refProduit", e.target.value)}
+                          className="h-8 text-xs"
+                          placeholder={loadingProduits ? "Chargement…" : "Saisie libre"}
+                        />
+                      );
+                    }
+                    return (
+                      <Select
+                        value={form.refProduit || NONE}
+                        onValueChange={v => {
+                          if (v === NONE) { patch("refProduit", ""); return; }
+                          const p = produits.find(p => p.num === v);
+                          patch("refProduit", p ? `${p.num} - ${p.nom}` : v);
+                        }}
+                      >
+                        <SelectTrigger className="h-8 text-xs">
+                          <SelectValue placeholder="Choisir un produit" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value={NONE}>—</SelectItem>
+                          {produits.map(p => (
+                            <SelectItem key={p.num} value={p.num}>
+                              <span className="font-mono text-[10px] text-muted-foreground mr-1.5">{p.num}</span>
+                              {p.nom}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    );
+                  })()}
+                </div>
                 <TextField label="Variante" value={form.variante} onChange={v => patch("variante", v)} />
                 <TextField label="Quantité" value={form.quantite} onChange={v => patch("quantite", v)} placeholder="1" />
               </div>
