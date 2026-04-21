@@ -97,13 +97,16 @@ function saveTaux(t: string) {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function calcBenef(f: Partial<Commande>): string {
+function calcBenefBrut(f: Partial<Commande>): number {
   const n = (s?: string) => parseFloat(s ?? "") || 0;
-  const brut = n(f.prixPayeClient) - n(f.prixProduit) - n(f.prixLivraison) - n(f.fraisEtsy);
-  if (!brut && brut !== 0) return "";
-  const taux = n(f.tauxImposition);
+  return n(f.prixPayeClient) - n(f.prixProduit) - n(f.prixLivraison) - n(f.fraisEtsy);
+}
+
+function calcBenef(f: Partial<Commande>): string {
+  const brut = calcBenefBrut(f);
+  if (isNaN(brut)) return "";
+  const taux = parseFloat(f.tauxImposition ?? "") || 0;
   const net = taux > 0 ? brut * (1 - taux / 100) : brut;
-  if (!net && net !== 0) return "";
   return net.toFixed(2);
 }
 
@@ -254,15 +257,28 @@ export default function SuiviCommandesPage() {
     });
   }, [commandes, filterStatut, filterBoutique, search]);
 
-  const stats = useMemo(() => ({
-    total: commandes.length,
-    aTraiter: commandes.filter(c => c.statutCommande === "A traité").length,
-    enCours: commandes.filter(c => c.statutCommande === "Attente Expédition" || c.statutCommande === "Expedier").length,
-    livres: commandes.filter(c => c.statutCommande === "Livré").length,
-    litiges: commandes.filter(c => c.statutCommande === "Litige").length,
-    retard: commandes.filter(isEnRetard).length,
-    totalBenef: commandes.reduce((s, c) => s + (parseFloat(c.estimationBenefice) || 0), 0),
-  }), [commandes]);
+  const stats = useMemo(() => {
+    const n = (v: string) => parseFloat(v) || 0;
+    let totalCA = 0, totalBrut = 0, totalNet = 0;
+    for (const c of commandes) {
+      totalCA += n(c.prixPayeClient);
+      const brut = n(c.prixPayeClient) - n(c.prixProduit) - n(c.prixLivraison) - n(c.fraisEtsy);
+      totalBrut += brut;
+      const taux = n(c.tauxImposition);
+      totalNet += taux > 0 ? brut * (1 - taux / 100) : brut;
+    }
+    return {
+      total: commandes.length,
+      aTraiter: commandes.filter(c => c.statutCommande === "A traité").length,
+      enCours: commandes.filter(c => c.statutCommande === "Attente Expédition" || c.statutCommande === "Expedier").length,
+      livres: commandes.filter(c => c.statutCommande === "Livré").length,
+      litiges: commandes.filter(c => c.statutCommande === "Litige").length,
+      retard: commandes.filter(isEnRetard).length,
+      totalCA,
+      totalBrut,
+      totalNet,
+    };
+  }, [commandes]);
 
   const boutiquesUsed = useMemo(() => {
     const set = new Set(commandes.map(c => c.boutique).filter(Boolean));
@@ -484,13 +500,36 @@ export default function SuiviCommandesPage() {
         ))}
       </div>
 
-      {/* Bénéfice total */}
-      <div className="tool-card p-3 flex items-center gap-2">
-        <TrendingUp className="h-4 w-4 text-emerald-500" />
-        <span className="text-xs text-muted-foreground">Estimation bénéfice total (après impôts si renseignés) :</span>
-        <span className={`text-sm font-semibold ${stats.totalBenef >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-          {stats.totalBenef.toFixed(2)} €
-        </span>
+      {/* Financier — CA / Bénéfice brut / Bénéfice net */}
+      <div className="grid grid-cols-3 gap-2">
+        <div className="tool-card p-3 flex flex-col gap-1">
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">CA total</span>
+          </div>
+          <span className="text-lg font-bold text-blue-500">{stats.totalCA.toFixed(2)} €</span>
+          <span className="text-[10px] text-muted-foreground">Prix payés clients</span>
+        </div>
+        <div className="tool-card p-3 flex flex-col gap-1">
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="h-3.5 w-3.5 text-amber-500" />
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Bénéfice brut</span>
+          </div>
+          <span className={`text-lg font-bold ${stats.totalBrut >= 0 ? "text-amber-500" : "text-red-500"}`}>
+            {stats.totalBrut.toFixed(2)} €
+          </span>
+          <span className="text-[10px] text-muted-foreground">Avant impôts</span>
+        </div>
+        <div className="tool-card p-3 flex flex-col gap-1">
+          <div className="flex items-center gap-1.5">
+            <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
+            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Bénéfice net</span>
+          </div>
+          <span className={`text-lg font-bold ${stats.totalNet >= 0 ? "text-emerald-500" : "text-red-500"}`}>
+            {stats.totalNet.toFixed(2)} €
+          </span>
+          <span className="text-[10px] text-muted-foreground">Après impôts</span>
+        </div>
       </div>
 
       {/* Filters */}
@@ -640,11 +679,23 @@ export default function SuiviCommandesPage() {
                     {/* Prix Payé */}
                     <td className="px-2 py-1.5 text-right whitespace-nowrap font-medium">{fmt(c.prixPayeClient)}</td>
                     {/* Bénéfice net */}
-                    <td className={`px-2 py-1.5 text-right whitespace-nowrap font-semibold ${parseFloat(c.estimationBenefice) >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}`}>
-                      {fmt(c.estimationBenefice)}
-                      {c.tauxImposition && (
-                        <div className="text-[9px] text-muted-foreground font-normal">{c.tauxImposition}% imp.</div>
-                      )}
+                    <td className="px-2 py-1.5 text-right whitespace-nowrap">
+                      {(() => {
+                        const brut = calcBenefBrut(c);
+                        const taux = parseFloat(c.tauxImposition) || 0;
+                        const net = taux > 0 ? brut * (1 - taux / 100) : brut;
+                        const color = net >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500";
+                        return (
+                          <>
+                            <div className={`font-semibold ${color}`}>{fmt(net.toFixed(2))}</div>
+                            {taux > 0 && (
+                              <div className="text-[9px] text-muted-foreground">
+                                brut {fmt(brut.toFixed(2))} · {taux}%
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
                     </td>
                   </tr>
                 );
