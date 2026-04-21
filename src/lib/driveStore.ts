@@ -531,9 +531,9 @@ export const driveStore = {
     } catch { return null; }
   },
 
-  /** Uploads a local File to Drive using multipart upload. Returns the file ID or null. */
-  async uploadFileToDrive(file: File, name: string, folderId: string): Promise<string | null> {
-    if (!_token) return null;
+  /** Uploads a local File to Drive using multipart upload. Returns the file ID or an error string. */
+  async uploadFileToDrive(file: File, name: string, folderId: string): Promise<string | { error: string }> {
+    if (!_token) return { error: "Non connecté à Drive" };
     try {
       const metadata = JSON.stringify({ name, parents: [folderId] });
       const form = new FormData();
@@ -543,9 +543,19 @@ export const driveStore = {
         "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
         { method: "POST", headers: { Authorization: `Bearer ${_token}` }, body: form }
       );
-      if (!res.ok) return null;
-      return (await res.json()).id ?? null;
-    } catch { return null; }
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        const msg = body?.error?.message ?? `HTTP ${res.status}`;
+        console.error("[Drive] uploadFileToDrive →", res.status, body);
+        if (res.status === 401) driveStore.handleExpiredToken();
+        return { error: msg };
+      }
+      const data = await res.json();
+      return data.id ?? { error: "Réponse Drive sans ID" };
+    } catch (e) {
+      console.error("[Drive] uploadFileToDrive exception", e);
+      return { error: String(e) };
+    }
   },
 
   /** Initialises a new suivi-commandes sheet: writes headers, formatting and dropdowns. */

@@ -369,22 +369,29 @@ export default function SuiviCommandesPage() {
 
     setUploadingId(targetId);
     try {
-      const stockageId = await driveStore.resolveFolderPath(["Stockage"]);
-      if (!stockageId) { toast.error("Dossier Stockage introuvable"); return; }
+      // Auto-crée Stockage s'il n'existe pas
+      let stockageId = await driveStore.resolveFolderPath(["Stockage"]);
+      if (!stockageId) {
+        stockageId = await driveStore.createFolder("Stockage", "root");
+        if (!stockageId) { toast.error("Impossible de créer le dossier Stockage dans Drive"); return; }
+      }
       const recapId = await driveStore.findOrCreateFolder("Document Recap Etsy", stockageId);
-      if (!recapId) { toast.error("Dossier Document Recap Etsy introuvable"); return; }
+      if (!recapId) { toast.error("Impossible de créer le dossier Document Recap Etsy"); return; }
 
       const ext = file.name.includes(".") ? `.${file.name.split(".").pop()}` : "";
       const finalName = (commande.noEtsy || file.name.replace(/\.[^/.]+$/, "")) + ext;
-      const fileId = await driveStore.uploadFileToDrive(file, finalName, recapId);
-      if (!fileId) { toast.error("Échec de l'upload"); return; }
+      const result = await driveStore.uploadFileToDrive(file, finalName, recapId);
+      if (typeof result !== "string") {
+        toast.error(`Échec de l'upload : ${result.error}`, { duration: 8000 });
+        return;
+      }
 
       const newList = commandes.map(c =>
-        c.id === targetId ? { ...c, docEtsyFileId: fileId, docEtsyFileName: finalName } : c
+        c.id === targetId ? { ...c, docEtsyFileId: result, docEtsyFileName: finalName } : c
       );
       setCommandes(newList);
       saveCommandes(newList);
-      toast.success("Document uploadé !");
+      toast.success(`Document uploadé dans Drive / Stockage / Document Recap Etsy`);
     } finally {
       setUploadingId(null);
       uploadTargetId.current = null;
