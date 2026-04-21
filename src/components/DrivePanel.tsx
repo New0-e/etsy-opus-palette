@@ -54,7 +54,9 @@ async function fetchFolderContents(
   if (res.status === 401) throw new Error("token_expired");
   if (!res.ok) throw new Error(`Drive API error: ${res.status}`);
   const data = await res.json();
-  const items = ((data.files ?? []) as DriveItem[]).sort(naturalSort);
+  const items = ((data.files ?? []) as DriveItem[])
+    .filter(f => !f.name.startsWith("."))
+    .sort(naturalSort);
   // Preload thumbnails
   items.forEach(item => {
     if (item.thumbnailLink) {
