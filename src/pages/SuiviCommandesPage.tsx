@@ -1142,43 +1142,79 @@ export default function SuiviCommandesPage() {
                     </Select>
                   </div>
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-1 sm:col-span-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-xs">Ref Produit</Label>
-                    {loadingProduits && <Loader2 className="h-2.5 w-2.5 animate-spin text-muted-foreground" />}
+                    {loadingProduits
+                      ? <span className="flex items-center gap-1 text-[10px] text-muted-foreground"><Loader2 className="h-2.5 w-2.5 animate-spin" />Chargement…</span>
+                      : Object.keys(produitsBoutique).length === 0
+                        ? <span className="text-[10px] text-muted-foreground">Sheet "Liste Boutique" introuvable</span>
+                        : null
+                    }
                   </div>
                   {(() => {
-                    const produits = produitsBoutique[form.boutique] ?? [];
-                    if (produits.length === 0) {
+                    // Tous les produits de tous les onglets, groupés par boutique
+                    const allEntries = Object.entries(produitsBoutique);
+                    const allProduits = allEntries.flatMap(([boutique, prods]) =>
+                      prods.map(p => ({ ...p, boutique }))
+                    );
+                    // Si boutique sélectionnée et qu'elle a des produits → filtrer
+                    const filtered = form.boutique && produitsBoutique[form.boutique]?.length
+                      ? allProduits.filter(p => p.boutique === form.boutique)
+                      : allProduits;
+
+                    if (filtered.length === 0) {
                       return (
                         <Input
                           value={form.refProduit}
                           onChange={e => patch("refProduit", e.target.value)}
                           className="h-8 text-xs"
-                          placeholder={loadingProduits ? "Chargement…" : "Saisie libre"}
+                          placeholder="Saisie libre"
                         />
                       );
                     }
+
+                    // Trouver la valeur sélectionnée (num uniquement pour la clé Select)
+                    const selectedKey = filtered.find(p => `${p.num} - ${p.nom}` === form.refProduit)?.num
+                      ?? filtered.find(p => p.num === form.refProduit)?.num
+                      ?? NONE;
+
                     return (
                       <Select
-                        value={form.refProduit || NONE}
+                        value={selectedKey}
                         onValueChange={v => {
                           if (v === NONE) { patch("refProduit", ""); return; }
-                          const p = produits.find(p => p.num === v);
+                          const p = filtered.find(p => p.num === v);
                           patch("refProduit", p ? `${p.num} - ${p.nom}` : v);
                         }}
                       >
                         <SelectTrigger className="h-8 text-xs">
-                          <SelectValue placeholder="Choisir un produit" />
+                          <SelectValue placeholder="Choisir un produit…" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="max-h-64">
                           <SelectItem value={NONE}>—</SelectItem>
-                          {produits.map(p => (
-                            <SelectItem key={p.num} value={p.num}>
-                              <span className="font-mono text-[10px] text-muted-foreground mr-1.5">{p.num}</span>
-                              {p.nom}
-                            </SelectItem>
-                          ))}
+                          {allEntries.length > 1 && !form.boutique
+                            ? allEntries.map(([boutique, prods]) => (
+                                prods.length === 0 ? null :
+                                <div key={boutique}>
+                                  <div className="px-2 py-1 text-[9px] font-semibold uppercase tracking-wide text-muted-foreground border-t border-border mt-1">
+                                    {boutique}
+                                  </div>
+                                  {prods.map(p => (
+                                    <SelectItem key={`${boutique}-${p.num}`} value={p.num}>
+                                      <span className="font-mono text-[10px] text-muted-foreground mr-1.5">{p.num}</span>
+                                      {p.nom}
+                                    </SelectItem>
+                                  ))}
+                                </div>
+                              ))
+                            : filtered.map(p => (
+                                <SelectItem key={`${p.boutique}-${p.num}`} value={p.num}>
+                                  <span className="font-mono text-[10px] text-muted-foreground mr-1.5">{p.num}</span>
+                                  {p.nom}
+                                </SelectItem>
+                              ))
+                          }
                         </SelectContent>
                       </Select>
                     );
