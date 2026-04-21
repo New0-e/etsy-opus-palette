@@ -526,6 +526,7 @@ export default function SuiviCommandesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [filterStatut, setFilterStatut] = useState("all");
   const [filterBoutique, setFilterBoutique] = useState("all");
+  const [filterTracktagos, setFilterTracktagos] = useState("all");
   const [search, setSearch] = useState("");
   const [shopList, setShopList] = useState<string[]>([]);
   const [loadingShops, setLoadingShops] = useState(false);
@@ -607,6 +608,7 @@ export default function SuiviCommandesPage() {
     return commandes.filter(c => {
       if (filterStatut !== "all" && c.statutCommande !== filterStatut) return false;
       if (filterBoutique !== "all" && c.boutique !== filterBoutique) return false;
+      if (filterTracktagos !== "all" && c.statutTracktagos !== filterTracktagos) return false;
       if (search) {
         const s = search.toLowerCase();
         if (!c.noEtsy.toLowerCase().includes(s) &&
@@ -616,7 +618,7 @@ export default function SuiviCommandesPage() {
       }
       return true;
     });
-  }, [commandes, filterStatut, filterBoutique, search]);
+  }, [commandes, filterStatut, filterBoutique, filterTracktagos, search]);
 
   const stats = useMemo(() => {
     const n = (v: string) => parseFloat(v) || 0;
@@ -894,9 +896,16 @@ export default function SuiviCommandesPage() {
             {boutiquesUsed.map(b => <SelectItem key={b} value={b}>{b}</SelectItem>)}
           </SelectContent>
         </Select>
-        {(filterStatut !== "all" || filterBoutique !== "all" || search) && (
+        <Select value={filterTracktagos} onValueChange={setFilterTracktagos}>
+          <SelectTrigger className="h-8 text-xs w-44"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous Tracktacos</SelectItem>
+            {STATUTS_TRACKTAGOS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        {(filterStatut !== "all" || filterBoutique !== "all" || filterTracktagos !== "all" || search) && (
           <button
-            onClick={() => { setFilterStatut("all"); setFilterBoutique("all"); setSearch(""); }}
+            onClick={() => { setFilterStatut("all"); setFilterBoutique("all"); setFilterTracktagos("all"); setSearch(""); }}
             className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
           >
             <X className="h-3 w-3" /> Effacer filtres
