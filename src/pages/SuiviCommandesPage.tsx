@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import {
   Plus, Pencil, Trash2, Upload, Loader2, FileText,
   Package, Clock, CheckCircle2, AlertTriangle, TrendingUp, RefreshCw, X, ExternalLink,
+  BarChart2, ArrowUpRight, ArrowDownRight, ShoppingBag, Star, Target, Minus,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -180,6 +181,340 @@ function TextField({ label, value, onChange, placeholder, type = "text" }: {
   );
 }
 
+// ── Stats helpers ──────────────────────────────────────────────────────────────
+
+function monthKey(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; }
+
+function buildMonthlyStats(commandes: Commande[]) {
+  const map = new Map<string, { label: string; ca: number; brut: number; net: number; count: number }>();
+  const now = new Date();
+  // Init last 12 months
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = monthKey(d);
+    map.set(key, { label: MOIS[d.getMonth()].slice(0, 3) + " " + String(d.getFullYear()).slice(2), ca: 0, brut: 0, net: 0, count: 0 });
+  }
+  for (const c of commandes) {
+    const d = new Date(c.createdAt);
+    const key = monthKey(d);
+    if (!map.has(key)) continue;
+    const n = (v: string) => parseFloat(v) || 0;
+    const ca = n(c.prixPayeClient);
+    const brut = ca - n(c.prixProduit) - n(c.prixLivraison) - n(c.fraisEtsy);
+    const taux = n(c.tauxImposition);
+    const net = taux > 0 ? brut * (1 - taux / 100) : brut;
+    const m = map.get(key)!;
+    m.ca += ca; m.brut += brut; m.net += net; m.count++;
+  }
+  return Array.from(map.values());
+}
+
+function buildBoutiqueStats(commandes: Commande[]) {
+  const map = new Map<string, { ca: number; brut: number; count: number; livres: number }>();
+  for (const c of commandes) {
+    const b = c.boutique || "—";
+    if (!map.has(b)) map.set(b, { ca: 0, brut: 0, count: 0, livres: 0 });
+    const n = (v: string) => parseFloat(v) || 0;
+    const ca = n(c.prixPayeClient);
+    const brut = ca - n(c.prixProduit) - n(c.prixLivraison) - n(c.fraisEtsy);
+    const m = map.get(b)!;
+    m.ca += ca; m.brut += brut; m.count++;
+    if (c.statutCommande === "Livré") m.livres++;
+  }
+  return Array.from(map.entries())
+    .map(([name, s]) => ({ name, ...s }))
+    .sort((a, b) => b.ca - a.ca);
+}
+
+function Trend({ curr, prev }: { curr: number; prev: number }) {
+  if (!prev) return null;
+  const pct = ((curr - prev) / Math.abs(prev)) * 100;
+  const up = pct >= 0;
+  return (
+    <span className={`inline-flex items-center gap-0.5 text-[10px] font-medium ${up ? "text-emerald-500" : "text-red-500"}`}>
+      {up ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+      {Math.abs(pct).toFixed(1)}%
+    </span>
+  );
+}
+
+function MiniBar({ value, max, color = "bg-blue-500" }: { value: number; max: number; color?: string }) {
+  const pct = max > 0 ? Math.max(2, (value / max) * 100) : 2;
+  return (
+    <div className="w-full bg-secondary rounded-full h-1.5 mt-1">
+      <div className={`${color} h-1.5 rounded-full transition-all`} style={{ width: `${pct}%` }} />
+    </div>
+  );
+}
+
+function StatsDialog({ open, onClose, commandes }: { open: boolean; onClose: () => void; commandes: Commande[] }) {
+  const now = new Date();
+  const curKey = monthKey(now);
+  const prevDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const prevKey = monthKey(prevDate);
+
+  const monthly = useMemo(() => buildMonthlyStats(commandes), [commandes]);
+  const boutiqueStats = useMemo(() => buildBoutiqueStats(commandes), [commandes]);
+
+  const cur = monthly.find(m => {
+    const d = new Date(now.getFullYear(), now.getMonth(), 1);
+    return m.label === MOIS[d.getMonth()].slice(0, 3) + " " + String(d.getFullYear()).slice(2);
+  }) ?? { ca: 0, brut: 0, net: 0, count: 0 };
+  const prev = monthly.find(m => {
+    return m.label === MOIS[prevDate.getMonth()].slice(0, 3) + " " + String(prevDate.getFullYear()).slice(2);
+  }) ?? { ca: 0, brut: 0, net: 0, count: 0 };
+
+  const n = (v: string) => parseFloat(v) || 0;
+
+  // Année en cours
+  const yearCommandes = commandes.filter(c => new Date(c.createdAt).getFullYear() === now.getFullYear());
+  const yearCA = yearCommandes.reduce((s, c) => s + n(c.prixPayeClient), 0);
+  const yearBrut = yearCommandes.reduce((s, c) => s + n(c.prixPayeClient) - n(c.prixProduit) - n(c.prixLivraison) - n(c.fraisEtsy), 0);
+  const yearNet = yearCommandes.reduce((s, c) => {
+    const brut = n(c.prixPayeClient) - n(c.prixProduit) - n(c.prixLivraison) - n(c.fraisEtsy);
+    const taux = n(c.tauxImposition);
+    return s + (taux > 0 ? brut * (1 - taux / 100) : brut);
+  }, 0);
+
+  const totalCommandes = commandes.length;
+  const panierMoyen = totalCommandes > 0 ? commandes.reduce((s, c) => s + n(c.prixPayeClient), 0) / totalCommandes : 0;
+  const tauxLivraison = totalCommandes > 0 ? (commandes.filter(c => c.statutCommande === "Livré").length / totalCommandes) * 100 : 0;
+  const tauxLitige = totalCommandes > 0 ? (commandes.filter(c => c.statutCommande === "Litige").length / totalCommandes) * 100 : 0;
+  const tauxRetard = totalCommandes > 0 ? (commandes.filter(isEnRetard).length / totalCommandes) * 100 : 0;
+
+  const maxCA = Math.max(...monthly.map(m => m.ca), 1);
+  const maxBar = Math.max(...boutiqueStats.map(b => b.ca), 1);
+
+  const statusDist = [
+    { label: "À traiter", count: commandes.filter(c => c.statutCommande === "A traité").length, color: "bg-slate-400" },
+    { label: "Attente Exp.", count: commandes.filter(c => c.statutCommande === "Attente Expédition").length, color: "bg-amber-400" },
+    { label: "Expédié", count: commandes.filter(c => c.statutCommande === "Expedier").length, color: "bg-blue-400" },
+    { label: "Livré", count: commandes.filter(c => c.statutCommande === "Livré").length, color: "bg-emerald-400" },
+    { label: "Litige", count: commandes.filter(c => c.statutCommande === "Litige").length, color: "bg-red-400" },
+  ];
+  const maxStatus = Math.max(...statusDist.map(s => s.count), 1);
+
+  const prodStats = useMemo(() => {
+    const map = new Map<string, { count: number; ca: number }>();
+    for (const c of commandes) {
+      const key = c.refProduit || "—";
+      if (!map.has(key)) map.set(key, { count: 0, ca: 0 });
+      const m = map.get(key)!;
+      m.count += parseInt(c.quantite) || 1;
+      m.ca += n(c.prixPayeClient);
+    }
+    return Array.from(map.entries()).map(([ref, s]) => ({ ref, ...s })).sort((a, b) => b.count - a.count).slice(0, 5);
+  }, [commandes]);
+
+  return (
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <BarChart2 className="h-5 w-5 text-primary" />
+            Tableau de bord — Statistiques globales
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-6 pb-2">
+
+          {/* ── Mois en cours vs précédent ── */}
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+              {MOIS[now.getMonth()]} {now.getFullYear()} vs {MOIS[prevDate.getMonth()]} {prevDate.getFullYear()}
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              {[
+                { label: "CA du mois", cur: cur.ca, prev: prev.ca, color: "text-blue-500", fmt: (v: number) => `${v.toFixed(2)} €` },
+                { label: "Bénéfice brut", cur: cur.brut, prev: prev.brut, color: "text-amber-500", fmt: (v: number) => `${v.toFixed(2)} €` },
+                { label: "Bénéfice net", cur: cur.net, prev: prev.net, color: "text-emerald-500", fmt: (v: number) => `${v.toFixed(2)} €` },
+                { label: "Commandes", cur: cur.count, prev: prev.count, color: "text-violet-500", fmt: (v: number) => String(v) },
+              ].map(card => (
+                <div key={card.label} className="tool-card p-3">
+                  <p className="text-[10px] text-muted-foreground mb-1">{card.label}</p>
+                  <p className={`text-base font-bold ${card.color}`}>{card.fmt(card.cur)}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[10px] text-muted-foreground">{card.fmt(card.prev)}</span>
+                    <Trend curr={card.cur} prev={card.prev} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Année en cours ── */}
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+              Année {now.getFullYear()} — {yearCommandes.length} commande{yearCommandes.length !== 1 ? "s" : ""}
+            </p>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="tool-card p-3">
+                <p className="text-[10px] text-muted-foreground mb-1">CA annuel</p>
+                <p className="text-lg font-bold text-blue-500">{yearCA.toFixed(2)} €</p>
+                <p className="text-[10px] text-muted-foreground">Panier moyen {panierMoyen.toFixed(2)} €</p>
+              </div>
+              <div className="tool-card p-3">
+                <p className="text-[10px] text-muted-foreground mb-1">Bénéfice brut annuel</p>
+                <p className={`text-lg font-bold ${yearBrut >= 0 ? "text-amber-500" : "text-red-500"}`}>{yearBrut.toFixed(2)} €</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Marge {yearCA > 0 ? ((yearBrut / yearCA) * 100).toFixed(1) : 0}%
+                </p>
+              </div>
+              <div className="tool-card p-3">
+                <p className="text-[10px] text-muted-foreground mb-1">Bénéfice net annuel</p>
+                <p className={`text-lg font-bold ${yearNet >= 0 ? "text-emerald-500" : "text-red-500"}`}>{yearNet.toFixed(2)} €</p>
+                <p className="text-[10px] text-muted-foreground">
+                  Net/CA {yearCA > 0 ? ((yearNet / yearCA) * 100).toFixed(1) : 0}%
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Évolution mensuelle (12 mois) ── */}
+          <div>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Évolution CA — 12 derniers mois</p>
+            <div className="tool-card p-4">
+              <div className="flex items-end gap-1 h-24">
+                {monthly.map((m, i) => {
+                  const isCurrent = i === monthly.length - 1;
+                  const h = maxCA > 0 ? Math.max(4, (m.ca / maxCA) * 100) : 4;
+                  return (
+                    <div key={m.label} className="flex flex-col items-center flex-1 gap-1" title={`${m.label} : ${m.ca.toFixed(2)} €`}>
+                      <span className="text-[8px] text-muted-foreground">{m.ca > 0 ? `${m.ca.toFixed(0)}€` : ""}</span>
+                      <div
+                        className={`w-full rounded-t transition-all ${isCurrent ? "bg-blue-500" : "bg-blue-300/60 dark:bg-blue-800/50"}`}
+                        style={{ height: `${h}%` }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="flex gap-1 mt-1">
+                {monthly.map(m => (
+                  <div key={m.label} className="flex-1 text-center">
+                    <span className="text-[8px] text-muted-foreground">{m.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Boutiques + Qualité ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            {/* Top boutiques */}
+            <div>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                <ShoppingBag className="h-3 w-3" /> Top boutiques (par CA)
+              </p>
+              <div className="tool-card p-3 space-y-2">
+                {boutiqueStats.length === 0 && (
+                  <p className="text-xs text-muted-foreground text-center py-4">Aucune donnée</p>
+                )}
+                {boutiqueStats.slice(0, 6).map((b, i) => (
+                  <div key={b.name}>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5">
+                        {i === 0 && <Star className="h-3 w-3 text-amber-400 fill-amber-400" />}
+                        <span className="font-medium truncate max-w-[120px]">{b.name}</span>
+                        <span className="text-muted-foreground text-[10px]">{b.count} cmd</span>
+                      </span>
+                      <span className="font-semibold text-blue-500">{b.ca.toFixed(2)} €</span>
+                    </div>
+                    <MiniBar value={b.ca} max={maxBar} color="bg-blue-400" />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Qualité */}
+            <div>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-1.5">
+                <Target className="h-3 w-3" /> Qualité & Santé
+              </p>
+              <div className="tool-card p-3 space-y-3">
+                {[
+                  { label: "Taux de livraison", value: tauxLivraison, color: "bg-emerald-400", good: true },
+                  { label: "Taux de litige", value: tauxLitige, color: "bg-red-400", good: false },
+                  { label: "Taux de retard", value: tauxRetard, color: "bg-amber-400", good: false },
+                ].map(row => (
+                  <div key={row.label}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="text-muted-foreground">{row.label}</span>
+                      <span className={`font-semibold ${row.good ? (row.value >= 80 ? "text-emerald-500" : "text-amber-500") : (row.value === 0 ? "text-emerald-500" : row.value < 5 ? "text-amber-500" : "text-red-500")}`}>
+                        {row.value.toFixed(1)}%
+                      </span>
+                    </div>
+                    <div className="w-full bg-secondary rounded-full h-2">
+                      <div className={`${row.color} h-2 rounded-full`} style={{ width: `${Math.min(row.value, 100)}%` }} />
+                    </div>
+                  </div>
+                ))}
+                <div className="pt-1 border-t border-border grid grid-cols-3 gap-2 text-center">
+                  {[
+                    { label: "Panier moyen", value: `${panierMoyen.toFixed(2)} €` },
+                    { label: "Total commandes", value: String(totalCommandes) },
+                    { label: "En cours", value: String(commandes.filter(c => ["Attente Expédition","Expedier"].includes(c.statutCommande)).length) },
+                  ].map(item => (
+                    <div key={item.label}>
+                      <p className="text-sm font-bold">{item.value}</p>
+                      <p className="text-[9px] text-muted-foreground">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── Répartition statuts + Top produits ── */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            {/* Statuts */}
+            <div>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Répartition par statut</p>
+              <div className="tool-card p-3 space-y-2">
+                {statusDist.map(s => (
+                  <div key={s.label}>
+                    <div className="flex justify-between text-xs mb-0.5">
+                      <span className="text-muted-foreground">{s.label}</span>
+                      <span className="font-semibold">
+                        {s.count}
+                        {totalCommandes > 0 && <span className="text-muted-foreground font-normal ml-1">({((s.count / totalCommandes) * 100).toFixed(0)}%)</span>}
+                      </span>
+                    </div>
+                    <MiniBar value={s.count} max={maxStatus} color={s.color} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Top produits */}
+            <div>
+              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-3">Top 5 produits (quantité)</p>
+              <div className="tool-card p-3 space-y-2">
+                {prodStats.length === 0 && <p className="text-xs text-muted-foreground text-center py-4">Aucune donnée</p>}
+                {prodStats.map((p, i) => (
+                  <div key={p.ref} className="flex items-center justify-between text-xs gap-2">
+                    <span className="text-muted-foreground w-4 shrink-0">{i + 1}.</span>
+                    <span className="flex-1 truncate font-medium" title={p.ref}>{p.ref}</span>
+                    <span className="text-violet-500 font-semibold shrink-0">{p.count} unité{p.count > 1 ? "s" : ""}</span>
+                    <span className="text-muted-foreground text-[10px] shrink-0">{p.ca.toFixed(0)} €</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose}>Fermer</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default function SuiviCommandesPage() {
@@ -200,6 +535,7 @@ export default function SuiviCommandesPage() {
   const [generating, setGenerating] = useState(false);
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [editingTaux, setEditingTaux] = useState(false);
+  const [statsOpen, setStatsOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetId = useRef<string | null>(null);
 
@@ -476,6 +812,10 @@ export default function SuiviCommandesPage() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h1 className="font-display text-2xl font-bold">Suivi Commandes</h1>
         <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => setStatsOpen(true)}>
+            <BarChart2 className="h-3.5 w-3.5" />
+            Statistiques
+          </Button>
           <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => setGenOpen(true)}>
             <FileText className="h-3.5 w-3.5" />
             Générer feuille mensuelle
@@ -711,6 +1051,9 @@ export default function SuiviCommandesPage() {
           </table>
         </div>
       </div>
+
+      {/* Stats */}
+      <StatsDialog open={statsOpen} onClose={() => setStatsOpen(false)} commandes={commandes} />
 
       {/* Add/Edit modal */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
