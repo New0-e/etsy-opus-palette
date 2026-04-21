@@ -872,38 +872,6 @@ export default function SuiviCommandesPage() {
         ))}
       </div>
 
-      {/* Financier — CA / Bénéfice brut / Bénéfice net */}
-      <div className="grid grid-cols-3 gap-2">
-        <div className="tool-card p-3 flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <TrendingUp className="h-3.5 w-3.5 text-blue-500" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">CA total</span>
-          </div>
-          <span className="text-lg font-bold text-blue-500">{stats.totalCA.toFixed(2)} €</span>
-          <span className="text-[10px] text-muted-foreground">Prix payés clients</span>
-        </div>
-        <div className="tool-card p-3 flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <TrendingUp className="h-3.5 w-3.5 text-amber-500" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Bénéfice brut</span>
-          </div>
-          <span className={`text-lg font-bold ${stats.totalBrut >= 0 ? "text-amber-500" : "text-red-500"}`}>
-            {stats.totalBrut.toFixed(2)} €
-          </span>
-          <span className="text-[10px] text-muted-foreground">Avant impôts</span>
-        </div>
-        <div className="tool-card p-3 flex flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <TrendingUp className="h-3.5 w-3.5 text-emerald-500" />
-            <span className="text-[10px] text-muted-foreground uppercase tracking-wide">Bénéfice net</span>
-          </div>
-          <span className={`text-lg font-bold ${stats.totalNet >= 0 ? "text-emerald-500" : "text-red-500"}`}>
-            {stats.totalNet.toFixed(2)} €
-          </span>
-          <span className="text-[10px] text-muted-foreground">Après impôts</span>
-        </div>
-      </div>
-
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
         <Input
