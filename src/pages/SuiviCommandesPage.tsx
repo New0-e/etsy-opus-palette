@@ -1059,7 +1059,7 @@ export default function SuiviCommandesPage() {
                   ? formatCountdown(c.attente8HStartedAt, now)
                   : null;
                 return (
-                  <tr key={c.id} className={`border-b border-border/50 hover:bg-secondary/30 transition-colors ${rowBg}`}>
+                  <tr key={c.id} className={`border-b border-border/50 transition-colors ${rowBg}`}>
                     {/* Actions — à gauche */}
                     <td className="px-2 py-1.5 whitespace-nowrap">
                       <div className="flex items-center gap-1">
