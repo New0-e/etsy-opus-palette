@@ -706,6 +706,9 @@ export default function SuiviCommandesPage() {
     return Array.from(set).sort();
   }, [commandes]);
 
+  const currentMonthKey = getMonthKey(new Date().toISOString());
+  const currentMonthSheetId = linkedSheets[currentMonthKey] ?? "";
+
   const displayed = useMemo(() => {
     if (sortBy !== "dateLimite") return filtered;
     return [...filtered].sort((a, b) => {
@@ -735,6 +738,10 @@ export default function SuiviCommandesPage() {
   };
 
   const openAdd = () => {
+    if (!currentMonthSheetId) {
+      toast.error(`Aucune feuille liée pour ${monthLabel(currentMonthKey)}. Liez un Google Sheet avant d'ajouter une commande.`, { duration: 6000 });
+      return;
+    }
     setEditId(null);
     setForm({ ...EMPTY, tauxImposition: loadTaux() });
     setEditingTaux(false);
@@ -929,10 +936,33 @@ export default function SuiviCommandesPage() {
             <FileText className="h-3.5 w-3.5" />
             Générer feuille mensuelle
           </Button>
-          <Button size="sm" className="gap-1.5 text-xs" onClick={openAdd}>
-            <Plus className="h-3.5 w-3.5" />
-            Nouvelle commande
-          </Button>
+          <div className="flex items-center gap-2">
+            {currentMonthSheetId ? (
+              <a
+                href={`https://docs.google.com/spreadsheets/d/${currentMonthSheetId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-700 rounded px-2 py-1 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-colors"
+                title="Feuille liée pour ce mois — cliquer pour ouvrir"
+              >
+                <Link2 className="h-3 w-3" />
+                {monthLabel(currentMonthKey)}
+              </a>
+            ) : (
+              <span
+                className="flex items-center gap-1.5 text-[11px] text-destructive border border-destructive/40 rounded px-2 py-1 cursor-pointer hover:bg-destructive/5 transition-colors"
+                onClick={() => setLinkOpen(true)}
+                title="Aucune feuille liée pour ce mois — cliquer pour en lier une"
+              >
+                <AlertTriangle className="h-3 w-3" />
+                Aucune feuille liée
+              </span>
+            )}
+            <Button size="sm" className="gap-1.5 text-xs" onClick={openAdd} disabled={!currentMonthSheetId}>
+              <Plus className="h-3.5 w-3.5" />
+              Nouvelle commande
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -1185,6 +1215,21 @@ export default function SuiviCommandesPage() {
           <DialogHeader>
             <DialogTitle>{editId ? "Modifier la commande" : "Nouvelle commande"}</DialogTitle>
           </DialogHeader>
+
+          {!editId && currentMonthSheetId && (
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-700 dark:text-emerald-400">
+              <Link2 className="h-3.5 w-3.5 flex-shrink-0" />
+              <span>Sera enregistrée dans <strong>{monthLabel(currentMonthKey)}</strong></span>
+              <a
+                href={`https://docs.google.com/spreadsheets/d/${currentMonthSheetId}`}
+                target="_blank"
+                rel="noreferrer"
+                className="ml-auto hover:underline flex items-center gap-1"
+              >
+                Ouvrir <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          )}
 
           <div className="space-y-5">
             {/* Section statuts */}
