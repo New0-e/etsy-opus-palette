@@ -1050,9 +1050,10 @@ export default function SuiviCommandesPage() {
               {displayed.map(c => {
                 const retard = isEnRetard(c);
                 const proche = !retard && isProcheDateLimite(c);
-                const rowBg = retard
+                const trackEnCours = c.statutTracktagos === "Attente 8H" || c.statutTracktagos === "Numéro de Suivi à changer";
+                const rowBg = !trackEnCours && retard
                   ? ROW_BG["Litige"] ?? ""
-                  : proche
+                  : !trackEnCours && proche
                     ? "bg-orange-50/60 dark:bg-orange-950/25"
                     : ROW_BG[c.statutCommande] ?? "";
                 const countdown = c.statutTracktagos === "Attente 8H" && c.attente8HStartedAt
@@ -1076,13 +1077,19 @@ export default function SuiviCommandesPage() {
                       <StatusBadge value={c.statutCommande} map={CMD_BADGE} />
                     </td>
                     {/* Date limite */}
-                    <td className={`px-2 py-1.5 whitespace-nowrap font-mono text-[10px] ${
-                      retard ? "text-red-500 font-semibold" : proche ? "text-orange-500 font-semibold" : ""
-                    }`}>
-                      {c.dateLimiteEnvoi || "—"}
-                      {retard && <span className="ml-1 text-[9px] text-red-500">⚠ retard</span>}
-                      {proche && <span className="ml-1 text-[9px] text-orange-500">⚠ demain</span>}
-                    </td>
+                    {(() => {
+                      const trackEnCours = c.statutTracktagos === "Attente 8H" || c.statutTracktagos === "Numéro de Suivi à changer";
+                      const showAlerte = !trackEnCours;
+                      return (
+                        <td className={`px-2 py-1.5 whitespace-nowrap font-mono text-[10px] ${
+                          showAlerte && retard ? "text-red-500 font-semibold" : showAlerte && proche ? "text-orange-500 font-semibold" : ""
+                        }`}>
+                          {c.dateLimiteEnvoi || "—"}
+                          {showAlerte && retard && <span className="ml-1 text-[9px] text-red-500">⚠ retard</span>}
+                          {showAlerte && proche && <span className="ml-1 text-[9px] text-orange-500">⚠ demain</span>}
+                        </td>
+                      );
+                    })()}
                     {/* Statut Tracktacos */}
                     <td className="px-2 py-1.5 whitespace-nowrap">
                       <StatusBadge value={c.statutTracktagos} map={TRACK_BADGE} />
