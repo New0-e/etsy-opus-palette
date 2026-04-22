@@ -7,6 +7,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShieldCheck, LogIn, ShieldAlert, Home, FolderOpen } from "lucide-react";
 import { driveStore, ALLOWED_EMAIL } from "@/lib/driveStore";
+import { type BottomTabId } from "@/lib/bottomTabsConfig";
 
 // ── PKCE helpers ───────────────────────────────────────────────────────────────
 
@@ -151,6 +152,7 @@ function AuthGate() {
 export default function DashboardLayout() {
   const [isAuthorized, setIsAuthorized] = useState(driveStore.isAuthorized());
   const [mobileDriveOpen, setMobileDriveOpen] = useState(false);
+  const [activeTabId, setActiveTabId] = useState<BottomTabId | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -166,7 +168,7 @@ export default function DashboardLayout() {
   return (
     <SidebarProvider>
       <div className="h-screen flex w-full overflow-hidden">
-        <AppSidebar />
+        <AppSidebar onOpenTab={(id) => setActiveTabId(prev => prev === id ? null : id)} activeTabId={activeTabId} />
         <div className="flex-1 flex flex-col overflow-hidden relative">
           {/* Mobile top bar */}
           <div className="md:hidden flex items-center gap-2 px-3 py-2 border-b border-border bg-background flex-shrink-0">
@@ -189,7 +191,7 @@ export default function DashboardLayout() {
           <main className="flex-1 overflow-auto p-6">
             <Outlet />
           </main>
-          <BottomTabs />
+          <BottomTabs activeId={activeTabId} onActiveChange={setActiveTabId} />
         </div>
         <DrivePanel mobileOpen={mobileDriveOpen} onMobileToggle={() => setMobileDriveOpen(v => !v)} />
       </div>

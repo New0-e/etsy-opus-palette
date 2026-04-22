@@ -1,45 +1,27 @@
-import { useState, useRef, useCallback } from "react";
-import { Table2, Store, FileText, X, ChevronUp, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
+import { useRef, useCallback } from "react";
+import { X, ChevronUp, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import { SheetsViewer } from "./SheetsViewer";
 import { NotepadViewer } from "./NotepadViewer";
-
-const TABS = [
-  {
-    id: "prompt",
-    title: "Bloc Note",
-    icon: FileText,
-    url: "",
-    type: "doc" as const,
-  },
-  {
-    id: "boutique",
-    title: "Liste Boutique",
-    icon: Store,
-    url: "https://docs.google.com/spreadsheets/d/1S1LsdSWUYZwBgFtcWu8hvOo27Y7rZCcyRShl7UI-zKo/edit?gid=1536179428#gid=1536179428",
-    type: "sheet" as const,
-  },
-  {
-    id: "tableau",
-    title: "Tableau Contrôle",
-    icon: Table2,
-    url: "https://docs.google.com/spreadsheets/d/1u3_-YtIYqCnO2YEPfLh1cCsjd2CcRiT1cKileCLA0Ig/edit?gid=0#gid=0",
-    type: "sheet" as const,
-  },
-] as const;
+import { BOTTOM_TABS, BottomTabId } from "@/lib/bottomTabsConfig";
+import { useState } from "react";
 
 const DEFAULT_HEIGHT = 420;
 const MIN_HEIGHT = 160;
-const TAB_BAR_H = 34; // height of the tab buttons bar
-const MOBILE_TOP_H = 44; // height of the mobile top bar (md:hidden)
+const TAB_BAR_H = 34;
+const MOBILE_TOP_H = 44;
 
-export function BottomTabs() {
-  const [activeId, setActiveId] = useState<string | null>(null);
+type Props = {
+  activeId: BottomTabId | null;
+  onActiveChange: (id: BottomTabId | null) => void;
+};
+
+export function BottomTabs({ activeId, onActiveChange }: Props) {
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
   const [maximized, setMaximized] = useState(false);
   const prevHeightRef = useRef(DEFAULT_HEIGHT);
   const resizing = useRef<{ startY: number; startH: number } | null>(null);
 
-  const active = TABS.find(t => t.id === activeId);
+  const active = BOTTOM_TABS.find(t => t.id === activeId);
   const maxHeight = () => {
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     return window.innerHeight - TAB_BAR_H - (isMobile ? MOBILE_TOP_H : 0);
@@ -75,7 +57,7 @@ export function BottomTabs() {
     window.addEventListener("mouseup", onUp);
   }, [height]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const toggle = (id: string) => setActiveId(prev => prev === id ? null : id);
+  const toggle = (id: BottomTabId) => onActiveChange(activeId === id ? null : id);
 
   return (
     <div className="flex-shrink-0 border-t border-border bg-background">
@@ -85,13 +67,13 @@ export function BottomTabs() {
           className={maximized ? "absolute inset-0 z-50 bg-background flex flex-col" : "flex flex-col"}
           style={maximized ? {} : { height }}
         >
-          {/* Resize handle — hidden when maximized */}
+          {/* Resize handle */}
           {!maximized && (
-          <div
-            className="h-1.5 cursor-row-resize hover:bg-primary/50 transition-colors flex-shrink-0 bg-border/60 group"
-            onMouseDown={startResize}
-            title="Redimensionner"
-          />
+            <div
+              className="h-1.5 cursor-row-resize hover:bg-primary/50 transition-colors flex-shrink-0 bg-border/60 group"
+              onMouseDown={startResize}
+              title="Redimensionner"
+            />
           )}
           {/* Panel header */}
           <div className="flex items-center gap-2 px-3 py-1.5 border-b border-border bg-secondary/40 flex-shrink-0">
@@ -117,7 +99,7 @@ export function BottomTabs() {
                 {maximized ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
               </button>
               <button
-                onClick={() => { setActiveId(null); setMaximized(false); }}
+                onClick={() => { onActiveChange(null); setMaximized(false); }}
                 className="text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded"
                 title="Fermer"
               >
@@ -125,7 +107,7 @@ export function BottomTabs() {
               </button>
             </div>
           </div>
-          {/* Content — key forces remount on tab switch */}
+          {/* Content */}
           <div key={activeId} className="flex-1 overflow-hidden">
             {active.type === "sheet" && <SheetsViewer url={active.url} />}
             {active.type === "doc" && <NotepadViewer />}
@@ -135,7 +117,7 @@ export function BottomTabs() {
 
       {/* Tab bar */}
       <div className="flex items-center h-8 px-2 gap-0.5 overflow-x-auto scrollbar-none">
-        {TABS.map(tab => {
+        {BOTTOM_TABS.map(tab => {
           const isActive = activeId === tab.id;
           return (
             <button

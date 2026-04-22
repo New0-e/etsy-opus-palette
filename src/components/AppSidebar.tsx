@@ -10,6 +10,7 @@ import {
   SidebarFooter, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { BOTTOM_TABS, type BottomTabId } from "@/lib/bottomTabsConfig";
 
 const mainTools = [
   { title: "Gen Fiches Produits", url: "/creation-fiche", icon: FileText },
@@ -26,7 +27,12 @@ const secondaryTools = [
   { title: "Idées sous Niche", url: "/generation-idee-sous-niche", icon: Layers },
 ];
 
-export function AppSidebar() {
+type Props = {
+  onOpenTab: (id: BottomTabId) => void;
+  activeTabId: BottomTabId | null;
+};
+
+export function AppSidebar({ onOpenTab, activeTabId }: Props) {
   const location = useLocation();
   const isActive = (path: string) => location.pathname === path;
   const { setOpenMobile } = useSidebar();
@@ -86,6 +92,17 @@ export function AppSidebar() {
 
       <SidebarFooter className="p-0">
         <div className="p-4 pt-2 border-t border-sidebar-border space-y-1.5">
+          {BOTTOM_TABS.map(tab => (
+            <SidebarMenuButton
+              key={tab.id}
+              isActive={activeTabId === tab.id}
+              onClick={() => { onOpenTab(tab.id); closeOnMobile(); }}
+              className="w-full"
+            >
+              <tab.icon className="h-4 w-4" />
+              <span className="group-data-[collapsible=icon]:hidden">{tab.title}</span>
+            </SidebarMenuButton>
+          ))}
           <SidebarMenuButton asChild isActive={isActive("/suivi-commandes")} onClick={closeOnMobile}>
             <NavLink to="/suivi-commandes" end activeClassName="bg-sidebar-accent text-primary font-medium">
               <ClipboardList className="h-4 w-4" />
