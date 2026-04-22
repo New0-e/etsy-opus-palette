@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from "react";
-import { Table2, Store, Package, FileText, X, ChevronUp, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
+import { Table2, Store, FileText, X, ChevronUp, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import { SheetsViewer } from "./SheetsViewer";
 import { NotepadViewer } from "./NotepadViewer";
 
@@ -16,13 +16,6 @@ const TABS = [
     title: "Liste Boutique",
     icon: Store,
     url: "https://docs.google.com/spreadsheets/d/1S1LsdSWUYZwBgFtcWu8hvOo27Y7rZCcyRShl7UI-zKo/edit?gid=1536179428#gid=1536179428",
-    type: "sheet" as const,
-  },
-  {
-    id: "commande",
-    title: "Suivi Commande",
-    icon: Package,
-    url: "https://docs.google.com/spreadsheets/d/1kM5fQ_3upj86gdlw0-1w9kUqavodpi6XOlM05sExe9g/edit?gid=495771845#gid=495771845",
     type: "sheet" as const,
   },
   {

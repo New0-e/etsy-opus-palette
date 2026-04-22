@@ -134,7 +134,7 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
       <div className="p-2 flex items-center justify-between border-b border-border flex-shrink-0">
         {(isOpen || !isMobile) && (
           <div className="flex items-center gap-1 px-1 min-w-0 flex-1">
-            <span className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider flex-shrink-0">Drive</span>
+            <span className="text-xs font-display font-semibold text-muted-foreground uppercase tracking-wider flex-shrink-0">Suivi commande</span>
             <a href="https://drive.google.com" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground ml-1 flex-shrink-0">
               <ExternalLink className="h-3 w-3" />
             </a>
