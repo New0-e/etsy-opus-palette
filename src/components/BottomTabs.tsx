@@ -1,5 +1,5 @@
 import { useRef, useCallback } from "react";
-import { X, ChevronUp, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
+import { X, ExternalLink, Maximize2, Minimize2 } from "lucide-react";
 import { SheetsViewer } from "./SheetsViewer";
 import { NotepadViewer } from "./NotepadViewer";
 import { BOTTOM_TABS, BottomTabId } from "@/lib/bottomTabsConfig";
@@ -57,8 +57,6 @@ export function BottomTabs({ activeId, onActiveChange }: Props) {
     window.addEventListener("mouseup", onUp);
   }, [height]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const toggle = (id: BottomTabId) => onActiveChange(activeId === id ? null : id);
-
   return (
     <div className="flex-shrink-0 border-t border-border bg-background">
       {/* Panel */}
@@ -115,27 +113,6 @@ export function BottomTabs({ activeId, onActiveChange }: Props) {
         </div>
       )}
 
-      {/* Tab bar */}
-      <div className="flex items-center h-8 px-2 gap-0.5 overflow-x-auto scrollbar-none">
-        {BOTTOM_TABS.map(tab => {
-          const isActive = activeId === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => toggle(tab.id)}
-              className={`flex items-center gap-1.5 px-2.5 h-6 rounded text-xs font-medium transition-colors ${
-                isActive
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "text-muted-foreground hover:text-foreground hover:bg-secondary"
-              }`}
-            >
-              <tab.icon className="h-3 w-3 flex-shrink-0" />
-              <span>{tab.title}</span>
-              {isActive && <ChevronUp className="h-3 w-3" />}
-            </button>
-          );
-        })}
-      </div>
     </div>
   );
 }
