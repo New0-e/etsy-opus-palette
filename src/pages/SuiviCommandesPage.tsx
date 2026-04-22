@@ -909,7 +909,7 @@ export default function SuiviCommandesPage() {
 
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h1 className="font-display text-2xl font-bold">Suivi Commandes</h1>
+        <h1 className="font-display text-2xl font-bold">Suivi Commande</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => setStatsOpen(true)}>
             <BarChart2 className="h-3.5 w-3.5" />

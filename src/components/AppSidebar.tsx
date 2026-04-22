@@ -89,7 +89,7 @@ export function AppSidebar() {
           <SidebarMenuButton asChild isActive={isActive("/suivi-commandes")} onClick={closeOnMobile}>
             <NavLink to="/suivi-commandes" end activeClassName="bg-sidebar-accent text-primary font-medium">
               <ClipboardList className="h-4 w-4" />
-              <span className="group-data-[collapsible=icon]:hidden">Suivi (TEST)</span>
+              <span className="group-data-[collapsible=icon]:hidden">Suivi Commande</span>
             </NavLink>
           </SidebarMenuButton>
           <Button
