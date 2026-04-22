@@ -696,6 +696,19 @@ export const driveStore = {
     } catch { return false; }
   },
 
+  /** Clears rows from A2 then writes new data — used for full sync to a linked sheet. */
+  async syncSheetRows(spreadsheetId: string, rows: string[][]): Promise<boolean> {
+    if (!_token) return false;
+    try {
+      await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/A2:Z9999:clear`,
+        { method: "POST", headers: { Authorization: `Bearer ${_token}` } }
+      );
+      if (rows.length === 0) return true;
+      return this.writeSheetRows(spreadsheetId, rows);
+    } catch { return false; }
+  },
+
   async fetchAsFile(id: string, name: string): Promise<File | null> {
     if (!_token) return null;
     try {

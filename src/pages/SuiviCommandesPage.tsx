@@ -9,6 +9,7 @@ import {
   Plus, Pencil, Trash2, Upload, Loader2, FileText,
   Package, Clock, CheckCircle2, AlertTriangle, TrendingUp, RefreshCw, X, ExternalLink,
   BarChart2, ArrowUpRight, ArrowDownRight, ShoppingBag, Star, Target, Minus,
+  Link2, ArrowUpDown,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -96,6 +97,37 @@ function saveTaux(t: string) {
   localStorage.setItem(TAUX_KEY, t);
 }
 
+// linked sheets : { "2026-04": "sheetId", "2026-03": "sheetId", ... }
+const LINKED_SHEETS_KEY = "suivi-linked-sheets";
+function loadLinkedSheets(): Record<string, string> {
+  try { return JSON.parse(localStorage.getItem(LINKED_SHEETS_KEY) ?? "{}"); } catch { return {}; }
+}
+function saveLinkedSheets(map: Record<string, string>) {
+  localStorage.setItem(LINKED_SHEETS_KEY, JSON.stringify(map));
+}
+function getMonthKey(dateStr: string): string {
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+}
+function monthLabel(key: string): string {
+  const [year, month] = key.split("-");
+  return `${MOIS[parseInt(month) - 1]} ${year}`;
+}
+function extractSheetId(input: string): string {
+  const m = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : input.trim();
+}
+
+function commandeToRow(c: Commande): string[] {
+  return [
+    c.statutCommande, c.dateLimiteEnvoi, c.statutTracktagos,
+    c.noEtsy, c.noAliexpress, c.noTracktagos, c.boutique,
+    c.refProduit, c.variante, c.quantite, c.infoClient,
+    c.docEtsyFileName || "", c.prixProduit, c.prixLivraison,
+    c.fraisEtsy, c.prixPayeClient, c.estimationBenefice,
+  ];
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 function calcBenefBrut(f: Partial<Commande>): number {
@@ -114,6 +146,13 @@ function calcBenef(f: Partial<Commande>): string {
 function isEnRetard(c: Commande): boolean {
   if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
   return new Date(c.dateLimiteEnvoi) < new Date(new Date().toDateString());
+}
+
+function isProcheDateLimite(c: Commande): boolean {
+  if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return new Date(c.dateLimiteEnvoi).toDateString() === tomorrow.toDateString();
 }
 
 function fmt(n: string) {
@@ -537,6 +576,11 @@ export default function SuiviCommandesPage() {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [editingTaux, setEditingTaux] = useState(false);
   const [statsOpen, setStatsOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<"none" | "dateLimite">("none");
+  const [filterMonth, setFilterMonth] = useState("all");
+  const [linkedSheets, setLinkedSheets] = useState<Record<string, string>>(() => loadLinkedSheets());
+  const [linkOpen, setLinkOpen] = useState(false);
+  const [linkInputs, setLinkInputs] = useState<Record<string, string>>({});
   // key = nom de l'onglet (boutique), value = liste de produits
   const [produitsBoutique, setProduitsBoutique] = useState<Record<string, { num: string; nom: string }[]>>({});
   const [loadingProduits, setLoadingProduits] = useState(false);
@@ -573,6 +617,14 @@ export default function SuiviCommandesPage() {
     }
   };
 
+  const syncLinkedSheet = async (monthKey: string, allCommandes: Commande[]) => {
+    const sheetId = loadLinkedSheets()[monthKey];
+    if (!sheetId || !driveStore.isAuthorized()) return;
+    const monthCommandes = allCommandes.filter(c => getMonthKey(c.createdAt) === monthKey);
+    const ok = await driveStore.syncSheetRows(sheetId, monthCommandes.map(commandeToRow));
+    if (!ok) toast.warning(`Synchro ${monthLabel(monthKey)} échouée`, { duration: 4000 });
+  };
+
   useEffect(() => { fetchShops(); fetchProduits(); }, []);
 
   // Tick every second for countdown
@@ -604,8 +656,14 @@ export default function SuiviCommandesPage() {
 
   // ── Computed ───────────────────────────────────────────────────────────────
 
+  const monthsUsed = useMemo(() => {
+    const set = new Set(commandes.map(c => getMonthKey(c.createdAt)));
+    return Array.from(set).sort().reverse();
+  }, [commandes]);
+
   const filtered = useMemo(() => {
     return commandes.filter(c => {
+      if (filterMonth !== "all" && getMonthKey(c.createdAt) !== filterMonth) return false;
       if (filterStatut !== "all" && c.statutCommande !== filterStatut) return false;
       if (filterBoutique !== "all" && c.boutique !== filterBoutique) return false;
       if (filterTracktagos !== "all" && c.statutTracktagos !== filterTracktagos) return false;
@@ -618,7 +676,7 @@ export default function SuiviCommandesPage() {
       }
       return true;
     });
-  }, [commandes, filterStatut, filterBoutique, filterTracktagos, search]);
+  }, [commandes, filterMonth, filterStatut, filterBoutique, filterTracktagos, search]);
 
   const stats = useMemo(() => {
     const n = (v: string) => parseFloat(v) || 0;
@@ -647,6 +705,15 @@ export default function SuiviCommandesPage() {
     const set = new Set(commandes.map(c => c.boutique).filter(Boolean));
     return Array.from(set).sort();
   }, [commandes]);
+
+  const displayed = useMemo(() => {
+    if (sortBy !== "dateLimite") return filtered;
+    return [...filtered].sort((a, b) => {
+      if (!a.dateLimiteEnvoi) return 1;
+      if (!b.dateLimiteEnvoi) return -1;
+      return a.dateLimiteEnvoi.localeCompare(b.dateLimiteEnvoi);
+    });
+  }, [filtered, sortBy]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -686,27 +753,36 @@ export default function SuiviCommandesPage() {
     const data = { ...form, estimationBenefice: calcBenef(form) || form.estimationBenefice };
     if (form.tauxImposition !== loadTaux()) saveTaux(form.tauxImposition);
     let newList: Commande[];
+    let monthKey: string;
     if (editId) {
+      const original = commandes.find(c => c.id === editId);
+      monthKey = getMonthKey(original?.createdAt ?? new Date().toISOString());
       newList = commandes.map(c => c.id === editId ? { ...c, ...data } : c);
       toast.success("Commande modifiée");
     } else {
-      newList = [{ id: crypto.randomUUID(), createdAt: new Date().toISOString(), ...data }, ...commandes];
+      const createdAt = new Date().toISOString();
+      monthKey = getMonthKey(createdAt);
+      newList = [{ id: crypto.randomUUID(), createdAt, ...data }, ...commandes];
       toast.success("Commande ajoutée");
     }
     setCommandes(newList);
     saveCommandes(newList);
     setModalOpen(false);
+    syncLinkedSheet(monthKey, newList);
   };
 
   const confirmDelete = (id: string) => setDeleteId(id);
 
   const doDelete = () => {
     if (!deleteId) return;
+    const toDelete = commandes.find(c => c.id === deleteId);
+    const monthKey = toDelete ? getMonthKey(toDelete.createdAt) : "";
     const newList = commandes.filter(c => c.id !== deleteId);
     setCommandes(newList);
     saveCommandes(newList);
     setDeleteId(null);
     toast.success("Commande supprimée");
+    if (monthKey) syncLinkedSheet(monthKey, newList);
   };
 
   // ── Doc ETSY upload ────────────────────────────────────────────────────────
@@ -790,28 +866,10 @@ export default function SuiviCommandesPage() {
       });
 
       if (monthCommandes.length > 0) {
-        const rows = monthCommandes.map(c => [
-          c.statutCommande,
-          c.dateLimiteEnvoi,
-          c.statutTracktagos,
-          c.noEtsy,
-          c.noAliexpress,
-          c.noTracktagos,
-          c.boutique,
-          c.refProduit,
-          c.variante,
-          c.quantite,
-          c.infoClient,
-          c.docEtsyFileName || "",
-          c.prixProduit,
-          c.prixLivraison,
-          c.fraisEtsy,
-          c.prixPayeClient,
-          c.estimationBenefice,
-        ]);
-        await driveStore.writeSheetRows(sheetId, rows);
+        await driveStore.writeSheetRows(sheetId, monthCommandes.map(commandeToRow));
       }
 
+      const mKey = `${genYear}-${String(parseInt(genMonth)).padStart(2, "0")}`;
       toast.success(
         `Tableau créé : Suivi commandes - ${monthName} ${genYear}` +
         (monthCommandes.length > 0 ? ` (${monthCommandes.length} commande${monthCommandes.length > 1 ? "s" : ""} exportée${monthCommandes.length > 1 ? "s" : ""})` : " (aucune commande ce mois)"),
@@ -822,6 +880,20 @@ export default function SuiviCommandesPage() {
           },
         }
       );
+      if (!loadLinkedSheets()[mKey]) {
+        toast.info(`Lier ${monthLabel(mKey)} à cette feuille pour la synchro auto ?`, {
+          duration: 12000,
+          action: {
+            label: "Lier",
+            onClick: () => {
+              const updated = { ...loadLinkedSheets(), [mKey]: sheetId };
+              saveLinkedSheets(updated);
+              setLinkedSheets(updated);
+              toast.success(`${monthLabel(mKey)} lié ! Synchro automatique activée.`);
+            },
+          },
+        });
+      }
       setGenOpen(false);
     } finally {
       setGenerating(false);
@@ -842,6 +914,16 @@ export default function SuiviCommandesPage() {
           <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => setStatsOpen(true)}>
             <BarChart2 className="h-3.5 w-3.5" />
             Statistiques
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className={`gap-1.5 text-xs ${Object.keys(linkedSheets).length > 0 ? "text-emerald-600 border-emerald-400 dark:text-emerald-400" : ""}`}
+            onClick={() => setLinkOpen(true)}
+            title="Gérer les feuilles Google Sheets liées par mois"
+          >
+            <Link2 className="h-3.5 w-3.5" />
+            {Object.keys(linkedSheets).length > 0 ? `${Object.keys(linkedSheets).length} feuille${Object.keys(linkedSheets).length > 1 ? "s liées" : " liée"}` : "Lier des feuilles"}
           </Button>
           <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => setGenOpen(true)}>
             <FileText className="h-3.5 w-3.5" />
@@ -903,15 +985,40 @@ export default function SuiviCommandesPage() {
             {STATUTS_TRACKTAGOS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
           </SelectContent>
         </Select>
-        {(filterStatut !== "all" || filterBoutique !== "all" || filterTracktagos !== "all" || search) && (
+        <Select value={filterMonth} onValueChange={setFilterMonth}>
+          <SelectTrigger className={`h-8 text-xs w-36 ${filterMonth !== "all" ? "border-primary text-primary" : ""}`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les mois</SelectItem>
+            {monthsUsed.map(m => (
+              <SelectItem key={m} value={m}>
+                {monthLabel(m)}
+                {linkedSheets[m] && <span className="ml-1 text-emerald-500 text-[10px]">●</span>}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <button
+          onClick={() => setSortBy(s => s === "dateLimite" ? "none" : "dateLimite")}
+          className={`flex items-center gap-1 text-xs px-2 py-1 rounded border transition-colors ${
+            sortBy === "dateLimite"
+              ? "border-primary text-primary bg-primary/10"
+              : "border-border text-muted-foreground hover:text-foreground hover:border-muted-foreground"
+          }`}
+          title="Trier par date limite (les plus urgentes en premier)"
+        >
+          <ArrowUpDown className="h-3 w-3" /> Date limite
+        </button>
+        {(filterMonth !== "all" || filterStatut !== "all" || filterBoutique !== "all" || filterTracktagos !== "all" || search) && (
           <button
-            onClick={() => { setFilterStatut("all"); setFilterBoutique("all"); setFilterTracktagos("all"); setSearch(""); }}
+            onClick={() => { setFilterMonth("all"); setFilterStatut("all"); setFilterBoutique("all"); setFilterTracktagos("all"); setSearch(""); }}
             className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
           >
             <X className="h-3 w-3" /> Effacer filtres
           </button>
         )}
-        <span className="text-xs text-muted-foreground ml-auto">{filtered.length} commande{filtered.length !== 1 ? "s" : ""}</span>
+        <span className="text-xs text-muted-foreground ml-auto">{displayed.length} commande{displayed.length !== 1 ? "s" : ""}</span>
       </div>
 
       {/* Table */}
@@ -933,16 +1040,21 @@ export default function SuiviCommandesPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 && (
+              {displayed.length === 0 && (
                 <tr>
                   <td colSpan={18} className="text-center py-12 text-muted-foreground text-xs">
                     Aucune commande. Cliquez sur « Nouvelle commande » pour commencer.
                   </td>
                 </tr>
               )}
-              {filtered.map(c => {
+              {displayed.map(c => {
                 const retard = isEnRetard(c);
-                const rowBg = ROW_BG[c.statutCommande] ?? "";
+                const proche = !retard && isProcheDateLimite(c);
+                const rowBg = retard
+                  ? ROW_BG["Litige"] ?? ""
+                  : proche
+                    ? "bg-orange-50/60 dark:bg-orange-950/25"
+                    : ROW_BG[c.statutCommande] ?? "";
                 const countdown = c.statutTracktagos === "Attente 8H" && c.attente8HStartedAt
                   ? formatCountdown(c.attente8HStartedAt, now)
                   : null;
@@ -964,9 +1076,12 @@ export default function SuiviCommandesPage() {
                       <StatusBadge value={c.statutCommande} map={CMD_BADGE} />
                     </td>
                     {/* Date limite */}
-                    <td className={`px-2 py-1.5 whitespace-nowrap font-mono text-[10px] ${retard ? "text-red-500 font-semibold" : ""}`}>
+                    <td className={`px-2 py-1.5 whitespace-nowrap font-mono text-[10px] ${
+                      retard ? "text-red-500 font-semibold" : proche ? "text-orange-500 font-semibold" : ""
+                    }`}>
                       {c.dateLimiteEnvoi || "—"}
                       {retard && <span className="ml-1 text-[9px] text-red-500">⚠ retard</span>}
+                      {proche && <span className="ml-1 text-[9px] text-orange-500">⚠ demain</span>}
                     </td>
                     {/* Statut Tracktacos */}
                     <td className="px-2 py-1.5 whitespace-nowrap">
@@ -1316,6 +1431,93 @@ export default function SuiviCommandesPage() {
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setDeleteId(null)}>Annuler</Button>
             <Button variant="destructive" onClick={doDelete}>Supprimer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Link Google Sheets dialog — one sheet per month */}
+      <Dialog open={linkOpen} onOpenChange={setLinkOpen}>
+        <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Feuilles Google Sheets par mois</DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground mb-4">
+            Associez un Google Sheet à chaque mois. Chaque ajout, modification ou suppression de commande mettra à jour automatiquement la feuille correspondante.
+          </p>
+          {monthsUsed.length === 0 && (
+            <p className="text-xs text-muted-foreground text-center py-4">Aucune commande pour le moment.</p>
+          )}
+          <div className="space-y-3">
+            {monthsUsed.map(mk => {
+              const currentId = linkedSheets[mk] ?? "";
+              const inputVal = linkInputs[mk] ?? currentId;
+              return (
+                <div key={mk} className="p-3 rounded-lg border border-border bg-secondary/20 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold">{monthLabel(mk)}</span>
+                    {currentId && (
+                      <span className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400">
+                        <Link2 className="h-3 w-3" /> Liée
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      value={inputVal}
+                      onChange={e => setLinkInputs(prev => ({ ...prev, [mk]: e.target.value }))}
+                      placeholder="URL ou ID Google Sheet…"
+                      className="h-7 text-xs flex-1"
+                    />
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-7 text-xs px-2 shrink-0"
+                      onClick={() => {
+                        const id = extractSheetId(inputVal);
+                        if (!id) { toast.error("URL ou ID invalide"); return; }
+                        const updated = { ...linkedSheets, [mk]: id };
+                        saveLinkedSheets(updated);
+                        setLinkedSheets(updated);
+                        toast.success(`${monthLabel(mk)} lié !`);
+                      }}
+                    >
+                      Lier
+                    </Button>
+                    {currentId && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 text-xs px-2 text-destructive shrink-0"
+                        onClick={() => {
+                          const updated = { ...linkedSheets };
+                          delete updated[mk];
+                          saveLinkedSheets(updated);
+                          setLinkedSheets(updated);
+                          setLinkInputs(prev => ({ ...prev, [mk]: "" }));
+                          toast.success(`${monthLabel(mk)} dissocié`);
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
+                  {currentId && (
+                    <a
+                      href={`https://docs.google.com/spreadsheets/d/${currentId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-1 text-[10px] text-primary hover:underline"
+                    >
+                      <ExternalLink className="h-2.5 w-2.5" />
+                      Ouvrir dans Google Sheets
+                    </a>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setLinkOpen(false)}>Fermer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
