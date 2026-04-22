@@ -68,7 +68,7 @@ const CMD_BADGE: Record<string, string> = {
 const TRACK_BADGE: Record<string, string> = {
   "A traité":                    "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400",
   "Attente 8H":                  "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
-  "Numéro de Suivi à changer":   "bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-300",
+  "Numéro de Suivi à changer":   "bg-violet-100 text-violet-800 border border-violet-300 dark:bg-violet-900/40 dark:text-violet-300 dark:border-violet-700",
   "Terminé":                     "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
 };
 
@@ -1054,7 +1054,7 @@ export default function SuiviCommandesPage() {
                 const rowBg = !trackEnCours && retard
                   ? ROW_BG["Litige"] ?? ""
                   : !trackEnCours && proche
-                    ? "bg-orange-50/60 dark:bg-orange-950/25"
+                    ? "bg-violet-50/60 dark:bg-violet-950/25"
                     : ROW_BG[c.statutCommande] ?? "";
                 const countdown = c.statutTracktagos === "Attente 8H" && c.attente8HStartedAt
                   ? formatCountdown(c.attente8HStartedAt, now)
