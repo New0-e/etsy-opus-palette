@@ -184,6 +184,26 @@ function StatusBadge({ value, map }: { value: string; map: Record<string, string
   );
 }
 
+function InlineStatusSelect({ value, options, map, onChange }: {
+  value: string; options: readonly string[]; map: Record<string, string>;
+  onChange: (v: string) => void;
+}) {
+  const cls = map[value] ?? "bg-secondary text-muted-foreground";
+  return (
+    <div className="relative inline-block">
+      <select
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className={`appearance-none cursor-pointer px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap border-0 outline-none pr-4 ${cls}`}
+        style={{ backgroundImage: "none" }}
+      >
+        {options.map(o => <option key={o} value={o}>{o}</option>)}
+      </select>
+      <span className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-[8px] opacity-60">▼</span>
+    </div>
+  );
+}
+
 const NONE = "__none__";
 
 function SelectField({ label, value, options, onChange }: {
@@ -720,6 +740,21 @@ export default function SuiviCommandesPage() {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
+  const updateStatutInline = (id: string, key: "statutCommande" | "statutTracktagos", val: string) => {
+    const newList = commandes.map(c => {
+      if (c.id !== id) return c;
+      const updated = { ...c, [key]: val };
+      if (key === "statutTracktagos") {
+        updated.attente8HStartedAt = val === "Attente 8H" ? new Date().toISOString() : "";
+      }
+      return updated;
+    });
+    setCommandes(newList);
+    saveCommandes(newList);
+    const monthKey = getMonthKey(commandes.find(c => c.id === id)?.createdAt ?? new Date().toISOString());
+    syncLinkedSheet(monthKey, newList);
+  };
+
   const patch = (key: keyof typeof form, val: string) => {
     setForm(prev => {
       const next = { ...prev, [key]: val };
@@ -1058,7 +1093,7 @@ export default function SuiviCommandesPage() {
             <thead className="sticky top-0 z-10 bg-secondary/80 backdrop-blur">
               <tr>
                 {[
-                  "", "Statut commande", "Date limite", "Statut Tracktacos",
+                  "", "Statut commande", "Statut Tracktacos", "Date limite",
                   "N° ETSY", "N° Aliexpress", "N° Tracktagos", "Boutique",
                   "Ref Produit", "Variante", "Qté", "Info Client", "Doc ETSY",
                   "Prix Produit", "Livraison", "Frais Etsy", "Prix Payé", "Bénéfice net",
@@ -1104,7 +1139,17 @@ export default function SuiviCommandesPage() {
                     </td>
                     {/* Statut commande */}
                     <td className="px-2 py-1.5 whitespace-nowrap">
-                      <StatusBadge value={c.statutCommande} map={CMD_BADGE} />
+                      <InlineStatusSelect value={c.statutCommande} options={STATUTS_COMMANDE} map={CMD_BADGE} onChange={v => updateStatutInline(c.id, "statutCommande", v)} />
+                    </td>
+                    {/* Statut Tracktacos */}
+                    <td className="px-2 py-1.5 whitespace-nowrap">
+                      <InlineStatusSelect value={c.statutTracktagos} options={STATUTS_TRACKTAGOS} map={TRACK_BADGE} onChange={v => updateStatutInline(c.id, "statutTracktagos", v)} />
+                      {countdown && (
+                        <div className={`mt-0.5 font-mono text-[10px] font-semibold ${countdown.expired ? "text-orange-500" : "text-yellow-600 dark:text-yellow-400"}`}>
+                          <Clock className="inline h-2.5 w-2.5 mr-0.5" />
+                          {countdown.label}
+                        </div>
+                      )}
                     </td>
                     {/* Date limite */}
                     {(() => {
@@ -1120,16 +1165,6 @@ export default function SuiviCommandesPage() {
                         </td>
                       );
                     })()}
-                    {/* Statut Tracktacos */}
-                    <td className="px-2 py-1.5 whitespace-nowrap">
-                      <StatusBadge value={c.statutTracktagos} map={TRACK_BADGE} />
-                      {countdown && (
-                        <div className={`mt-0.5 font-mono text-[10px] font-semibold ${countdown.expired ? "text-orange-500" : "text-yellow-600 dark:text-yellow-400"}`}>
-                          <Clock className="inline h-2.5 w-2.5 mr-0.5" />
-                          {countdown.label}
-                        </div>
-                      )}
-                    </td>
                     {/* N° ETSY */}
                     <td className="px-2 py-1.5 font-mono text-[10px] whitespace-nowrap">{c.noEtsy || "—"}</td>
                     {/* N° ALIEXPRESS */}
