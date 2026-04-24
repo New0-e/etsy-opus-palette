@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { driveStore } from "@/lib/driveStore";
+import { saveToDrive, loadFromDrive, clearDriveCache } from "@/lib/suiviSync";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +10,7 @@ import {
   Plus, Pencil, Trash2, Upload, Loader2, FileText,
   Package, Clock, CheckCircle2, AlertTriangle, TrendingUp, RefreshCw, X, ExternalLink,
   BarChart2, ArrowUpRight, ArrowDownRight, ShoppingBag, Star, Target, Minus,
-  Link2, ArrowUpDown,
+  Link2, ArrowUpDown, Cloud, CloudOff,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -606,6 +607,27 @@ export default function SuiviCommandesPage() {
   const [loadingProduits, setLoadingProduits] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetId = useRef<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "ok" | "error">("idle");
+  const driveSyncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Déclenche une sync Drive 2s après le dernier changement (debounce)
+  const scheduleDriveSync = useCallback((
+    nextCommandes: Commande[],
+    nextLinked: Record<string, string>,
+    nextTaux: string
+  ) => {
+    if (!driveStore.isAuthorized()) return;
+    if (driveSyncTimer.current) clearTimeout(driveSyncTimer.current);
+    setSyncStatus("syncing");
+    driveSyncTimer.current = setTimeout(async () => {
+      const ok = await saveToDrive({
+        commandes: nextCommandes,
+        linkedSheets: nextLinked,
+        tauxImposition: nextTaux,
+      });
+      setSyncStatus(ok ? "ok" : "error");
+    }, 2000);
+  }, []);
 
   const fetchShops = async () => {
     if (!driveStore.isAuthorized()) return;
@@ -645,7 +667,37 @@ export default function SuiviCommandesPage() {
     if (!ok) toast.warning(`Synchro ${monthLabel(monthKey)} échouée`, { duration: 4000 });
   };
 
-  useEffect(() => { fetchShops(); fetchProduits(); }, []);
+  useEffect(() => {
+    fetchShops();
+    fetchProduits();
+
+    // Charge depuis Drive au démarrage — si Drive est plus récent que localStorage, on l'utilise
+    if (driveStore.isAuthorized()) {
+      loadFromDrive().then(remote => {
+        if (!remote) return;
+        const localRaw = localStorage.getItem("suivi-commandes-v1");
+        const localCommandes: Commande[] = localRaw ? JSON.parse(localRaw) : [];
+        // Compare les timestamps : prend la source la plus récente
+        const localLastSaved = localCommandes.length > 0
+          ? Math.max(...localCommandes.map(c => new Date(c.createdAt).getTime()))
+          : 0;
+        const remoteLastSaved = new Date(remote.lastSaved).getTime();
+
+        if (remoteLastSaved > localLastSaved || localCommandes.length === 0) {
+          // Drive est plus récent → on écrase le localStorage et on met à jour l'UI
+          localStorage.setItem("suivi-commandes-v1", JSON.stringify(remote.commandes));
+          localStorage.setItem("suivi-linked-sheets", JSON.stringify(remote.linkedSheets));
+          if (remote.tauxImposition) localStorage.setItem("suivi-taux-imposition", remote.tauxImposition);
+          setCommandes(remote.commandes);
+          setLinkedSheets(remote.linkedSheets);
+          setSyncStatus("ok");
+          toast.success("Données synchronisées depuis Google Drive", { duration: 3000 });
+        } else {
+          setSyncStatus("ok");
+        }
+      }).catch(() => setSyncStatus("idle"));
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Tick every second for countdown
   useEffect(() => {
@@ -751,6 +803,7 @@ export default function SuiviCommandesPage() {
     });
     setCommandes(newList);
     saveCommandes(newList);
+    scheduleDriveSync(newList, linkedSheets, loadTaux());
     const monthKey = getMonthKey(commandes.find(c => c.id === id)?.createdAt ?? new Date().toISOString());
     syncLinkedSheet(monthKey, newList);
   };
@@ -809,6 +862,7 @@ export default function SuiviCommandesPage() {
     }
     setCommandes(newList);
     saveCommandes(newList);
+    scheduleDriveSync(newList, linkedSheets, data.tauxImposition || loadTaux());
     setModalOpen(false);
     syncLinkedSheet(monthKey, newList);
   };
@@ -822,6 +876,7 @@ export default function SuiviCommandesPage() {
     const newList = commandes.filter(c => c.id !== deleteId);
     setCommandes(newList);
     saveCommandes(newList);
+    scheduleDriveSync(newList, linkedSheets, loadTaux());
     setDeleteId(null);
     toast.success("Commande supprimée");
     if (monthKey) syncLinkedSheet(monthKey, newList);
@@ -931,6 +986,7 @@ export default function SuiviCommandesPage() {
               const updated = { ...loadLinkedSheets(), [mKey]: sheetId };
               saveLinkedSheets(updated);
               setLinkedSheets(updated);
+              scheduleDriveSync(commandes, updated, loadTaux());
               toast.success(`${monthLabel(mKey)} lié ! Synchro automatique activée.`);
             },
           },
@@ -991,6 +1047,30 @@ export default function SuiviCommandesPage() {
               >
                 <AlertTriangle className="h-3 w-3" />
                 Aucune feuille liée
+              </span>
+            )}
+            {/* Indicateur sync Drive */}
+            {driveStore.isAuthorized() && (
+              <span
+                className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded transition-colors ${
+                  syncStatus === "syncing" ? "text-primary/60" :
+                  syncStatus === "ok"      ? "text-emerald-500" :
+                  syncStatus === "error"   ? "text-destructive" :
+                  "text-muted-foreground/30"
+                }`}
+                title={
+                  syncStatus === "syncing" ? "Synchronisation Drive en cours…" :
+                  syncStatus === "ok"      ? "Données sauvegardées sur Google Drive" :
+                  syncStatus === "error"   ? "Erreur de sync Drive — données sauvegardées en local" :
+                  "Non synchronisé"
+                }
+              >
+                {syncStatus === "syncing"
+                  ? <Loader2 className="h-3 w-3 animate-spin" />
+                  : syncStatus === "error"
+                    ? <CloudOff className="h-3 w-3" />
+                    : <Cloud className="h-3 w-3" />
+                }
               </span>
             )}
             <Button size="sm" className="gap-1.5 text-xs" onClick={openAdd} disabled={!currentMonthSheetId}>
@@ -1565,6 +1645,7 @@ export default function SuiviCommandesPage() {
                         const updated = { ...linkedSheets, [mk]: id };
                         saveLinkedSheets(updated);
                         setLinkedSheets(updated);
+                        scheduleDriveSync(commandes, updated, loadTaux());
                         toast.success(`${monthLabel(mk)} lié !`);
                       }}
                     >
@@ -1580,6 +1661,7 @@ export default function SuiviCommandesPage() {
                           delete updated[mk];
                           saveLinkedSheets(updated);
                           setLinkedSheets(updated);
+                          scheduleDriveSync(commandes, updated, loadTaux());
                           setLinkInputs(prev => ({ ...prev, [mk]: "" }));
                           toast.success(`${monthLabel(mk)} dissocié`);
                         }}
