@@ -5,6 +5,24 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { getFavorites, addFavorite, removeFavorite } from "@/lib/colorFavorites";
 
+// Palette de couleurs rapides (fond ou texte avec Shift)
+const QUICK_COLORS = [
+  { value: "#ffffff", label: "Blanc" },
+  { value: "#f3f3f3", label: "Gris clair" },
+  { value: "#fce8e8", label: "Rouge pâle" },
+  { value: "#fff3cd", label: "Jaune pâle" },
+  { value: "#d4edda", label: "Vert pâle" },
+  { value: "#d1ecf1", label: "Bleu pâle" },
+  { value: "#e8d5f5", label: "Violet pâle" },
+  { value: "#ffd6cc", label: "Orange pâle" },
+  { value: "#f5a623", label: "Orange" },
+  { value: "#f44336", label: "Rouge" },
+  { value: "#4caf50", label: "Vert" },
+  { value: "#2196f3", label: "Bleu" },
+  { value: "#9c27b0", label: "Violet" },
+  { value: "#212121", label: "Noir" },
+];
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function extractIds(url: string) {
@@ -476,61 +494,105 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
 
       {/* Barre de mise en forme cellule */}
       {hasToken && (
-        <div className="flex items-center gap-2 px-3 py-1 border-b border-border bg-background flex-shrink-0 flex-wrap">
-          <Palette className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-          <span className="text-xs text-muted-foreground">
-            {selectedCell ? `L${selectedCell.ri + 1} C${selectedCell.ci + 1}` : "—"}
-          </span>
-          <div className="w-px h-3.5 bg-border" />
-          {/* Fond */}
-          <label className="flex items-center gap-1 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors" title="Couleur de fond">
-            <div className="w-3.5 h-3.5 rounded border border-border flex-shrink-0" style={{ backgroundColor: fmtBg }} />
-            <span>Fond</span>
-            <input type="color" className="absolute opacity-0 w-0 h-0" value={fmtBg}
-              onChange={e => { setFmtBg(e.target.value); applyFormat({ bgColor: e.target.value }); }} />
-          </label>
-          <div className="w-px h-3.5 bg-border" />
-          {/* Texte */}
-          <label className="flex items-center gap-1 cursor-pointer text-xs text-muted-foreground hover:text-foreground transition-colors" title="Couleur du texte">
-            <span className="text-xs font-bold border-b-2 leading-none" style={{ color: fmtText, borderColor: fmtText }}>A</span>
-            <span>Texte</span>
-            <input type="color" className="absolute opacity-0 w-0 h-0" value={fmtText}
-              onChange={e => { setFmtText(e.target.value); applyFormat({ textColor: e.target.value }); }} />
-          </label>
-          <div className="w-px h-3.5 bg-border" />
-          {/* Taille */}
-          <select
-            className="text-xs bg-secondary border border-border rounded px-1 h-5 outline-none cursor-pointer"
-            onChange={e => { if (e.target.value) { applyFormat({ fontSize: Number(e.target.value) }); e.currentTarget.value = ""; } }}
-            defaultValue=""
-          >
-            <option value="" disabled>Taille</option>
-            {[8, 9, 10, 11, 12, 14, 16, 18, 20, 24].map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-          {fmtApplying && <Loader2 className="h-3 w-3 animate-spin text-primary" />}
-          {!selectedCell && <span className="text-xs text-muted-foreground/40">← sélectionne une cellule</span>}
-          <div className="w-px h-3.5 bg-border" />
-          {/* Favoris couleurs */}
-          <Star className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-          {favorites.map((fav, i) => (
+        <div className="flex flex-col border-b border-border bg-background flex-shrink-0">
+          {/* Ligne 1 : référence + pickers + taille + favoris */}
+          <div className="flex items-center gap-1.5 px-3 py-1 flex-wrap">
+            <Palette className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+            <span className="text-xs text-muted-foreground min-w-[48px]">
+              {selectedCell ? `L${selectedCell.ri + 1} C${selectedCell.ci + 1}` : "—"}
+            </span>
+            {fmtApplying && <Loader2 className="h-3 w-3 animate-spin text-primary flex-shrink-0" />}
+            <div className="w-px h-3.5 bg-border flex-shrink-0" />
+
+            {/* Couleur de fond */}
+            <label
+              className="flex items-center gap-1 cursor-pointer group text-xs text-muted-foreground hover:text-foreground transition-colors"
+              title="Couleur de fond — ouvre le sélecteur, appliqué en fermant"
+            >
+              <div className="w-4 h-4 rounded border border-border flex-shrink-0 shadow-sm" style={{ backgroundColor: fmtBg }} />
+              <span>Fond</span>
+              <input
+                type="color"
+                className="sr-only"
+                value={fmtBg}
+                onChange={e => setFmtBg(e.target.value)}
+                onBlur={e => { if (selectedCell) applyFormat({ bgColor: e.target.value }); }}
+              />
+            </label>
+
+            {/* Couleur du texte */}
+            <label
+              className="flex items-center gap-1 cursor-pointer group text-xs text-muted-foreground hover:text-foreground transition-colors"
+              title="Couleur du texte — ouvre le sélecteur, appliqué en fermant"
+            >
+              <span className="text-sm font-bold border-b-2 leading-none px-0.5" style={{ color: fmtText, borderColor: fmtText }}>A</span>
+              <span>Texte</span>
+              <input
+                type="color"
+                className="sr-only"
+                value={fmtText}
+                onChange={e => setFmtText(e.target.value)}
+                onBlur={e => { if (selectedCell) applyFormat({ textColor: e.target.value }); }}
+              />
+            </label>
+
+            <div className="w-px h-3.5 bg-border flex-shrink-0" />
+
+            {/* Taille de police */}
+            <select
+              className="text-xs bg-secondary border border-border rounded px-1 h-5 outline-none cursor-pointer"
+              onChange={e => { if (e.target.value) { applyFormat({ fontSize: Number(e.target.value) }); e.currentTarget.value = ""; } }}
+              defaultValue=""
+            >
+              <option value="" disabled>Taille</option>
+              {[8, 9, 10, 11, 12, 14, 16, 18, 20, 24].map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+
+            {!selectedCell && <span className="text-xs text-muted-foreground/40 ml-1">← sélectionne une cellule</span>}
+
+            <div className="w-px h-3.5 bg-border flex-shrink-0 ml-auto" />
+
+            {/* Favoris */}
+            <Star className="h-3 w-3 text-amber-400 flex-shrink-0" />
+            {favorites.map((fav, i) => (
+              <button
+                key={i}
+                className="w-4 h-4 rounded border border-border/60 flex-shrink-0 hover:scale-125 transition-transform"
+                style={{ backgroundColor: fav }}
+                title={`${fav} — clic: fond | Shift+clic: texte | clic droit: supprimer`}
+                onClick={e => {
+                  if (e.shiftKey) { setFmtText(fav); applyFormat({ textColor: fav }); }
+                  else { setFmtBg(fav); applyFormat({ bgColor: fav }); }
+                }}
+                onContextMenu={e => { e.preventDefault(); setFavorites(removeFavorite(fav)); }}
+              />
+            ))}
             <button
-              key={i}
-              className="w-4 h-4 rounded-full border border-border/60 flex-shrink-0 hover:scale-125 transition-transform"
-              style={{ backgroundColor: fav }}
-              title={`${fav} — clic: fond | clic droit: supprimer`}
-              onClick={() => { setFmtBg(fav); applyFormat({ bgColor: fav }); }}
-              onContextMenu={e => { e.preventDefault(); setFavorites(removeFavorite(fav)); }}
-            />
-          ))}
-          <button
-            className="flex items-center gap-0.5 text-xs text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
-            title={`Ajouter ${fmtBg} aux favoris`}
-            onClick={() => setFavorites(addFavorite(fmtBg))}
-          >
-            <div className="w-3.5 h-3.5 rounded-full border border-dashed border-current flex items-center justify-center" style={{ backgroundColor: fmtBg }}>
-              <span className="text-[8px] leading-none font-bold" style={{ color: fmtBg === "#ffffff" ? "#888" : "#fff" }}>+</span>
-            </div>
-          </button>
+              className="w-4 h-4 rounded border border-dashed border-border/60 flex-shrink-0 hover:scale-125 transition-transform flex items-center justify-center"
+              style={{ backgroundColor: fmtBg }}
+              title={`Sauvegarder ${fmtBg} dans les favoris`}
+              onClick={() => setFavorites(addFavorite(fmtBg))}
+            >
+              <span className="text-[9px] leading-none font-bold" style={{ color: fmtBg === "#ffffff" ? "#888" : "#fff", textShadow: "0 0 2px rgba(0,0,0,0.4)" }}>+</span>
+            </button>
+          </div>
+
+          {/* Ligne 2 : palette rapide */}
+          <div className="flex items-center gap-1 px-3 pb-1.5">
+            <span className="text-[10px] text-muted-foreground/50 mr-1 flex-shrink-0">Rapide :</span>
+            {QUICK_COLORS.map(c => (
+              <button
+                key={c.value}
+                className="w-4 h-4 rounded-sm border border-border/40 flex-shrink-0 hover:scale-125 transition-transform"
+                style={{ backgroundColor: c.value }}
+                title={`${c.label} (${c.value}) — clic: fond | Shift+clic: texte`}
+                onClick={e => {
+                  if (e.shiftKey) { setFmtText(c.value); applyFormat({ textColor: c.value }); }
+                  else { setFmtBg(c.value); applyFormat({ bgColor: c.value }); }
+                }}
+              />
+            ))}
+          </div>
         </div>
       )}
 
