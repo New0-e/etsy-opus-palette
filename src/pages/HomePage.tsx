@@ -35,10 +35,17 @@ type CommandeAlert = {
   dateLimiteEnvoi: string;
 };
 
+const EIGHT_HOURS_MS = 8 * 60 * 60 * 1000;
+
 function loadCommandesAChanger(): CommandeAlert[] {
   try {
     const all = JSON.parse(localStorage.getItem("suivi-commandes-v1") ?? "[]");
-    return all.filter((c: any) => c.statutTracktagos === "Numéro de Suivi à changer");
+    return all.filter((c: any) =>
+      c.statutTracktagos === "Numéro de Suivi à changer" ||
+      (c.statutTracktagos === "Attente 8H" &&
+        c.attente8HStartedAt &&
+        Date.now() - new Date(c.attente8HStartedAt).getTime() >= EIGHT_HOURS_MS)
+    );
   } catch { return []; }
 }
 
@@ -49,7 +56,20 @@ export default function HomePage() {
   const [commandesAlert, setCommandesAlert] = useState<CommandeAlert[]>([]);
 
   useEffect(() => {
-    setCommandesAlert(loadCommandesAChanger());
+    const refresh = () => setCommandesAlert(loadCommandesAChanger());
+    refresh();
+
+    // Re-vérifie toutes les minutes (les timers 8H peuvent expirer pendant que le dashboard est ouvert)
+    const interval = setInterval(refresh, 60_000);
+
+    // Re-vérifie quand l'onglet redevient actif (retour depuis un autre onglet ou une autre app)
+    const onVisible = () => { if (document.visibilityState === "visible") refresh(); };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
 
   const handleCreateBoutique = () => {
