@@ -69,36 +69,36 @@ export default function HomePage() {
       {/* Alerte — Numéros de suivi à changer */}
       {commandesAlert.length > 0 && (
         <section>
-          <div className="rounded-xl border border-orange-300 dark:border-orange-700 bg-orange-50 dark:bg-orange-950/30 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-orange-200 dark:border-orange-800">
+          <div className="rounded-xl border border-primary/40 bg-primary/8 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-primary/20">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-orange-500" />
-                <span className="font-semibold text-sm text-orange-700 dark:text-orange-400">
+                <AlertTriangle className="h-4 w-4 text-primary" />
+                <span className="font-semibold text-sm text-primary">
                   {commandesAlert.length} numéro{commandesAlert.length > 1 ? "s" : ""} de suivi à changer
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setCommandesAlert(loadCommandesAChanger())}
-                  className="text-orange-500 hover:text-orange-700 transition-colors"
+                  className="text-primary/60 hover:text-primary transition-colors"
                   title="Rafraîchir"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={() => navigate("/suivi-commandes")}
-                  className="flex items-center gap-1 text-xs text-orange-600 dark:text-orange-400 hover:text-orange-800 font-medium transition-colors"
+                  className="flex items-center gap-1 text-xs text-primary/80 hover:text-primary font-medium transition-colors"
                 >
                   Voir tout <ArrowRight className="h-3 w-3" />
                 </button>
               </div>
             </div>
-            <div className="divide-y divide-orange-100 dark:divide-orange-900/50">
+            <div className="divide-y divide-primary/10">
               {commandesAlert.map(c => (
                 <button
                   key={c.id}
                   onClick={() => navigate("/suivi-commandes")}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-orange-100/60 dark:hover:bg-orange-900/30 transition-colors text-left"
+                  className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-primary/10 transition-colors text-left"
                 >
                   <div className="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-0.5">
                     <div>
@@ -115,10 +115,10 @@ export default function HomePage() {
                     </div>
                     <div>
                       <p className="text-[9px] text-muted-foreground uppercase tracking-wide">N° Tracktagos actuel</p>
-                      <p className="text-xs font-mono truncate text-orange-600 dark:text-orange-400">{c.noTracktagos || "—"}</p>
+                      <p className="text-xs font-mono truncate text-primary">{c.noTracktagos || "—"}</p>
                     </div>
                   </div>
-                  <ArrowRight className="h-3.5 w-3.5 text-orange-400 shrink-0" />
+                  <ArrowRight className="h-3.5 w-3.5 text-primary/60 shrink-0" />
                 </button>
               ))}
             </div>
