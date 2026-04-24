@@ -14,7 +14,8 @@ export type SuiviData = {
 
 const SESSION_FOLDER_ID = "etsy-dash-folder-id";
 const SESSION_FILE_ID   = "etsy-dash-file-id";
-const FOLDER_NAME       = "EtsyDash";
+// Chemin cible : Mon Drive / Stockage / Suivi commande / etsy-dash-data.json
+const FOLDER_PATH       = ["Stockage", "Suivi commande"];
 const FILE_NAME         = "etsy-dash-data.json";
 
 // ── Helpers internes ──────────────────────────────────────────────────────────
@@ -23,15 +24,9 @@ function tok(): string | null {
   return driveStore.getToken();
 }
 
-async function findOrCreateFolder(): Promise<string | null> {
-  const cached = sessionStorage.getItem(SESSION_FOLDER_ID);
-  if (cached) return cached;
-
-  const token = tok();
-  if (!token) return null;
-
-  // Cherche le dossier EtsyDash à la racine
-  const q = `name='${FOLDER_NAME}' and 'root' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
+// Trouve ou crée un dossier par nom dans un parent donné ("root" ou un ID de dossier)
+async function findOrCreateFolderIn(name: string, parentId: string, token: string): Promise<string | null> {
+  const q = `name='${name}' and '${parentId}' in parents and mimeType='application/vnd.google-apps.folder' and trashed=false`;
   try {
     const search = await fetch(
       `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id)`,
@@ -39,22 +34,37 @@ async function findOrCreateFolder(): Promise<string | null> {
     );
     if (search.ok) {
       const data = await search.json();
-      if (data.files?.[0]?.id) {
-        sessionStorage.setItem(SESSION_FOLDER_ID, data.files[0].id);
-        return data.files[0].id;
-      }
+      if (data.files?.[0]?.id) return data.files[0].id;
     }
-
     // Crée le dossier s'il n'existe pas
     const create = await fetch("https://www.googleapis.com/drive/v3/files", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ name: FOLDER_NAME, mimeType: "application/vnd.google-apps.folder" }),
+      body: JSON.stringify({ name, mimeType: "application/vnd.google-apps.folder", parents: [parentId] }),
     });
     if (!create.ok) return null;
     const folder = await create.json();
-    sessionStorage.setItem(SESSION_FOLDER_ID, folder.id);
     return folder.id;
+  } catch { return null; }
+}
+
+// Navigue le chemin FOLDER_PATH depuis la racine, crée les dossiers manquants
+async function findOrCreateFolder(): Promise<string | null> {
+  const cached = sessionStorage.getItem(SESSION_FOLDER_ID);
+  if (cached) return cached;
+
+  const token = tok();
+  if (!token) return null;
+
+  try {
+    let parentId = "root";
+    for (const segment of FOLDER_PATH) {
+      const id = await findOrCreateFolderIn(segment, parentId, token);
+      if (!id) return null;
+      parentId = id;
+    }
+    sessionStorage.setItem(SESSION_FOLDER_ID, parentId);
+    return parentId;
   } catch { return null; }
 }
 
