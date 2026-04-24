@@ -15,7 +15,7 @@ export type SuiviData = {
 const SESSION_FOLDER_ID = "etsy-dash-folder-id";
 const SESSION_FILE_ID   = "etsy-dash-file-id";
 // Chemin cible : Mon Drive / Stockage / Suivi commande / etsy-dash-data.json
-const FOLDER_PATH       = ["Stockage", "Suivi commande"];
+const FOLDER_PATH       = ["Stockage", "Suivi Commande"];
 const FILE_NAME         = "etsy-dash-data.json";
 
 // ── Helpers internes ──────────────────────────────────────────────────────────
