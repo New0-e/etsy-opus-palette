@@ -198,7 +198,9 @@ function InlineStatusSelect({ value, options, map, onChange }: {
         className={`appearance-none cursor-pointer px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap border-0 outline-none pr-4 ${cls}`}
         style={{ backgroundImage: "none" }}
       >
-        {options.map(o => <option key={o} value={o}>{o}</option>)}
+        {options.map(o => (
+          <option key={o} value={o} style={{ backgroundColor: "#1e2130", color: "#e8eaf0" }}>{o}</option>
+        ))}
       </select>
       <span className="pointer-events-none absolute right-1 top-1/2 -translate-y-1/2 text-[8px] opacity-60">▼</span>
     </div>
