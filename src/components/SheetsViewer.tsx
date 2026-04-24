@@ -229,6 +229,10 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
   const [favorites, setFavorites] = useState<string[]>(() => getFavorites());
   const [selectedRow, setSelectedRow] = useState<number | null>(null);
   const resizing = useRef<{ col: number; startX: number; startW: number } | null>(null);
+  const applyBgTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const applyTextTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestBg = useRef(fmtBg);
+  const latestText = useRef(fmtText);
 
   const { spreadsheetId: urlSid, gid: urlGid } = useMemo(() => extractIds(url), [url]);
 
@@ -507,7 +511,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
             {/* Couleur de fond */}
             <label
               className="flex items-center gap-1 cursor-pointer group text-xs text-muted-foreground hover:text-foreground transition-colors"
-              title="Couleur de fond — ouvre le sélecteur, appliqué en fermant"
+              title="Couleur de fond — appliquée 600ms après sélection"
             >
               <div className="w-4 h-4 rounded border border-border flex-shrink-0 shadow-sm" style={{ backgroundColor: fmtBg }} />
               <span>Fond</span>
@@ -515,15 +519,22 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                 type="color"
                 className="sr-only"
                 value={fmtBg}
-                onChange={e => setFmtBg(e.target.value)}
-                onBlur={e => { if (selectedCell) applyFormat({ bgColor: e.target.value }); }}
+                onChange={e => {
+                  const v = e.target.value;
+                  setFmtBg(v);
+                  latestBg.current = v;
+                  if (applyBgTimer.current) clearTimeout(applyBgTimer.current);
+                  applyBgTimer.current = setTimeout(() => {
+                    if (selectedCell) applyFormat({ bgColor: latestBg.current });
+                  }, 600);
+                }}
               />
             </label>
 
             {/* Couleur du texte */}
             <label
               className="flex items-center gap-1 cursor-pointer group text-xs text-muted-foreground hover:text-foreground transition-colors"
-              title="Couleur du texte — ouvre le sélecteur, appliqué en fermant"
+              title="Couleur du texte — appliquée 600ms après sélection"
             >
               <span className="text-sm font-bold border-b-2 leading-none px-0.5" style={{ color: fmtText, borderColor: fmtText }}>A</span>
               <span>Texte</span>
@@ -531,8 +542,15 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                 type="color"
                 className="sr-only"
                 value={fmtText}
-                onChange={e => setFmtText(e.target.value)}
-                onBlur={e => { if (selectedCell) applyFormat({ textColor: e.target.value }); }}
+                onChange={e => {
+                  const v = e.target.value;
+                  setFmtText(v);
+                  latestText.current = v;
+                  if (applyTextTimer.current) clearTimeout(applyTextTimer.current);
+                  applyTextTimer.current = setTimeout(() => {
+                    if (selectedCell) applyFormat({ textColor: latestText.current });
+                  }, 600);
+                }}
               />
             </label>
 
