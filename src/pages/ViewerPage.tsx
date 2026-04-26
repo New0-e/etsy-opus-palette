@@ -1,4 +1,5 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { ficheImportStore } from "@/lib/ficheImportStore";
 import { ArrowLeft, ExternalLink, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SheetsViewer } from "@/components/SheetsViewer";
@@ -94,7 +95,7 @@ export default function ViewerPage() {
           <SheetsViewer
             url={url}
             title={title}
-            onImportRow={data => navigate("/creation-fiche", { state: { ficheImport: data } })}
+            onImportRow={data => { ficheImportStore.set(data); navigate("/creation-fiche"); }}
           />
         )}
 

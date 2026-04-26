@@ -5,6 +5,7 @@ import { NotepadViewer } from "./NotepadViewer";
 import { BOTTOM_TABS, BottomTabId } from "@/lib/bottomTabsConfig";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ficheImportStore } from "@/lib/ficheImportStore";
 
 const DEFAULT_HEIGHT = 420;
 const MIN_HEIGHT = 160;
@@ -112,7 +113,7 @@ export function BottomTabs({ activeId, onActiveChange }: Props) {
             {active.type === "sheet" && (
               <SheetsViewer
                 url={active.url}
-                onImportRow={data => navigate("/creation-fiche", { state: { ficheImport: data } })}
+                onImportRow={data => { ficheImportStore.set(data); navigate("/creation-fiche"); }}
               />
             )}
             {active.type === "doc" && <NotepadViewer />}

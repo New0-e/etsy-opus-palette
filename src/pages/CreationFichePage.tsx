@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +9,7 @@ import { Loader2, Send, FlaskConical, Clock, CheckCheck, AlertCircle, X, Refresh
 import { toast } from "sonner";
 import { driveStore, type DriveFolder } from "@/lib/driveStore";
 import { queueStore, type QueueItem, type FicheFormData } from "@/lib/queueStore";
+import { ficheImportStore } from "@/lib/ficheImportStore";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -114,21 +114,19 @@ function QueueRow({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function CreationFichePage() {
-  const location = useLocation();
   const [testMode, setTestMode] = useState(false);
   const [boutiques, setBoutiques] = useState<DriveFolder[]>([]);
-  const [form, setForm] = useState<FicheFormData>(() => {
-    const imp = (location.state as any)?.ficheImport;
-    return imp ? { ...EMPTY_FORM, ...imp } : EMPTY_FORM;
-  });
+  const [form, setForm] = useState<FicheFormData>(EMPTY_FORM);
   const [queue, setQueue] = useState<QueueItem[]>(queueStore.getQueue());
   const [paused, setPaused] = useState(queueStore.isPaused());
 
-  // Toast + nettoyage state si import depuis tableau
+  // Pré-remplissage depuis le store d'import (bouton tableau)
   useEffect(() => {
-    if ((location.state as any)?.ficheImport) {
+    const imp = ficheImportStore.get();
+    if (imp) {
+      setForm({ ...EMPTY_FORM, ...imp });
+      ficheImportStore.clear();
       toast.success("Ligne importée depuis le tableau !");
-      window.history.replaceState({}, "", "/creation-fiche");
     }
   }, []);
 
