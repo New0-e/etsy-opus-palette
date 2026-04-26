@@ -209,7 +209,7 @@ const DEFAULT_COL = 100;
 const EXTRA_ROWS = 20;
 const CELL_HEIGHT = 28;
 
-type ImportRowData = { etsy_lien: string; lien_ali: string; categorie: string; nom_du_produit: string; boutique_nom: string };
+type ImportRowData = { etsy_lien: string; lien_ali: string; categorie: string; nom_du_produit: string; boutique_nom: string; fiche_numero: string };
 
 export function SheetsViewer({ url, title, onImportRow }: { url: string; title?: string; onImportRow?: (data: ImportRowData) => void }) {
   const [rows, setRows] = useState<string[][] | null>(null);
@@ -454,6 +454,7 @@ export function SheetsViewer({ url, title, onImportRow }: { url: string; title?:
   const colExempleConcurrent = allHeaders.findIndex(h => h.toLowerCase().trim() === "exemple concurrent");
   const colLienProduits = allHeaders.findIndex(h => h.toLowerCase().trim() === "lien produits");
   const colProduits = allHeaders.findIndex(h => h.toLowerCase().trim() === "produits");
+  const colNumero = allHeaders.findIndex(h => h.trim() === "n°");
   const currentSheetTitle = sheets.find(s => String(s.sheetId) === activeGid)?.title ?? "";
 
   return (
@@ -692,6 +693,7 @@ export function SheetsViewer({ url, title, onImportRow }: { url: string; title?:
                               categorie: colProduits >= 0 ? (row[colProduits] ?? "") : "",
                               nom_du_produit: colProduits >= 0 ? (row[colProduits] ?? "") : "",
                               boutique_nom: currentSheetTitle,
+                              fiche_numero: colNumero >= 0 ? (row[colNumero] ?? "") : "",
                             }); }}
                             className="hidden group-hover/row:flex items-center justify-center w-full h-full absolute inset-0 hover:text-primary transition-colors"
                             title="Importer dans Génération Fiche"

@@ -4,6 +4,7 @@ export type FicheImportData = {
   categorie: string;
   nom_du_produit: string;
   boutique_nom: string;
+  fiche_numero: string;
 };
 
 let _pending: FicheImportData | null = null;
