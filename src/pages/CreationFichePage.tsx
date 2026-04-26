@@ -9,7 +9,7 @@ import { Loader2, Send, FlaskConical, Clock, CheckCheck, AlertCircle, X, Refresh
 import { toast } from "sonner";
 import { driveStore, type DriveFolder } from "@/lib/driveStore";
 import { queueStore, type QueueItem, type FicheFormData } from "@/lib/queueStore";
-import { ficheImportStore } from "@/lib/ficheImportStore";
+import { ficheImportStore, type FicheImportData } from "@/lib/ficheImportStore";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -120,14 +120,16 @@ export default function CreationFichePage() {
   const [queue, setQueue] = useState<QueueItem[]>(queueStore.getQueue());
   const [paused, setPaused] = useState(queueStore.isPaused());
 
-  // Pré-remplissage depuis le store d'import (bouton tableau)
+  // Pré-remplissage depuis le store d'import — au montage ET en live si déjà sur la page
   useEffect(() => {
-    const imp = ficheImportStore.get();
-    if (imp) {
+    const apply = (imp: FicheImportData) => {
       setForm({ ...EMPTY_FORM, ...imp });
       ficheImportStore.clear();
       toast.success("Ligne importée depuis le tableau !");
-    }
+    };
+    const imp = ficheImportStore.get();
+    if (imp) apply(imp);
+    return ficheImportStore.subscribe(apply);
   }, []);
 
   useEffect(() => {
