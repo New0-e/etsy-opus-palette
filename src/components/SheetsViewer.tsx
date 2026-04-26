@@ -296,7 +296,9 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
       .then(text => {
         const parsed = parseCSV(text);
         setRows(parsed);
-        if (parsed[0]) setColWidths(parsed[0].map(() => DEFAULT_COL));
+        if (parsed[0]) setColWidths(parsed[0].map(h =>
+          h.toLowerCase().trim() === "produits" ? DEFAULT_COL * 3 : DEFAULT_COL
+        ));
         setLoading(false);
       })
       .catch(e => {
@@ -759,6 +761,16 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                             expanded={isExpanded}
                           />
                         </div>
+                        {/* Bouton copier — colonne produits */}
+                        {allHeaders[ci]?.toLowerCase().trim() === "produits" && val && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(val); toast.success("Copié !"); }}
+                            className="absolute top-0.5 right-0.5 text-muted-foreground hover:text-primary bg-background/80 rounded p-0.5 opacity-0 group-hover/row:opacity-100 transition-opacity"
+                            title="Copier le texte"
+                          >
+                            <Copy className="h-3 w-3" />
+                          </button>
+                        )}
                         {/* Expand button — only on first cell of rows with long text, on hover */}
                         {ci === 0 && hasLongText && (
                           <button
