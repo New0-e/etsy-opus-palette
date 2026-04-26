@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp, RefreshCw, Palette, Star } from "lucide-react";
+import { Loader2, LogIn, Save, AlertCircle, ExternalLink, Copy, ChevronDown, ChevronUp, RefreshCw, Palette, Star, PackagePlus } from "lucide-react";
 import { driveStore } from "@/lib/driveStore";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -209,7 +209,9 @@ const DEFAULT_COL = 100;
 const EXTRA_ROWS = 20;
 const CELL_HEIGHT = 28;
 
-export function SheetsViewer({ url, title }: { url: string; title?: string }) {
+type ImportRowData = { etsy_lien: string; lien_ali: string; categorie: string; nom_du_produit: string; boutique_nom: string };
+
+export function SheetsViewer({ url, title, onImportRow }: { url: string; title?: string; onImportRow?: (data: ImportRowData) => void }) {
   const [rows, setRows] = useState<string[][] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -449,6 +451,11 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
   const allHeaders = Array.from({ length: maxCols }, (_, i) => headers[i] ?? "");
   const totalDataRows = dataRows.length + EXTRA_ROWS;
 
+  const colExempleConcurrent = allHeaders.findIndex(h => h.toLowerCase().trim() === "exemple concurrent");
+  const colLienProduits = allHeaders.findIndex(h => h.toLowerCase().trim() === "lien produits");
+  const colProduits = allHeaders.findIndex(h => h.toLowerCase().trim() === "produits");
+  const currentSheetTitle = sheets.find(s => String(s.sheetId) === activeGid)?.title ?? "";
+
   return (
     <div className="flex flex-col h-full">
       {/* Onglets feuilles */}
@@ -629,6 +636,15 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                 className="border border-border select-none"
                 style={{ width: 32, minWidth: 32, height: CELL_HEIGHT, backgroundColor: "#f1f3f4" }}
               />
+              {onImportRow && (
+                <th
+                  className="border border-border select-none"
+                  style={{ width: 28, minWidth: 28, height: CELL_HEIGHT, backgroundColor: "#f1f3f4" }}
+                  title="Importer dans Génération Fiche"
+                >
+                  <PackagePlus className="h-3 w-3 text-muted-foreground mx-auto" />
+                </th>
+              )}
               {allHeaders.map((h, i) => (
                 <th
                   key={i}
@@ -676,6 +692,30 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                   >
                     {isEmpty ? "" : ri + 1}
                   </td>
+                  {/* Bouton import vers Génération Fiche */}
+                  {onImportRow && (
+                    <td
+                      className="border border-border text-center"
+                      style={{ width: 28, minWidth: 28, backgroundColor: isRowSelected ? "#c4b5fd" : "#f1f3f4" }}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      {!isEmpty && (
+                        <button
+                          onClick={() => onImportRow({
+                            etsy_lien: colExempleConcurrent >= 0 ? (row[colExempleConcurrent] ?? "") : "",
+                            lien_ali: colLienProduits >= 0 ? (row[colLienProduits] ?? "") : "",
+                            categorie: colProduits >= 0 ? (row[colProduits] ?? "") : "",
+                            nom_du_produit: colProduits >= 0 ? (row[colProduits] ?? "") : "",
+                            boutique_nom: currentSheetTitle,
+                          })}
+                          className="opacity-0 group-hover/row:opacity-100 transition-opacity text-muted-foreground hover:text-primary p-0.5 rounded"
+                          title="Importer dans Génération Fiche"
+                        >
+                          <PackagePlus className="h-3 w-3" />
+                        </button>
+                      )}
+                    </td>
+                  )}
                   {allHeaders.map((_, ci) => {
                     const val = row[ci] ?? "";
                     const key = `${ri}-${ci}`;

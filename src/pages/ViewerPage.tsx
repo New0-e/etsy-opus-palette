@@ -90,7 +90,13 @@ export default function ViewerPage() {
 
       {/* Contenu */}
       <div className="flex-1 overflow-hidden">
-        {sheet && <SheetsViewer url={url} title={title} />}
+        {sheet && (
+          <SheetsViewer
+            url={url}
+            title={title}
+            onImportRow={data => navigate("/creation-fiche", { state: { ficheImport: data } })}
+          />
+        )}
 
         {doc && <DocViewer url={url} />}
 

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -113,11 +114,23 @@ function QueueRow({
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default function CreationFichePage() {
+  const location = useLocation();
   const [testMode, setTestMode] = useState(false);
   const [boutiques, setBoutiques] = useState<DriveFolder[]>([]);
-  const [form, setForm] = useState<FicheFormData>(EMPTY_FORM);
+  const [form, setForm] = useState<FicheFormData>(() => {
+    const imp = (location.state as any)?.ficheImport;
+    return imp ? { ...EMPTY_FORM, ...imp } : EMPTY_FORM;
+  });
   const [queue, setQueue] = useState<QueueItem[]>(queueStore.getQueue());
   const [paused, setPaused] = useState(queueStore.isPaused());
+
+  // Toast + nettoyage state si import depuis tableau
+  useEffect(() => {
+    if ((location.state as any)?.ficheImport) {
+      toast.success("Ligne importée depuis le tableau !");
+      window.history.replaceState({}, "", "/creation-fiche");
+    }
+  }, []);
 
   useEffect(() => {
     driveStore.fetchRootFolders().then(folders => setBoutiques(folders.filter(f => f.name !== "Stockage" && !f.name.startsWith("."))));
