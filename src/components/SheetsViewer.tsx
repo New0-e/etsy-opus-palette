@@ -351,6 +351,11 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
     [spreadsheetId, activeGid, rows]
   );
 
+  const handleCellClick = useCallback((ri: number, ci: number) => {
+    setSelectedCell({ ri, ci });
+    setSelectedRow(ri);
+  }, []);
+
   const handleDropdownChange = useCallback(async (value: string, rowIdx: number, colIdx: number) => {
     if (!spreadsheetId) return;
     const key = `${rowIdx}-${colIdx}`;
@@ -689,7 +694,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                           key={ci}
                           className="border border-border overflow-hidden"
                           style={cellStyle}
-                          onClick={() => setSelectedCell({ ri, ci })}
+                          onClick={() => handleCellClick(ri, ci)}
                         >
                           <div className="px-2" style={{ height: CELL_HEIGHT, overflow: "hidden", display: "flex", alignItems: "center" }}>
                             <UrlCell val={val} />
@@ -705,7 +710,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                           key={ci}
                           className="border border-border overflow-hidden relative"
                           style={cellStyle}
-                          onClick={() => setSelectedCell({ ri, ci })}
+                          onClick={() => handleCellClick(ri, ci)}
                         >
                           <div className="relative flex items-center" style={{ height: CELL_HEIGHT }}>
                             <select
@@ -735,7 +740,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                         key={ci}
                         className={`border border-border overflow-hidden relative ${hasToken ? "focus-within:bg-primary/5" : ""}`}
                         style={cellStyle}
-                        onClick={() => setSelectedCell({ ri, ci })}
+                        onClick={() => handleCellClick(ri, ci)}
                       >
                         <div
                           className="px-2 flex items-start"

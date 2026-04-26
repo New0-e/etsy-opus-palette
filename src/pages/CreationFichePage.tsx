@@ -158,11 +158,10 @@ export default function CreationFichePage() {
       testMode,
     };
     queueStore.addItem(item);
-    // Keep boutique + categorie for rapid chain submissions, reset the rest
+    // Keep boutique for rapid chain submissions, reset the rest
     setForm(prev => ({
       ...EMPTY_FORM,
       boutique_nom: prev.boutique_nom,
-      categorie: prev.categorie,
     }));
     toast.info(`"${label}" ajouté à la file`);
   };
