@@ -680,10 +680,11 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                     const isSaving = saving === key;
                     const meta = formatting[ri + 1]?.[ci] ?? {};
                     const cellBg = meta.bgColor;
+                    const rowHighlight = "#c4b5fd";
                     const cellStyle = {
                       width: colWidths[ci] ?? DEFAULT_COL,
                       maxWidth: colWidths[ci] ?? DEFAULT_COL,
-                      backgroundColor: isRowSelected ? "#ede9fe" : (cellBg ?? "#ffffff"),
+                      backgroundColor: isRowSelected ? rowHighlight : (cellBg ?? "#ffffff"),
                       color: meta.textColor ?? "#000000",
                       outline: selectedCell?.ri === ri && selectedCell?.ci === ci ? "2px solid hsl(var(--primary))" : undefined,
                     };
@@ -718,7 +719,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                               disabled={!hasToken}
                               onChange={e => handleDropdownChange(e.target.value, ri, ci)}
                               className="w-full h-full border-0 outline-none text-xs cursor-pointer pl-1 pr-5 appearance-none"
-                              style={{ backgroundColor: cellBg ?? "#fff", color: "#000" }}
+                              style={{ backgroundColor: isRowSelected ? rowHighlight : (cellBg ?? "#fff"), color: "#000" }}
                             >
                               {/* Option vide pour les cellules sans valeur sélectionnée */}
                               <option value="" style={{ color: "#000", background: "#fff" }}>—</option>
