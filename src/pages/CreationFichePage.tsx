@@ -193,7 +193,11 @@ export default function CreationFichePage() {
             placeholder="https://www.etsy.com/listing/..."
             value={form.etsy_lien}
             onChange={e => update("etsy_lien", e.target.value)}
+            className={form.etsy_lien && !form.etsy_lien.includes("etsy.com") ? "border-destructive focus-visible:ring-destructive bg-destructive/5" : ""}
           />
+          {form.etsy_lien && !form.etsy_lien.includes("etsy.com") && (
+            <p className="text-xs text-destructive">Ce lien ne semble pas être un lien Etsy</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label>Lien Aliexpress</Label>
@@ -201,7 +205,11 @@ export default function CreationFichePage() {
             placeholder="https://www.aliexpress.com/item/..."
             value={form.lien_ali}
             onChange={e => update("lien_ali", e.target.value)}
+            className={form.lien_ali && !form.lien_ali.includes("aliexpress.com") ? "border-destructive focus-visible:ring-destructive bg-destructive/5" : ""}
           />
+          {form.lien_ali && !form.lien_ali.includes("aliexpress.com") && (
+            <p className="text-xs text-destructive">Ce lien ne semble pas être un lien AliExpress</p>
+          )}
         </div>
         <div className="space-y-2">
           <Label>Boutique</Label>
