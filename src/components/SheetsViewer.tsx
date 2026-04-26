@@ -353,7 +353,6 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
 
   const handleCellClick = useCallback((ri: number, ci: number) => {
     setSelectedCell({ ri, ci });
-    setSelectedRow(ri);
   }, []);
 
   const handleDropdownChange = useCallback(async (value: string, rowIdx: number, colIdx: number) => {
@@ -655,9 +654,10 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
               return (
                 <tr
                   key={ri}
-                  className={`transition-colors group/row ${isEmpty ? "opacity-50 hover:opacity-100" : ""} ${!isRowSelected ? "hover:bg-secondary/30" : ""}`}
+                  onClick={() => setSelectedRow(ri)}
+                  className={`transition-colors group/row cursor-pointer ${isEmpty ? "opacity-50 hover:opacity-100" : ""}`}
                 >
-                  {/* Numéro de ligne — clic pour sélectionner */}
+                  {/* Numéro de ligne — clic pour sélectionner/désélectionner */}
                   <td
                     className="border border-border text-center cursor-pointer select-none"
                     style={{
@@ -669,7 +669,7 @@ export function SheetsViewer({ url, title }: { url: string; title?: string }) {
                       fontSize: 10,
                       fontWeight: isRowSelected ? 700 : 400,
                     }}
-                    onClick={() => setSelectedRow(prev => prev === ri ? null : ri)}
+                    onClick={(e) => { e.stopPropagation(); setSelectedRow(prev => prev === ri ? null : ri); }}
                     title={isRowSelected ? "Désélectionner la ligne" : "Sélectionner la ligne"}
                   >
                     {isEmpty ? "" : ri + 1}
