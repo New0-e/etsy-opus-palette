@@ -4,6 +4,7 @@ import { SheetsViewer } from "./SheetsViewer";
 import { NotepadViewer } from "./NotepadViewer";
 import { BOTTOM_TABS, BottomTabId } from "@/lib/bottomTabsConfig";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const DEFAULT_HEIGHT = 420;
 const MIN_HEIGHT = 160;
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function BottomTabs({ activeId, onActiveChange }: Props) {
+  const navigate = useNavigate();
   const [height, setHeight] = useState(DEFAULT_HEIGHT);
   const [maximized, setMaximized] = useState(false);
   const prevHeightRef = useRef(DEFAULT_HEIGHT);
@@ -107,7 +109,12 @@ export function BottomTabs({ activeId, onActiveChange }: Props) {
           </div>
           {/* Content */}
           <div key={activeId} className="flex-1 overflow-hidden">
-            {active.type === "sheet" && <SheetsViewer url={active.url} />}
+            {active.type === "sheet" && (
+              <SheetsViewer
+                url={active.url}
+                onImportRow={data => navigate("/creation-fiche", { state: { ficheImport: data } })}
+              />
+            )}
             {active.type === "doc" && <NotepadViewer />}
           </div>
         </div>
