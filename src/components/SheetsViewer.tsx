@@ -636,15 +636,6 @@ export function SheetsViewer({ url, title, onImportRow }: { url: string; title?:
                 className="border border-border select-none"
                 style={{ width: 32, minWidth: 32, height: CELL_HEIGHT, backgroundColor: "#f1f3f4" }}
               />
-              {onImportRow && (
-                <th
-                  className="border border-border select-none"
-                  style={{ width: 28, minWidth: 28, height: CELL_HEIGHT, backgroundColor: "#f1f3f4" }}
-                  title="Importer dans Génération Fiche"
-                >
-                  <PackagePlus className="h-3 w-3 text-muted-foreground mx-auto" />
-                </th>
-              )}
               {allHeaders.map((h, i) => (
                 <th
                   key={i}
@@ -675,9 +666,9 @@ export function SheetsViewer({ url, title, onImportRow }: { url: string; title?:
                   onClick={() => setSelectedRow(ri)}
                   className={`transition-colors group/row cursor-pointer ${isEmpty ? "opacity-50 hover:opacity-100" : ""}`}
                 >
-                  {/* Numéro de ligne — clic pour sélectionner/désélectionner */}
+                  {/* Numéro de ligne — survol : bouton import (si dispo) sinon numéro seul */}
                   <td
-                    className="border border-border text-center cursor-pointer select-none"
+                    className="border border-border text-center cursor-pointer select-none relative"
                     style={{
                       width: 32,
                       minWidth: 32,
@@ -690,32 +681,27 @@ export function SheetsViewer({ url, title, onImportRow }: { url: string; title?:
                     onClick={(e) => { e.stopPropagation(); setSelectedRow(prev => prev === ri ? null : ri); }}
                     title={isRowSelected ? "Désélectionner la ligne" : "Sélectionner la ligne"}
                   >
-                    {isEmpty ? "" : ri + 1}
+                    {isEmpty ? "" : (
+                      <>
+                        <span className={onImportRow ? "group-hover/row:hidden" : ""}>{ri + 1}</span>
+                        {onImportRow && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); onImportRow({
+                              etsy_lien: colExempleConcurrent >= 0 ? (row[colExempleConcurrent] ?? "") : "",
+                              lien_ali: colLienProduits >= 0 ? (row[colLienProduits] ?? "") : "",
+                              categorie: colProduits >= 0 ? (row[colProduits] ?? "") : "",
+                              nom_du_produit: colProduits >= 0 ? (row[colProduits] ?? "") : "",
+                              boutique_nom: currentSheetTitle,
+                            }); }}
+                            className="hidden group-hover/row:flex items-center justify-center w-full h-full absolute inset-0 hover:text-primary transition-colors"
+                            title="Importer dans Génération Fiche"
+                          >
+                            <PackagePlus className="h-3.5 w-3.5" />
+                          </button>
+                        )}
+                      </>
+                    )}
                   </td>
-                  {/* Bouton import vers Génération Fiche */}
-                  {onImportRow && (
-                    <td
-                      className="border border-border text-center"
-                      style={{ width: 28, minWidth: 28, backgroundColor: isRowSelected ? "#c4b5fd" : "#f1f3f4" }}
-                      onClick={e => e.stopPropagation()}
-                    >
-                      {!isEmpty && (
-                        <button
-                          onClick={() => onImportRow({
-                            etsy_lien: colExempleConcurrent >= 0 ? (row[colExempleConcurrent] ?? "") : "",
-                            lien_ali: colLienProduits >= 0 ? (row[colLienProduits] ?? "") : "",
-                            categorie: colProduits >= 0 ? (row[colProduits] ?? "") : "",
-                            nom_du_produit: colProduits >= 0 ? (row[colProduits] ?? "") : "",
-                            boutique_nom: currentSheetTitle,
-                          })}
-                          className="opacity-0 group-hover/row:opacity-100 transition-opacity text-muted-foreground hover:text-primary p-0.5 rounded"
-                          title="Importer dans Génération Fiche"
-                        >
-                          <PackagePlus className="h-3 w-3" />
-                        </button>
-                      )}
-                    </td>
-                  )}
                   {allHeaders.map((_, ci) => {
                     const val = row[ci] ?? "";
                     const key = `${ri}-${ci}`;
