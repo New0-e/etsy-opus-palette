@@ -191,16 +191,16 @@ export default function CreationFichePage() {
           <Label>Lien Etsy</Label>
           <Input
             placeholder="https://www.etsy.com/listing/..."
-            value={form.lien_ali}
-            onChange={e => update("lien_ali", e.target.value)}
+            value={form.etsy_lien}
+            onChange={e => update("etsy_lien", e.target.value)}
           />
         </div>
         <div className="space-y-2">
           <Label>Lien Aliexpress</Label>
           <Input
             placeholder="https://www.aliexpress.com/item/..."
-            value={form.etsy_lien}
-            onChange={e => update("etsy_lien", e.target.value)}
+            value={form.lien_ali}
+            onChange={e => update("lien_ali", e.target.value)}
           />
         </div>
         <div className="space-y-2">
