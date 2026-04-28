@@ -1,4 +1,4 @@
-import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus, Tags, BarChart3, UserSearch, FileImage, PersonStanding, Layers, AlertTriangle, ArrowRight, RefreshCw } from "lucide-react";
+import { FileText, ImageDown, Camera, ExternalLink, Table2, Store, Package, FolderPlus, Tags, BarChart3, UserSearch, FileImage, PersonStanding, Layers, AlertTriangle, Clock, ChevronDown, ArrowRight, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -49,17 +49,49 @@ function loadCommandesAChanger(): CommandeAlert[] {
   } catch { return []; }
 }
 
+function loadCommandesDateButoire(): CommandeAlert[] {
+  try {
+    const today = new Date().toDateString();
+    const all = JSON.parse(localStorage.getItem("suivi-commandes-v1") ?? "[]");
+    return all.filter((c: any) => {
+      if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
+      return new Date(c.dateLimiteEnvoi) <= new Date(today);
+    });
+  } catch { return []; }
+}
+
+function loadCommandesBientot(jours = 3): CommandeAlert[] {
+  try {
+    const today = new Date(new Date().toDateString());
+    const limite = new Date(today);
+    limite.setDate(today.getDate() + jours);
+    const all = JSON.parse(localStorage.getItem("suivi-commandes-v1") ?? "[]");
+    return all.filter((c: any) => {
+      if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
+      const d = new Date(c.dateLimiteEnvoi);
+      // strictement dans le futur (pas aujourd'hui/dépassées) jusqu'à +jours
+      return d > today && d <= limite;
+    }).sort((a: any, b: any) => a.dateLimiteEnvoi.localeCompare(b.dateLimiteEnvoi));
+  } catch { return []; }
+}
+
 export default function HomePage() {
   const navigate = useNavigate();
   const [newBoutiqueName, setNewBoutiqueName] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [commandesAlert, setCommandesAlert] = useState<CommandeAlert[]>([]);
+  const [commandesButoire, setCommandesButoire] = useState<CommandeAlert[]>([]);
+  const [commandesBientot, setCommandesBientot] = useState<CommandeAlert[]>([]);
+  const [bientotOpen, setBientotOpen] = useState(false);
 
   useEffect(() => {
-    const refresh = () => setCommandesAlert(loadCommandesAChanger());
+    const refresh = () => {
+      setCommandesAlert(loadCommandesAChanger());
+      setCommandesButoire(loadCommandesDateButoire());
+      setCommandesBientot(loadCommandesBientot());
+    };
     refresh();
 
-    // Re-vérifie toutes les minutes (les timers 8H peuvent expirer pendant que le dashboard est ouvert)
     const interval = setInterval(refresh, 60_000);
 
     // Re-vérifie quand l'onglet redevient actif (retour depuis un autre onglet ou une autre app)
@@ -143,6 +175,130 @@ export default function HomePage() {
               ))}
             </div>
           </div>
+        </section>
+      )}
+
+      {/* Alerte — Date butoire aujourd'hui ou dépassée */}
+      {commandesButoire.length > 0 && (
+        <section>
+          <div className="rounded-xl border border-destructive/40 bg-destructive/8 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-destructive/20">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4 text-destructive" />
+                <span className="font-semibold text-sm text-destructive">
+                  {commandesButoire.length} commande{commandesButoire.length > 1 ? "s" : ""} à envoyer aujourd'hui ou en retard
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCommandesButoire(loadCommandesDateButoire())}
+                  className="text-destructive/60 hover:text-destructive transition-colors"
+                  title="Rafraîchir"
+                >
+                  <RefreshCw className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => navigate("/suivi-commandes")}
+                  className="flex items-center gap-1 text-xs text-destructive/80 hover:text-destructive font-medium transition-colors"
+                >
+                  Voir tout <ArrowRight className="h-3 w-3" />
+                </button>
+              </div>
+            </div>
+            <div className="divide-y divide-destructive/10">
+              {commandesButoire.map(c => {
+                const today = new Date().toDateString();
+                const isToday = c.dateLimiteEnvoi ? new Date(c.dateLimiteEnvoi).toDateString() === today : false;
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => navigate("/suivi-commandes")}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-destructive/10 transition-colors text-left"
+                  >
+                    <div className="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-0.5">
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase tracking-wide">N° ETSY</p>
+                        <p className="text-xs font-mono font-medium truncate">{c.noEtsy || "—"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Produit</p>
+                        <p className="text-xs font-medium truncate">{c.refProduit || "—"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Boutique</p>
+                        <p className="text-xs truncate">{c.boutique || "—"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Date limite</p>
+                        <p className={`text-xs font-mono font-semibold ${isToday ? "text-orange-500" : "text-destructive"}`}>
+                          {c.dateLimiteEnvoi || "—"}
+                          {isToday && <span className="ml-1 text-[9px] font-normal">Aujourd'hui</span>}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="h-3.5 w-3.5 text-destructive/60 shrink-0" />
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Menu déroulant — Commandes bientôt en date limite (3 prochains jours) */}
+      {commandesBientot.length > 0 && (
+        <section>
+          <button
+            onClick={() => setBientotOpen(o => !o)}
+            className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${bientotOpen ? "rotate-180" : ""}`} />
+            <span>
+              {commandesBientot.length} commande{commandesBientot.length > 1 ? "s" : ""} à envoyer dans les 3 prochains jours
+            </span>
+          </button>
+          {bientotOpen && (
+            <div className="mt-2 rounded-xl border border-orange-500/30 bg-orange-500/5 overflow-hidden">
+              <div className="divide-y divide-orange-500/10">
+                {commandesBientot.map(c => {
+                  const today = new Date(new Date().toDateString());
+                  const d = new Date(c.dateLimiteEnvoi);
+                  const diffDays = Math.round((d.getTime() - today.getTime()) / 86400000);
+                  const label = diffDays === 1 ? "Demain" : `J-${diffDays}`;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => navigate("/suivi-commandes")}
+                      className="w-full flex items-center gap-3 px-4 py-2 hover:bg-orange-500/10 transition-colors text-left"
+                    >
+                      <div className="flex-1 min-w-0 grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-0.5">
+                        <div>
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-wide">N° ETSY</p>
+                          <p className="text-xs font-mono font-medium truncate">{c.noEtsy || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Produit</p>
+                          <p className="text-xs font-medium truncate">{c.refProduit || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Boutique</p>
+                          <p className="text-xs truncate">{c.boutique || "—"}</p>
+                        </div>
+                        <div>
+                          <p className="text-[9px] text-muted-foreground uppercase tracking-wide">Date limite</p>
+                          <p className="text-xs font-mono font-semibold text-orange-500">
+                            {c.dateLimiteEnvoi}
+                            <span className="ml-1 text-[9px] font-normal text-orange-400">{label}</span>
+                          </p>
+                        </div>
+                      </div>
+                      <ArrowRight className="h-3.5 w-3.5 text-orange-500/60 shrink-0" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </section>
       )}
 
