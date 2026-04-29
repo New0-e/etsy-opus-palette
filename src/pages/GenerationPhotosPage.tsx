@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { driveStore } from "@/lib/driveStore";
+import { useGenHistory, pushGenHistory } from "@/lib/useGenHistory";
 import { usePageState } from "@/lib/usePageState";
 import { useOptionsList } from "@/lib/useOptionsList";
 import { useFavorites } from "@/lib/useFavorites";
@@ -10,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, Plus, Star, Trash2, Settings } from "lucide-react";
+import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, Plus, Star, Trash2, Settings, History, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/edc44347-0c53-473e-8047-956afd36b4f4";
@@ -334,6 +335,8 @@ export default function GenerationPhotosPage() {
   const [selectedResults, setSelectedResults] = useState<string[]>([]);
   const [testMode, setTestMode] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const { entries: historyEntries, removeGenHistory, clearGenHistory } = useGenHistory();
 
   // Option lists avec persistance
   const envList = useOptionsList("gen-photos-env", DEFAULT_ENVIRONMENTS);
@@ -489,7 +492,7 @@ export default function GenerationPhotosPage() {
           return [];
         }).filter(Boolean);
 
-        if (urls.length) { psPatch({ results: urls }); toast.success("Génération terminée !"); }
+        if (urls.length) { psPatch({ results: urls }); pushGenHistory(urls); toast.success("Génération terminée !"); }
         else { toast.success("Workflow lancé — les images seront disponibles sous peu."); }
       } catch {
         toast.success("Workflow lancé !");
@@ -505,12 +508,103 @@ export default function GenerationPhotosPage() {
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Gen Images</h1>
-        <div className="flex items-center gap-2">
-          <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
-          <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
-          <Switch checked={testMode} onCheckedChange={setTestMode} />
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setShowHistory(!showHistory)}
+            className={`relative flex items-center gap-1.5 text-sm transition-colors ${showHistory ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <History className="h-4 w-4" />
+            <span>Historique</span>
+            {historyEntries.length > 0 && (
+              <span className="absolute -top-1.5 -right-2 h-4 w-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-medium">
+                {historyEntries.length > 9 ? "9+" : historyEntries.length}
+              </span>
+            )}
+          </button>
+          <div className="flex items-center gap-2">
+            <FlaskConical className={`h-4 w-4 ${testMode ? "text-amber-400" : "text-muted-foreground"}`} />
+            <span className={`text-sm font-medium ${testMode ? "text-amber-400" : "text-muted-foreground"}`}>Mode test</span>
+            <Switch checked={testMode} onCheckedChange={setTestMode} />
+          </div>
         </div>
       </div>
+
+      {/* Historique panel */}
+      {showHistory && (
+        <div className="tool-card mb-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <History className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium text-sm">Historique de la session</span>
+            </div>
+            {historyEntries.length > 0 && (
+              <button
+                type="button"
+                onClick={clearGenHistory}
+                className="text-xs text-muted-foreground hover:text-destructive flex items-center gap-1 transition-colors"
+              >
+                <Trash2 className="h-3 w-3" />
+                Tout effacer
+              </button>
+            )}
+          </div>
+          {historyEntries.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Aucune génération dans cette session.</p>
+          ) : (
+            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+              {historyEntries.map((entry) => (
+                <div key={entry.id} className="rounded-lg border border-border bg-secondary/10 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">
+                      {new Date(entry.timestamp).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                      {" — "}
+                      {entry.urls.length} image{entry.urls.length > 1 ? "s" : ""}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => { psPatch({ results: entry.urls }); setShowHistory(false); toast.success("Résultats restaurés !"); }}
+                        className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 transition-colors"
+                        title="Restaurer ces résultats"
+                      >
+                        <RotateCcw className="h-3 w-3" />
+                        Restaurer
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeGenHistory(entry.id)}
+                        className="text-muted-foreground hover:text-destructive transition-colors"
+                        title="Supprimer"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {entry.urls.slice(0, 8).map((url, i) => (
+                      <div key={i} className="relative group/h">
+                        <img src={url} className="w-full aspect-square object-cover rounded cursor-pointer" onClick={() => { psPatch({ results: entry.urls }); setLightboxIndex(i); setShowHistory(false); }} />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); downloadImage(url, i); }}
+                          className="absolute top-1 right-1 bg-black/50 rounded-full p-0.5 opacity-0 group-hover/h:opacity-100 transition-all hover:bg-black/80"
+                        >
+                          <Download className="h-2.5 w-2.5 text-white" />
+                        </button>
+                      </div>
+                    ))}
+                    {entry.urls.length > 8 && (
+                      <div className="aspect-square rounded bg-secondary flex items-center justify-center text-xs text-muted-foreground">
+                        +{entry.urls.length - 8}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       <div className="tool-card space-y-6">
         {/* Mode Toggle */}
         <div className="flex items-center gap-3">
