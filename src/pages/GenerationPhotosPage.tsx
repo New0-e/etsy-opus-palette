@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, Plus, Star, Trash2, Settings, History, RotateCcw } from "lucide-react";
+import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, Plus, Star, Trash2, Settings, History, RotateCcw, Terminal, Copy, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
 const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/edc44347-0c53-473e-8047-956afd36b4f4";
@@ -336,6 +336,8 @@ export default function GenerationPhotosPage() {
   const [testMode, setTestMode] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [n8nLog, setN8nLog] = useState<{ status: number; ok: boolean; raw: string; ts: string } | null>(null);
+  const [logOpen, setLogOpen] = useState(false);
   const { entries: historyEntries, removeGenHistory, clearGenHistory } = useGenHistory();
 
   // Option lists avec persistance
@@ -449,6 +451,10 @@ export default function GenerationPhotosPage() {
         body: formData,
       });
 
+      const rawText = await res.text();
+      setN8nLog({ status: res.status, ok: res.ok, raw: rawText, ts: new Date().toLocaleTimeString() });
+      setLogOpen(!res.ok);
+
       if (!res.ok) {
         if (res.status === 413) { toast.error("Images trop lourdes — réduisez leur taille"); return; }
         if (res.status === 404) { toast.error("Webhook introuvable — en mode test, lancez d'abord un test dans n8n"); return; }
@@ -456,11 +462,9 @@ export default function GenerationPhotosPage() {
         return;
       }
 
-      const text = await res.text();
-      console.log("[GenerationPhotos] raw response:", text.slice(0, 2000));
+      const text = rawText;
       try {
         const json = JSON.parse(text);
-        console.log("[GenerationPhotos] parsed JSON:", JSON.stringify(json, null, 2).slice(0, 2000));
         const arr = Array.isArray(json) ? json : [json];
 
         const cleanB64 = (s: string) => s.replace(/\s+/g, "").replace(/^data:[^,]+,/, "");
@@ -856,6 +860,37 @@ export default function GenerationPhotosPage() {
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
           {loading ? "Génération en cours..." : "Générer"}
         </Button>
+
+        {/* Log n8n */}
+        {n8nLog && (
+          <div className={`rounded-lg border text-xs font-mono ${n8nLog.ok ? "border-border bg-secondary/20" : "border-destructive/40 bg-destructive/5"}`}>
+            <button
+              type="button"
+              onClick={() => setLogOpen(o => !o)}
+              className="w-full flex items-center gap-2 px-3 py-2 text-left"
+            >
+              <Terminal className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <span className={`font-semibold ${n8nLog.ok ? "text-green-500" : "text-destructive"}`}>
+                HTTP {n8nLog.status}
+              </span>
+              <span className="text-muted-foreground flex-1">— réponse n8n · {n8nLog.ts}</span>
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(n8nLog.raw); toast.success("Copié !"); }}
+                className="text-muted-foreground hover:text-foreground transition-colors mr-1"
+                title="Copier"
+              >
+                <Copy className="h-3 w-3" />
+              </button>
+              <ChevronDown className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${logOpen ? "rotate-180" : ""}`} />
+            </button>
+            {logOpen && (
+              <pre className="px-3 pb-3 overflow-x-auto max-h-60 overflow-y-auto text-[11px] leading-relaxed whitespace-pre-wrap break-all text-foreground/80">
+                {(() => { try { return JSON.stringify(JSON.parse(n8nLog.raw), null, 2); } catch { return n8nLog.raw; } })()}
+              </pre>
+            )}
+          </div>
+        )}
 
         {/* Results */}
         {results.length > 0 && (
