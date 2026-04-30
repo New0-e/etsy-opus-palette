@@ -58,12 +58,15 @@ function loadCommandesAChanger(): CommandeAlert[] {
   } catch { return []; }
 }
 
+const TRACKTAGOS_NON_RETARD = ["Attente 8H", "Numéro de Suivi à changer", "Terminé"];
+
 function loadCommandesDateButoire(): CommandeAlert[] {
   try {
     const today = new Date().toDateString();
     const all = JSON.parse(localStorage.getItem("suivi-commandes-v1") ?? "[]");
     return all.filter((c: any) => {
       if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
+      if (TRACKTAGOS_NON_RETARD.includes(c.statutTracktagos)) return false;
       return new Date(c.dateLimiteEnvoi) <= new Date(today);
     });
   } catch { return []; }
@@ -77,6 +80,7 @@ function loadCommandesBientot(jours = 3): CommandeAlert[] {
     const all = JSON.parse(localStorage.getItem("suivi-commandes-v1") ?? "[]");
     return all.filter((c: any) => {
       if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
+      if (TRACKTAGOS_NON_RETARD.includes(c.statutTracktagos)) return false;
       const d = new Date(c.dateLimiteEnvoi);
       return d > today && d <= limite;
     }).sort((a: any, b: any) => a.dateLimiteEnvoi.localeCompare(b.dateLimiteEnvoi));

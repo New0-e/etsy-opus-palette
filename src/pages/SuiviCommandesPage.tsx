@@ -144,13 +144,17 @@ function calcBenef(f: Partial<Commande>): string {
   return net.toFixed(2);
 }
 
+const TRACKTAGOS_NON_RETARD = ["Attente 8H", "Numéro de Suivi à changer", "Terminé"];
+
 function isEnRetard(c: Commande): boolean {
   if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
+  if (TRACKTAGOS_NON_RETARD.includes(c.statutTracktagos)) return false;
   return new Date(c.dateLimiteEnvoi) < new Date(new Date().toDateString());
 }
 
 function isProcheDateLimite(c: Commande): boolean {
   if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
+  if (TRACKTAGOS_NON_RETARD.includes(c.statutTracktagos)) return false;
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   return new Date(c.dateLimiteEnvoi).toDateString() === tomorrow.toDateString();
