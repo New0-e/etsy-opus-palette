@@ -338,6 +338,7 @@ export default function GenerationPhotosPage() {
   const [showHistory, setShowHistory] = useState(false);
   const [n8nLog, setN8nLog] = useState<{ status: number; ok: boolean; raw: string; ts: string } | null>(null);
   const [logOpen, setLogOpen] = useState(false);
+  const [genSummary, setGenSummary] = useState<{ requested: number; generated: number; failed: number; successRate: string } | null>(null);
   const { entries: historyEntries, removeGenHistory, clearGenHistory } = useGenHistory();
 
   // Option lists avec persistance
@@ -423,7 +424,7 @@ export default function GenerationPhotosPage() {
 
   const handleGenerate = useCallback(async (currentMode: "auto" | "manuel" = mode) => {
     if (productImages.length === 0) { toast.error("Ajoutez au moins une image produit"); return; }
-    psPatch({ loading: true, results: [] }); setSelectedResults([]);
+    psPatch({ loading: true, results: [] }); setSelectedResults([]); setGenSummary(null);
     try {
       const [compressedProducts, compressedBg, compressedModels] = await Promise.all([
         Promise.all(productImages.map((f) => compressImage(f))),
@@ -465,6 +466,10 @@ export default function GenerationPhotosPage() {
       const text = rawText;
       try {
         const json = JSON.parse(text);
+        const topLevel = Array.isArray(json) ? json[0] : json;
+        if (topLevel?.summary?.successRate !== undefined) {
+          setGenSummary(topLevel.summary);
+        }
         const arr = Array.isArray(json) ? json : [json];
 
         const cleanB64 = (s: string) => s.replace(/\s+/g, "").replace(/^data:[^,]+,/, "");
@@ -889,6 +894,20 @@ export default function GenerationPhotosPage() {
                 {(() => { try { return JSON.stringify(JSON.parse(n8nLog.raw), null, 2); } catch { return n8nLog.raw; } })()}
               </pre>
             )}
+          </div>
+        )}
+
+        {/* Taux de réussite */}
+        {genSummary && (
+          <div className="rounded-lg border border-border bg-secondary/20 px-4 py-3 text-sm flex flex-wrap gap-4 items-center">
+            <span className="font-semibold text-foreground">Taux de réussite</span>
+            <span className={`font-bold text-base ${genSummary.failed === 0 ? "text-green-500" : genSummary.generated === 0 ? "text-destructive" : "text-yellow-500"}`}>
+              {genSummary.successRate}
+            </span>
+            <span className="text-muted-foreground text-xs">
+              {genSummary.generated}/{genSummary.requested} générée(s)
+              {genSummary.failed > 0 && <span className="text-destructive ml-2">· {genSummary.failed} échouée(s)</span>}
+            </span>
           </div>
         )}
 
