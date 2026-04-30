@@ -423,7 +423,7 @@ export default function GenerationPhotosPage() {
 
   const handleGenerate = useCallback(async (currentMode: "auto" | "manuel" = mode) => {
     if (productImages.length === 0) { toast.error("Ajoutez au moins une image produit"); return; }
-    psPatch({ loading: true, results: [] });
+    psPatch({ loading: true, results: [] }); setSelectedResults([]);
     try {
       const [compressedProducts, compressedBg, compressedModels] = await Promise.all([
         Promise.all(productImages.map((f) => compressImage(f))),
@@ -496,7 +496,7 @@ export default function GenerationPhotosPage() {
           return [];
         }).filter(Boolean);
 
-        if (urls.length) { psPatch({ results: urls }); pushGenHistory(urls); toast.success("Génération terminée !"); }
+        if (urls.length) { psPatch({ results: urls }); setSelectedResults([]); pushGenHistory(urls); toast.success("Génération terminée !"); }
         else { toast.success("Workflow lancé — les images seront disponibles sous peu."); }
       } catch {
         toast.success("Workflow lancé !");
