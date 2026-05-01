@@ -1,6 +1,6 @@
 import {
   FileText, ImageDown, Camera, Tags, BarChart3, UserSearch,
-  ExternalLink, FolderOpen, FileImage, PersonStanding, Layers, ClipboardList,
+  ExternalLink, FolderOpen, FileImage, PersonStanding, Layers, ClipboardList, Smile,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -10,6 +10,11 @@ import {
   SidebarFooter, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useState } from "react";
+import Picker from "@emoji-mart/react";
+import data from "@emoji-mart/data";
+import { toast } from "sonner";
 import { BOTTOM_TABS, type BottomTabId } from "@/lib/bottomTabsConfig";
 
 const mainTools = [
@@ -37,6 +42,7 @@ export function AppSidebar({ onOpenTab, activeTabId }: Props) {
   const isActive = (path: string) => location.pathname === path;
   const { setOpenMobile } = useSidebar();
   const closeOnMobile = () => setOpenMobile(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -118,6 +124,26 @@ export function AppSidebar({ onOpenTab, activeTabId }: Props) {
             <span className="group-data-[collapsible=icon]:hidden">Google Drive</span>
             <ExternalLink className="h-3 w-3 ml-auto group-data-[collapsible=icon]:hidden" />
           </Button>
+          <Popover open={emojiOpen} onOpenChange={setEmojiOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="w-full justify-start gap-2 border-border hover:bg-secondary">
+                <Smile className="h-4 w-4" />
+                <span className="group-data-[collapsible=icon]:hidden">Emojis</span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent side="right" align="end" className="p-0 border-0 bg-transparent shadow-none w-auto">
+              <Picker
+                data={data}
+                locale="fr"
+                theme="auto"
+                onEmojiSelect={(emoji: { native: string }) => {
+                  navigator.clipboard.writeText(emoji.native);
+                  toast.success(`${emoji.native} copié !`);
+                  setEmojiOpen(false);
+                }}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
       </SidebarFooter>
     </Sidebar>
