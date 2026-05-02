@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronRight, Folder, PanelRightClose, PanelRightOpen,
-  Loader2, ExternalLink, LogOut, FileText, Image, Table2, Home, RefreshCw, FileType2, Film,
+  Loader2, ExternalLink, LogOut, FileText, Image, Table2, Home, RefreshCw, FileType2, Film, Play,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -312,15 +312,17 @@ function DriveItemRow({
           style={{ top: previewPos.top, right: previewPos.right }}
         >
           {isVideo ? (
-            <video
-              src={`https://www.googleapis.com/drive/v3/files/${item.id}?alt=media&access_token=${driveStore.getToken()}`}
-              className="rounded w-full"
-              style={{ height: "108px" }}
-              autoPlay
-              muted
-              loop
-              playsInline
-            />
+            <div className="relative rounded overflow-hidden w-full bg-muted/50" style={{ aspectRatio: "16/9" }}>
+              {item.thumbnailLink
+                ? <img src={item.thumbnailLink} alt={item.name} className="w-full h-full object-cover" />
+                : <div className="w-full h-full flex items-center justify-center min-h-[80px]"><Film className="h-8 w-8 text-muted-foreground/40" /></div>
+              }
+              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                <div className="bg-black/60 rounded-full p-2">
+                  <Play className="h-5 w-5 text-white fill-white ml-0.5" />
+                </div>
+              </div>
+            </div>
           ) : (
             <img src={item.thumbnailLink!} alt={item.name} className="rounded w-full object-cover" />
           )}
