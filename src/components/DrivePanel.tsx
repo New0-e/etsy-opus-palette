@@ -30,7 +30,6 @@ function naturalSort(a: DriveItem, b: DriveItem): number {
   const bf = b.mimeType === MIME_FOLDER;
   if (af !== bf) return af ? -1 : 1;
   if (af && bf) {
-    // Folders: descending order (largest number first)
     return b.name.localeCompare(a.name, undefined, { numeric: true, sensitivity: "base" });
   }
   return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
@@ -57,7 +56,6 @@ async function fetchFolderContents(
   const items = ((data.files ?? []) as DriveItem[])
     .filter(f => !f.name.startsWith("."))
     .sort(naturalSort);
-  // Preload thumbnails
   items.forEach(item => {
     if (item.thumbnailLink) {
       const img = new window.Image();
@@ -70,6 +68,7 @@ async function fetchFolderContents(
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 type NavEntry = { id: string; name: string };
+type PreviewState = { item: DriveItem; top: number; right: number } | null;
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
@@ -83,10 +82,28 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // ── Shared preview state ───────────────────────────────────────────────────
+  const [preview, setPreview] = useState<PreviewState>(null);
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showPreview = useCallback((item: DriveItem, rect: DOMRect) => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    setPreview({ item, top: rect.top, right: window.innerWidth - rect.left + 6 });
+  }, []);
+
+  const scheduleHide = useCallback(() => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+    hideTimer.current = setTimeout(() => setPreview(null), 150);
+  }, []);
+
+  const cancelHide = useCallback(() => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+  }, []);
+
+  // ── Folder navigation ──────────────────────────────────────────────────────
   const isRoot = navStack.length === 0;
   const currentId = isRoot ? "root" : navStack[navStack.length - 1].id;
 
-  // Load contents of the current folder
   const loadCurrent = useCallback(async (folderId: string, root: boolean) => {
     const token = driveStore.getToken();
     if (!token) return;
@@ -111,11 +128,11 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
   }, [currentId, isRoot, loadCurrent]);
 
   const navigateInto = (item: DriveItem) => {
+    setPreview(null);
     setNavStack(prev => [...prev, { id: item.id, name: item.name }]);
   };
 
   const navigateTo = (idx: number) => {
-    // idx = -1 → root, idx >= 0 → that level
     setNavStack(prev => prev.slice(0, idx + 1));
   };
 
@@ -125,9 +142,10 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
       : "hidden"
     : `border-l border-border bg-drive transition-all duration-300 flex flex-col h-full ${isOpen ? "w-64" : "w-10"}`;
 
+  const isPreviewVideo = preview?.item.mimeType.startsWith("video/");
+
   return (
     <>
-
     <div className={containerClass}>
 
       {/* Header */}
@@ -208,6 +226,8 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
                   key={item.id}
                   item={item}
                   onNavigateInto={navigateInto}
+                  onMouseEnterRow={showPreview}
+                  onMouseLeaveRow={scheduleHide}
                 />
               ))
             )}
@@ -215,6 +235,34 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
         </>
       )}
     </div>
+
+    {/* Single shared preview portal */}
+    {preview && createPortal(
+      <div
+        className="fixed z-[9999] w-48 p-1 rounded-md border border-border bg-popover shadow-md"
+        style={{ top: preview.top, right: preview.right }}
+        onMouseEnter={cancelHide}
+        onMouseLeave={scheduleHide}
+      >
+        {isPreviewVideo ? (
+          <div className="relative rounded overflow-hidden w-full bg-muted/50" style={{ aspectRatio: "16/9" }}>
+            {preview.item.thumbnailLink
+              ? <img src={preview.item.thumbnailLink} alt={preview.item.name} className="w-full h-full object-cover" />
+              : <div className="w-full h-full flex items-center justify-center min-h-[80px]"><Film className="h-8 w-8 text-muted-foreground/40" /></div>
+            }
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <div className="bg-black/60 rounded-full p-2">
+                <Play className="h-5 w-5 text-white fill-white ml-0.5" />
+              </div>
+            </div>
+          </div>
+        ) : (
+          <img src={preview.item.thumbnailLink!} alt={preview.item.name} className="rounded w-full object-cover" />
+        )}
+        <p className="text-xs text-muted-foreground mt-1 truncate px-1">{preview.item.name}</p>
+      </div>,
+      document.body
+    )}
     </>
   );
 }
@@ -224,9 +272,13 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
 function DriveItemRow({
   item,
   onNavigateInto,
+  onMouseEnterRow,
+  onMouseLeaveRow,
 }: {
   item: DriveItem;
   onNavigateInto: (item: DriveItem) => void;
+  onMouseEnterRow: (item: DriveItem, rect: DOMRect) => void;
+  onMouseLeaveRow: () => void;
 }) {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -236,22 +288,9 @@ function DriveItemRow({
   const isSheet  = item.mimeType === MIME_SHEET;
   const isDoc    = item.mimeType === MIME_DOC;
   const isPdf    = item.mimeType === MIME_PDF;
-  const rowRef     = useRef<HTMLAnchorElement & HTMLButtonElement>(null);
-  const hideTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [previewPos, setPreviewPos] = useState<{ top: number; right: number } | null>(null);
+  const rowRef   = useRef<HTMLAnchorElement & HTMLButtonElement>(null);
 
-  const showPreview = () => {
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-    if (!rowRef.current) return;
-    const rect = rowRef.current.getBoundingClientRect();
-    setPreviewPos({ top: rect.top, right: window.innerWidth - rect.left + 6 });
-  };
-  const scheduleHide = () => {
-    hideTimer.current = setTimeout(() => setPreviewPos(null), 120);
-  };
-  const cancelHide = () => {
-    if (hideTimer.current) clearTimeout(hideTimer.current);
-  };
+  const hasThumbnail = (isImage || isVideo) && !isMobile;
 
   if (isFolder) {
     return (
@@ -286,59 +325,28 @@ function DriveItemRow({
       }
     : undefined;
 
-  const hasThumbnail = !!(isImage || isVideo) && !isMobile;
-
   return (
-    <>
-      <a
-        ref={rowRef}
-        href={item.webViewLink ?? "#"}
-        target={(isDoc || isSheet) ? "_self" : "_blank"}
-        rel="noreferrer"
-        onClick={handleClick}
-        draggable={(isImage || isVideo) && !isMobile}
-        onDragStart={((isImage || isVideo) && !isMobile) ? e => {
-          e.dataTransfer.setData("drive-item-id", item.id);
-          e.dataTransfer.setData("drive-item-name", item.name);
-          e.dataTransfer.effectAllowed = "copy";
-        } : undefined}
-        onMouseEnter={hasThumbnail ? showPreview : undefined}
-        onMouseLeave={hasThumbnail ? scheduleHide : undefined}
-        className={`flex items-center gap-2 w-full py-1.5 px-2 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors ${(isImage || isVideo) ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
-      >
-        <span className="w-3 flex-shrink-0" />
-        {isMobile && (isImage || isVideo) && item.thumbnailLink
-          ? <img src={item.thumbnailLink} alt="" className="h-8 w-8 rounded object-cover flex-shrink-0" />
-          : icon}
-        <span className="truncate">{item.name}</span>
-      </a>
-
-      {hasThumbnail && previewPos && createPortal(
-        <div
-          className="fixed z-[9999] w-48 p-1 rounded-md border border-border bg-popover shadow-md"
-          style={{ top: previewPos.top, right: previewPos.right }}
-          onMouseEnter={cancelHide}
-          onMouseLeave={scheduleHide}
-        >
-          {isVideo ? (
-            <div className="relative rounded overflow-hidden w-full bg-muted/50" style={{ aspectRatio: "16/9" }}>
-              {item.thumbnailLink
-                ? <img src={item.thumbnailLink} alt={item.name} className="w-full h-full object-cover" />
-                : <div className="w-full h-full flex items-center justify-center min-h-[80px]"><Film className="h-8 w-8 text-muted-foreground/40" /></div>
-              }
-              <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                <div className="bg-black/60 rounded-full p-2">
-                  <Play className="h-5 w-5 text-white fill-white ml-0.5" />
-                </div>
-              </div>
-            </div>
-          ) : (
-            <img src={item.thumbnailLink!} alt={item.name} className="rounded w-full object-cover" />
-          )}
-          <p className="text-xs text-muted-foreground mt-1 truncate px-1">{item.name}</p>
-        </div>,
-        document.body
-      )}
-    </>
+    <a
+      ref={rowRef}
+      href={item.webViewLink ?? "#"}
+      target={(isDoc || isSheet) ? "_self" : "_blank"}
+      rel="noreferrer"
+      onClick={handleClick}
+      draggable={(isImage || isVideo) && !isMobile}
+      onDragStart={((isImage || isVideo) && !isMobile) ? e => {
+        e.dataTransfer.setData("drive-item-id", item.id);
+        e.dataTransfer.setData("drive-item-name", item.name);
+        e.dataTransfer.effectAllowed = "copy";
+      } : undefined}
+      onMouseEnter={hasThumbnail ? () => rowRef.current && onMouseEnterRow(item, rowRef.current.getBoundingClientRect()) : undefined}
+      onMouseLeave={hasThumbnail ? onMouseLeaveRow : undefined}
+      className={`flex items-center gap-2 w-full py-1.5 px-2 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors ${(isImage || isVideo) ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
+    >
+      <span className="w-3 flex-shrink-0" />
+      {isMobile && (isImage || isVideo) && item.thumbnailLink
+        ? <img src={item.thumbnailLink} alt="" className="h-8 w-8 rounded object-cover flex-shrink-0" />
+        : icon}
+      <span className="truncate">{item.name}</span>
+    </a>
   );
 }
