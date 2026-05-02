@@ -250,11 +250,14 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
               ? <img src={preview.item.thumbnailLink} alt={preview.item.name} className="w-full h-full object-cover" />
               : <div className="w-full h-full flex items-center justify-center min-h-[80px]"><Film className="h-8 w-8 text-muted-foreground/40" /></div>
             }
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+            <button
+              className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors"
+              onClick={() => window.open(preview.item.webViewLink ?? `https://drive.google.com/file/d/${preview.item.id}/view`, "_blank")}
+            >
               <div className="bg-black/60 rounded-full p-2">
                 <Play className="h-5 w-5 text-white fill-white ml-0.5" />
               </div>
-            </div>
+            </button>
           </div>
         ) : (
           <img src={preview.item.thumbnailLink!} alt={preview.item.name} className="rounded w-full object-cover" />
