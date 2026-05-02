@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronRight, Folder, PanelRightClose, PanelRightOpen,
-  Loader2, ExternalLink, LogOut, FileText, Image, Table2, Home, RefreshCw, FileType2,
+  Loader2, ExternalLink, LogOut, FileText, Image, Table2, Home, RefreshCw, FileType2, Film,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ async function fetchFolderContents(
   if (foldersOnly) {
     q += ` and mimeType='${MIME_FOLDER}'`;
   } else {
-    q += ` and (mimeType='${MIME_FOLDER}' or mimeType='${MIME_DOC}' or mimeType='${MIME_SHEET}' or mimeType='${MIME_PDF}' or mimeType contains 'image/')`;
+    q += ` and (mimeType='${MIME_FOLDER}' or mimeType='${MIME_DOC}' or mimeType='${MIME_SHEET}' or mimeType='${MIME_PDF}' or mimeType contains 'image/' or mimeType contains 'video/')`;
   }
   const res = await fetch(
     `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,webViewLink,thumbnailLink)&pageSize=200`,
@@ -232,6 +232,7 @@ function DriveItemRow({
   const isMobile = useIsMobile();
   const isFolder = item.mimeType === MIME_FOLDER;
   const isImage  = item.mimeType.startsWith("image/");
+  const isVideo  = item.mimeType.startsWith("video/");
   const isSheet  = item.mimeType === MIME_SHEET;
   const isDoc    = item.mimeType === MIME_DOC;
   const isPdf    = item.mimeType === MIME_PDF;
@@ -251,11 +252,13 @@ function DriveItemRow({
 
   const icon = isImage
     ? <Image className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-    : isSheet
-      ? <Table2 className="h-4 w-4 text-green-400 flex-shrink-0" />
-      : isPdf
-        ? <FileType2 className="h-4 w-4 text-red-400 flex-shrink-0" />
-        : <FileText className="h-4 w-4 text-blue-400 flex-shrink-0" />;
+    : isVideo
+      ? <Film className="h-4 w-4 text-purple-400 flex-shrink-0" />
+      : isSheet
+        ? <Table2 className="h-4 w-4 text-green-400 flex-shrink-0" />
+        : isPdf
+          ? <FileType2 className="h-4 w-4 text-red-400 flex-shrink-0" />
+          : <FileText className="h-4 w-4 text-blue-400 flex-shrink-0" />;
 
   const handleClick = (isDoc || isSheet || isPdf)
     ? (e: React.MouseEvent) => {
@@ -273,23 +276,23 @@ function DriveItemRow({
       target={(isDoc || isSheet) ? "_self" : "_blank"}
       rel="noreferrer"
       onClick={handleClick}
-      draggable={isImage && !isMobile}
-      onDragStart={(isImage && !isMobile) ? e => {
+      draggable={(isImage || isVideo) && !isMobile}
+      onDragStart={((isImage || isVideo) && !isMobile) ? e => {
         e.dataTransfer.setData("drive-item-id", item.id);
         e.dataTransfer.setData("drive-item-name", item.name);
         e.dataTransfer.effectAllowed = "copy";
       } : undefined}
-      className={`flex items-center gap-2 w-full py-1.5 px-2 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors ${isImage ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
+      className={`flex items-center gap-2 w-full py-1.5 px-2 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors ${(isImage || isVideo) ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
     >
       <span className="w-3 flex-shrink-0" />
-      {isMobile && isImage && item.thumbnailLink
+      {isMobile && (isImage || isVideo) && item.thumbnailLink
         ? <img src={item.thumbnailLink} alt="" className="h-8 w-8 rounded object-cover flex-shrink-0" />
         : icon}
       <span className="truncate">{item.name}</span>
     </a>
   );
 
-  if (isImage && item.thumbnailLink && !isMobile) {
+  if ((isImage || isVideo) && item.thumbnailLink && !isMobile) {
     return (
       <HoverCard openDelay={100} closeDelay={50}>
         <HoverCardTrigger asChild>{row}</HoverCardTrigger>
