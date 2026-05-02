@@ -1,7 +1,7 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Upload, Sparkles, FlaskConical } from "lucide-react";
+import { Loader2, Upload, Sparkles, FlaskConical, Download } from "lucide-react";
 import { toast } from "sonner";
 
 const PROXY_URL = "/api/n8n-proxy-background";
@@ -53,12 +53,38 @@ export default function FondProduitPage() {
       if (contentType.startsWith("image/")) {
         const blob = await res.blob();
         setResult(URL.createObjectURL(blob));
+        toast.success("Fond généré !");
       } else {
-        const data = await res.json();
-        const url = data.url ?? data.image ?? data.imageUrl ?? null;
-        if (url) setResult(url);
+        const raw = await res.text();
+        let imgUrl: string | null = null;
+        try {
+          const data = JSON.parse(raw);
+          // cherche récursivement la première valeur qui ressemble à une URL d'image ou base64
+          const find = (obj: unknown): string | null => {
+            if (typeof obj === "string") {
+              if (obj.startsWith("data:image") || obj.match(/\.(png|jpg|jpeg|webp|gif)(\?|$)/i) || obj.startsWith("http")) return obj;
+            }
+            if (Array.isArray(obj)) {
+              for (const v of obj) { const r = find(v); if (r) return r; }
+            }
+            if (obj && typeof obj === "object") {
+              for (const v of Object.values(obj as Record<string, unknown>)) { const r = find(v); if (r) return r; }
+            }
+            return null;
+          };
+          imgUrl = find(data);
+        } catch {
+          // réponse brute non-JSON : peut-être une URL directe
+          if (raw.startsWith("http") || raw.startsWith("data:image")) imgUrl = raw.trim();
+        }
+        if (imgUrl) {
+          setResult(imgUrl);
+          toast.success("Fond généré !");
+        } else {
+          toast.error("Réponse reçue mais aucune image trouvée");
+          console.error("Réponse n8n :", raw);
+        }
       }
-      toast.success("Fond généré !");
     } catch {
       toast.error("Erreur lors de l'envoi");
     } finally {
@@ -108,16 +134,24 @@ export default function FondProduitPage() {
       </div>
 
       {result && (
-        <div className="tool-card space-y-3 mt-6">
-          <label className="text-sm text-muted-foreground block">Résultat</label>
-          <img src={result} alt="fond généré" className="w-full rounded-lg" />
-          <a
-            href={result}
-            download="fond-produit.png"
-            className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-          >
-            Télécharger
-          </a>
+        <div className="tool-card space-y-4 mt-6">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">Image générée</span>
+            <a
+              href={result}
+              download="fond-produit.png"
+              className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+            >
+              <Download className="h-4 w-4" />
+              Télécharger
+            </a>
+          </div>
+          <img
+            src={result}
+            alt="fond généré"
+            className="w-full rounded-lg border border-border shadow-sm"
+            onError={() => toast.error("Impossible d'afficher l'image")}
+          />
         </div>
       )}
     </div>
