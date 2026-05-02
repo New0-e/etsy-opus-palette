@@ -312,11 +312,14 @@ function DriveItemRow({
           style={{ top: previewPos.top, right: previewPos.right }}
         >
           {isVideo ? (
-            <iframe
-              src={`https://drive.google.com/file/d/${item.id}/preview`}
+            <video
+              src={`https://www.googleapis.com/drive/v3/files/${item.id}?alt=media&access_token=${driveStore.getToken()}`}
               className="rounded w-full"
-              style={{ height: "108px", border: "none" }}
-              allow="autoplay"
+              style={{ height: "108px" }}
+              autoPlay
+              muted
+              loop
+              playsInline
             />
           ) : (
             <img src={item.thumbnailLink!} alt={item.name} className="rounded w-full object-cover" />
