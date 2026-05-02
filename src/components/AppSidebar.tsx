@@ -1,6 +1,6 @@
 import {
   FileText, ImageDown, Camera, Tags, BarChart3, UserSearch,
-  ExternalLink, FolderOpen, FileImage, PersonStanding, Layers, ClipboardList, Smile,
+  ExternalLink, FolderOpen, FileImage, PersonStanding, Layers, ClipboardList, Smile, ScanSearch,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -22,6 +22,7 @@ const mainTools = [
   { title: "Gen Fiches Produits", url: "/creation-fiche", icon: FileText },
   { title: "Téléchargement Images", url: "/download-images", icon: ImageDown },
   { title: "Gen Images", url: "/generation-photos", icon: Camera },
+  { title: "Fond Produit", url: "/fond-produit", icon: ScanSearch },
 ];
 
 const secondaryTools = [
