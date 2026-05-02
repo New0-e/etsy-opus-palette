@@ -1,0 +1,9748 @@
+{
+"🏻": [
+"peau",
+"peau claire"
+],
+"🏼": [
+"peau moyennement claire",
+"peau"
+],
+"🏽": [
+"peau légèrement mate",
+"peau"
+],
+"🏾": [
+"peau",
+"peau mate"
+],
+"🏿": [
+"peau foncée",
+"peau",
+"peau mate"
+],
+"‾": [
+"trait suscrit"
+],
+"‐": [
+"trait d’union",
+"tiret"
+],
+"–": [
+"demi-cadratin",
+"tiret",
+"tiret demi-cadratin"
+],
+"—": [
+"tiret cadratin",
+"cadratin",
+"tiret"
+],
+"―": [
+"tiret",
+"barre horizontale",
+"ligne",
+"barre"
+],
+"・": [
+"point milieu",
+"katakana",
+"points",
+"point médian katakana",
+"point médian"
+],
+"،": [
+"virgule",
+"arabe",
+"virgule arabe"
+],
+"、": [
+"virgule",
+"virgule idéographique",
+"idéographique"
+],
+"؛": [
+"point-virgule",
+"arabe",
+"point-virgule arabe"
+],
+"¡": [
+"exclamation",
+"point d’exclamation inversé",
+"inversé",
+"point d’exclamation"
+],
+"¿": [
+"point d’interrogation inversé",
+"question",
+"point d’interrogation",
+"inversé"
+],
+"؟": [
+"question",
+"point d’interrogation",
+"arabe",
+"point d’interrogation arabe"
+],
+"‽": [
+"point exclarrogatif"
+],
+"…": [
+"points de suspension",
+"ellipse",
+"suspension"
+],
+"。": [
+"point",
+"point final",
+"point idéographique",
+"idéographique"
+],
+"·": [
+"point médian",
+"milieu",
+"point",
+"médian"
+],
+"‘": [
+"guillemet simple",
+"apostrophe gauche",
+"guillemet typographique",
+"guillemet",
+"apostrophe"
+],
+"’": [
+"apostrophe droite",
+"guillemet simple",
+"guillemet typographique",
+"guillemet",
+"apostrophe"
+],
+"‚": [
+"guillemet inférieur",
+"apostrophe droite basse",
+"guillemet",
+"apostrophe"
+],
+"“": [
+"guillemets doubles",
+"guillemet double",
+"guillemet",
+"guillemet droit gauche",
+"guillemets"
+],
+"”": [
+"guillemet double",
+"guillemet",
+"guillemets typographiques",
+"guillemets",
+"guillemet droit droit"
+],
+"„": [
+"guillemet double",
+"guillemet",
+"guillemet droit bas",
+"guillemets typographiques",
+"guillemets",
+"guillemets bas"
+],
+"«": [
+"crochets",
+"anti-lambda",
+"guillemet gauche",
+"chevron",
+"citation",
+"gauche",
+"crochet oblique"
+],
+"»": [
+"crochets",
+"droit",
+"anti-lambda",
+"guillemet droit",
+"chevron",
+"citation",
+"crochet oblique"
+],
+"〈": [
+"chevron angulaire ouvrant",
+"crochet",
+"chevron angulaire",
+"chevron",
+"tuple",
+"crochets obliques",
+"chevron pointu"
+],
+"〉": [
+"crochet",
+"chevron angulaire",
+"chevron",
+"tuple",
+"crochets obliques",
+"chevron angulaire fermant",
+"chevron pointu"
+],
+"《": [
+"chevron",
+"chevron angulaire ouvrant double",
+"chevron angulaire double"
+],
+"》": [
+"chevron angulaire fermant double",
+"chevron",
+"chevron angulaire double"
+],
+"「": [
+"crochet",
+"crochet de partie entière",
+"crochet de partie entière ouvrant"
+],
+"」": [
+"crochet",
+"crochet de partie entière",
+"crochet de partie entière fermant"
+],
+"『": [
+"crochet",
+"crochet de partie entière creux",
+"crochet de partie entière ouvrant creux"
+],
+"』": [
+"crochet",
+"crochet de partie entière fermant creux",
+"crochet de partie entière creux"
+],
+"【": [
+"crochet",
+"crochet lenticulaire",
+"crochet lenticulaire ouvrant noir"
+],
+"】": [
+"crochet",
+"crochet lenticulaire",
+"crochet lenticulaire fermant noir"
+],
+"〔": [
+"crochet",
+"crochet en écaille",
+"crochet en écaille ouvrant"
+],
+"〕": [
+"crochet",
+"crochet en écaille",
+"crochet en écaille fermant"
+],
+"〖": [
+"crochet",
+"crochet lenticulaire creux",
+"crochet lenticulaire ouvrant creux"
+],
+"〗": [
+"crochet",
+"crochet lenticulaire creux",
+"crochet lenticulaire fermant creux"
+],
+"§": [
+"section",
+"paragraphe",
+"symbole",
+"partie"
+],
+"¶": [
+"alinéa",
+"marque de paragraphe",
+"paragraphe",
+"pied-de-mouche",
+"paraphe"
+],
+"‰": [
+"par mille",
+"pour mille"
+],
+"†": [
+"obélus",
+"obèle",
+"dague"
+],
+"‡": [
+"obélus",
+"obèle",
+"dague",
+"double",
+"double obèle"
+],
+"•": [
+"point",
+"puce"
+],
+"‧": [
+"point de coupure de mot",
+"point",
+"tiret",
+"union"
+],
+"′": [
+"prime"
+],
+"″": [
+"double prime",
+"prime"
+],
+"‴": [
+"triple prime",
+"prime"
+],
+"‸": [
+"caret"
+],
+"※": [
+"marque de référence"
+],
+"⁂": [
+"astérisme"
+],
+"´": [
+"ton",
+"accent",
+"accent aigu",
+"aigu"
+],
+"¨": [
+"umlaut",
+"tréma",
+"diérèse"
+],
+"°": [
+"preuve",
+"heure",
+"degré"
+],
+"℗": [
+"copyright",
+"enregistrement",
+"phonographique",
+"copyright phonographique"
+],
+"←": [
+"flèche vers la gauche",
+"gauche",
+"flèche"
+],
+"↚": [
+"flèche vers la gauche barrée"
+],
+"→": [
+"droite",
+"flèche vers la droite",
+"flèche"
+],
+"↛": [
+"flèche vers la droite barrée"
+],
+"↑": [
+"flèche vers le haut",
+"haut",
+"flèche"
+],
+"↓": [
+"flèche vers le bas",
+"bas",
+"flèche"
+],
+"↜": [
+"flèche vers la gauche ondulée"
+],
+"↝": [
+"flèche vers la droite ondulée"
+],
+"↞": [
+"flèche à deux pointes vers la gauche"
+],
+"↟": [
+"flèche à deux pointes vers le haut"
+],
+"↠": [
+"flèche à deux pointes vers la droite"
+],
+"↡": [
+"flèche à deux pointes vers le bas"
+],
+"↢": [
+"flèche vers la gauche avec empenne"
+],
+"↣": [
+"flèche vers la droite avec empenne"
+],
+"↤": [
+"flèche d’un taquet vers la gauche"
+],
+"↥": [
+"flèche d’un taquet vers le haut"
+],
+"↦": [
+"flèche d’un taquet vers la droite"
+],
+"↧": [
+"flèche d’un taquet vers le bas"
+],
+"↨": [
+"flèche haut-bas sur base"
+],
+"↫": [
+"flèche vers la gauche avec boucle"
+],
+"↬": [
+"flèche vers la droite avec boucle"
+],
+"↭": [
+"flèche gauche-droite ondulée"
+],
+"↯": [
+"flèche vers le bas en zigzag"
+],
+"↰": [
+"flèche vers le haut avec pointe vers la gauche"
+],
+"↱": [
+"flèche vers le haut avec pointe vers la droite"
+],
+"↲": [
+"flèche vers le bas avec pointe vers la gauche"
+],
+"↳": [
+"flèche vers le bas avec pointe vers la droite"
+],
+"↴": [
+"flèche vers la droite avec coin vers le bas"
+],
+"↵": [
+"flèche vers le bas avec coin vers la gauche"
+],
+"↶": [
+"flèche semi-circulaire sens antihoraire en chef"
+],
+"↷": [
+"flèche semi-circulaire sens horaire en chef"
+],
+"↸": [
+"flèche nord-ouest jusqu’à un long taquet"
+],
+"↹": [
+"vers la gauche",
+"flèche",
+"vers la droite",
+"flèches gauche et droite superposées avec taquets",
+"taquet"
+],
+"↺": [
+"flèche circulaire ouverte sens antihoraire"
+],
+"↻": [
+"flèche circulaire ouverte sens horaire"
+],
+"↼": [
+"harpon vers la gauche avec barbillon vers le haut"
+],
+"↽": [
+"harpon vers la gauche avec barbillon vers le bas"
+],
+"↾": [
+"harpon vers le haut avec barbillon vers la droite"
+],
+"↿": [
+"harpon vers le haut avec barbillon vers la gauche"
+],
+"⇀": [
+"harpon vers la droite avec barbillon vers le haut"
+],
+"⇁": [
+"harpon vers la droite avec barbillon vers le bas"
+],
+"⇂": [
+"harpon vers le bas avec barbillon vers la droite"
+],
+"⇃": [
+"harpon vers le bas avec barbillon vers la gauche"
+],
+"⇄": [
+"flèche vers la droite sur flèche vers la gauche"
+],
+"⇅": [
+"haut",
+"bas",
+"flèches vers le haut et vers le bas",
+"flèche"
+],
+"⇆": [
+"flèche gauche au-dessus de flèche droite",
+"droite",
+"gauche",
+"flèche"
+],
+"⇇": [
+"paire de flèches vers la gauche"
+],
+"⇈": [
+"paire de flèches vers le haut"
+],
+"⇉": [
+"paire de flèches vers la droite"
+],
+"⇊": [
+"paire de flèches vers le bas"
+],
+"⇋": [
+"harpon vers la gauche sur harpon vers la droite"
+],
+"⇌": [
+"harpon vers la droite sur harpon vers la gauche"
+],
+"⇐": [
+"flèche double vers la gauche"
+],
+"⇍": [
+"double flèche vers la gauche barrée"
+],
+"⇑": [
+"flèche double vers le haut"
+],
+"⇒": [
+"flèche double vers la droite"
+],
+"⇏": [
+"double flèche vers la droite barrée"
+],
+"⇓": [
+"flèche double vers le bas"
+],
+"⇔": [
+"flèche double vers la gauche et la droite"
+],
+"⇎": [
+"double flèche gauche-droite barrée"
+],
+"⇖": [
+"flèche double vers le nord-ouest"
+],
+"⇗": [
+"flèche double vers le nord-est"
+],
+"⇘": [
+"flèche double vers le sud-est"
+],
+"⇙": [
+"flèche double vers le sud-ouest"
+],
+"⇚": [
+"flèche triple vers la gauche"
+],
+"⇛": [
+"flèche triple vers la droite"
+],
+"⇜": [
+"flèche vers la gauche en tire-bouchon"
+],
+"⇝": [
+"flèche vers la droite en tire-bouchon"
+],
+"⇞": [
+"flèche vers le haut avec double barre"
+],
+"⇟": [
+"flèche vers le bas avec double barre"
+],
+"⇠": [
+"flèche pointillée vers la gauche"
+],
+"⇡": [
+"flèche pointillée vers le haut"
+],
+"⇢": [
+"flèche pointillée vers la droite"
+],
+"⇣": [
+"flèche pointillée vers le bas"
+],
+"⇤": [
+"flèche vers la gauche jusqu’à un taquet"
+],
+"⇥": [
+"flèche vers la droite jusqu’à un taquet"
+],
+"⇦": [
+"flèche creuse vers la gauche"
+],
+"⇧": [
+"flèche creuse vers le haut"
+],
+"⇨": [
+"flèche creuse vers la droite"
+],
+"⇩": [
+"flèche creuse vers le bas"
+],
+"⇪": [
+"flèche creuse d’un taquet vers le haut"
+],
+"⇵": [
+"flèche vers le bas à gauche d’une flèche vers le haut"
+],
+"∀": [
+"pour tout",
+"tout",
+"universel"
+],
+"∂": [
+"dérivée partielle"
+],
+"∃": [
+"il existe"
+],
+"∅": [
+"mathématiques",
+"ensemble vide"
+],
+"∆": [
+"incrément",
+"triangle"
+],
+"∇": [
+"triangle",
+"nabla"
+],
+"∈": [
+"ensemble",
+"appartenance",
+"contient",
+"élément",
+"appartient à",
+"élément de"
+],
+"∉": [
+"n’appartient pas"
+],
+"∋": [
+"contient comme élément",
+"élément"
+],
+"∎": [
+"fin d’article"
+],
+"∏": [
+"logique",
+"produit",
+"produit n-aire",
+"produit de la famille"
+],
+"∑": [
+"mathématiques",
+"sommation",
+"sommation de la famille"
+],
+"±": [
+"plus-moins"
+],
+"÷": [
+"division",
+"obélus",
+"diviser",
+"signe de division"
+],
+"×": [
+"fois",
+"multiplication",
+"multiplier",
+"signe de multiplication"
+],
+"≮": [
+"inégalité",
+"pas inférieur à",
+"mathématiques"
+],
+"≠": [
+"inégalité",
+"non égal",
+"inéquation"
+],
+"≯": [
+"inégalité",
+"pas supérieur à",
+"mathématiques"
+],
+"¬": [
+"négation",
+"non"
+],
+"−": [
+"moins",
+"soustraire",
+"signe moins"
+],
+"⁻": [
+"moins",
+"exposant",
+"exposant moins"
+],
+"∓": [
+"plus ou moins"
+],
+"∕": [
+"barre oblique de division"
+],
+"⁄": [
+"barre oblique de fraction"
+],
+"∗": [
+"opérateur astérisque"
+],
+"∘": [
+"opérateur",
+"composition",
+"opérateur rond"
+],
+"∙": [
+"opérateur",
+"opérateur puce"
+],
+"√": [
+"racine",
+"racine carrée",
+"carrée",
+"base",
+"radical",
+"nombre sourd"
+],
+"∝": [
+"proportionnel",
+"proportionnalité"
+],
+"∞": [
+"infini",
+"symbole de l’infini"
+],
+"∟": [
+"mathématiques",
+"angle droit"
+],
+"∠": [
+"angle",
+"aigu"
+],
+"∣": [
+"est un diviseur de"
+],
+"∥": [
+"parallèle"
+],
+"∧": [
+"et logique"
+],
+"∩": [
+"ensemble",
+"intersection"
+],
+"∪": [
+"ensemble",
+"collection",
+"union"
+],
+"∫": [
+"intégrale"
+],
+"∬": [
+"double intégrale"
+],
+"∮": [
+"intégrale de contour"
+],
+"∴": [
+"logique",
+"par conséquent"
+],
+"∵": [
+"logique",
+"parce que"
+],
+"∶": [
+"rapport"
+],
+"∷": [
+"proportionnalité",
+"proportion"
+],
+"∼": [
+"opérateur",
+"opérateur tilde"
+],
+"∽": [
+"tilde renversé",
+"tilde"
+],
+"∾": [
+"s couché renversé"
+],
+"≃": [
+"mathématiques",
+"asymptotiquement égal à",
+"asymptote"
+],
+"≅": [
+"isomorphisme",
+"égalité",
+"approximativement égal à",
+"mathématiques"
+],
+"≈": [
+"presque égal",
+"approximation",
+"environ"
+],
+"≌": [
+"mathématiques",
+"entièrement égal à",
+"égalité"
+],
+"≒": [
+"approximativement égal à ou image de"
+],
+"≖": [
+"mathématiques",
+"égalité",
+"rond dans égal"
+],
+"≡": [
+"identique à",
+"exact",
+"triple",
+"identique"
+],
+"≣": [
+"mathématiques",
+"strictement équivalent à",
+"égalité"
+],
+"≤": [
+"est égal",
+"inégalité",
+"inférieur à",
+"inférieur ou égal",
+"égal"
+],
+"≥": [
+"est égal",
+"supérieur",
+"inégalité",
+"égal",
+"supérieur ou égal"
+],
+"≦": [
+"inégalité",
+"inférieur à sur égal à",
+"mathématiques"
+],
+"≧": [
+"inégalité",
+"supérieur à sur égal à",
+"mathématiques"
+],
+"≪": [
+"inégalité",
+"très inférieur à",
+"mathématiques"
+],
+"≫": [
+"inégalité",
+"très supérieur à",
+"mathématiques"
+],
+"≬": [
+"entre"
+],
+"≳": [
+"inégalité",
+"supérieur ou équivalent à",
+"mathématiques"
+],
+"≺": [
+"mathématiques",
+"précède"
+],
+"≻": [
+"mathématiques",
+"suit"
+],
+"⊁": [
+"mathématiques",
+"ne suit pas"
+],
+"⊂": [
+"ensemble",
+"sous-ensemble",
+"sous-ensemble de"
+],
+"⊃": [
+"mathématiques",
+"sur-ensemble de"
+],
+"⊆": [
+"sous-ensemble égal à"
+],
+"⊇": [
+"mathématiques",
+"égalité",
+"sur-ensemble égal à"
+],
+"⊕": [
+"plus",
+"plus cerclé"
+],
+"⊖": [
+"moins cerclé",
+"érosion",
+"différence symétrique"
+],
+"⊗": [
+"fois cerclé",
+"tenseur",
+"produit"
+],
+"⊘": [
+"barre oblique de division cerclée",
+"mathématiques"
+],
+"⊙": [
+"opérateur",
+"XNOR",
+"opérateur point cerclé"
+],
+"⊚": [
+"opérateur rond cerclé"
+],
+"⊛": [
+"astérisque",
+"opérateur astérisque cerclé",
+"opérateur"
+],
+"⊞": [
+"mathématiques",
+"plus encadré"
+],
+"⊟": [
+"mathématiques",
+"moins encadré"
+],
+"⊥": [
+"taquet vers le haut",
+"taquet"
+],
+"⊮": [
+"n’oblige pas"
+],
+"⊰": [
+"mathématiques",
+"précède sous relation"
+],
+"⊱": [
+"mathématiques",
+"suit sous relation"
+],
+"⋭": [
+"mathématiques",
+"théorie des groupes",
+"ni égal ni contenant comme sous-groupe normal"
+],
+"⊶": [
+"original de"
+],
+"⊹": [
+"mathématiques",
+"matrice hermitienne conjuguée",
+"matrice carrée",
+"matrice autoadjointe"
+],
+"⊿": [
+"mathématiques",
+"triangle rectangle"
+],
+"⋁": [
+"logique",
+"ou logique de la famille",
+"disjonction"
+],
+"⋂": [
+"intersection de la famille",
+"intersection",
+"mathématiques"
+],
+"⋃": [
+"mathématiques",
+"union de la famille",
+"union"
+],
+"⋅": [
+"opérateur",
+"opérateur point"
+],
+"⋆": [
+"opérateur",
+"opérateur étoile"
+],
+"⋈": [
+"jointure naturelle",
+"opérateur binaire"
+],
+"⋒": [
+"double intersection",
+"intersection",
+"mathématiques"
+],
+"⋘": [
+"inégalité",
+"considérablement inférieur à",
+"mathématiques"
+],
+"⋙": [
+"inégalité",
+"considérablement supérieur à",
+"mathématiques"
+],
+"⋮": [
+"points de suspension verticaux",
+"mathématiques",
+"trois points verticaux",
+"trois points suspendus",
+"ellipse"
+],
+"⋯": [
+"ellipse",
+"trois points médians"
+],
+"⋰": [
+"mathématiques",
+"trois points diagonaux vers le coin haut à droite",
+"ellipse"
+],
+"⋱": [
+"mathématiques",
+"ellipse",
+"trois points diagonaux vers le coin bas à droite"
+],
+"■": [
+"carré plein"
+],
+"□": [
+"carré creux"
+],
+"▢": [
+"carré creux aux angles arrondis"
+],
+"▣": [
+"carré creux contenant un carré plein"
+],
+"▤": [
+"carré hachuré horizontalement"
+],
+"▥": [
+"carré hachuré verticalement"
+],
+"▦": [
+"carré quadrillé"
+],
+"▧": [
+"carré hachuré du haut à droite vers le bas à gauche en diagonale"
+],
+"▨": [
+"carré hachuré du haut à gauche vers le bas à droite"
+],
+"▩": [
+"carré quadrillé en diagonale"
+],
+"▬": [
+"rectangle plein"
+],
+"▭": [
+"rectangle creux"
+],
+"▮": [
+"rectangle vertical plein"
+],
+"▰": [
+"parallélogramme plein"
+],
+"▲": [
+"triangle",
+"triangle plein vers le haut",
+"flèche",
+"plein",
+"haut"
+],
+"△": [
+"triangle creux pointant vers le haut"
+],
+"▴": [
+"petit triangle plein pointant vers le haut"
+],
+"▵": [
+"petit triangle creux pointant vers le haut"
+],
+"▷": [
+"triangle creux pointant vers la droite"
+],
+"▸": [
+"petit triangle plein pointant vers la droite"
+],
+"▹": [
+"petit triangle creux pointant vers la droite"
+],
+"►": [
+"pointe pleine vers la droite"
+],
+"▻": [
+"pointe creuse vers la droite"
+],
+"▼": [
+"bas",
+"triangle",
+"flèche",
+"plein",
+"triangle plein vers le bas"
+],
+"▽": [
+"triangle creux pointant vers le bas"
+],
+"▾": [
+"petit triangle plein pointant vers le bas"
+],
+"▿": [
+"petit triangle creux pointant vers le bas"
+],
+"◁": [
+"triangle creux pointant vers la gauche"
+],
+"◂": [
+"petit triangle plein pointant vers la gauche"
+],
+"◃": [
+"petit triangle creux pointant vers la gauche"
+],
+"◄": [
+"pointe pleine vers la gauche"
+],
+"◅": [
+"pointe creuse vers la gauche"
+],
+"◆": [
+"losange plein"
+],
+"◇": [
+"losange creux"
+],
+"◈": [
+"losange creux contenant un losange plein"
+],
+"◉": [
+"cercle creux contenant un cercle plein",
+"cercles concentriques",
+"point cerclé"
+],
+"◊": [
+"losange",
+"rhombe"
+],
+"○": [
+"cercle vide",
+"anneau",
+"cercle"
+],
+"◌": [
+"cercle en pointillés"
+],
+"◍": [
+"cercle hachuré verticalement"
+],
+"◎": [
+"cercles concentriques"
+],
+"●": [
+"cercle",
+"cercle plein"
+],
+"◐": [
+"cercle avec moitié gauche pleine"
+],
+"◑": [
+"cercle avec moitié droite pleine"
+],
+"◒": [
+"cercle avec moitié inférieure pleine"
+],
+"◓": [
+"cercle avec moitié supérieure pleine"
+],
+"◔": [
+"cercle avec quadrant supérieur droit plein"
+],
+"◕": [
+"cercle avec quadrant supérieur gauche vide"
+],
+"◖": [
+"demi-cercle gauche plein"
+],
+"◗": [
+"demi-cercle droit plein"
+],
+"◘": [
+"puce noir au blanc"
+],
+"◙": [
+"carré plein contenant un cercle creux"
+],
+"◜": [
+"arc de cercle dans le quadrant supérieur gauche"
+],
+"◝": [
+"arc de cercle dans le quadrant supérieur droit"
+],
+"◞": [
+"arc de cercle dans le quadrant inférieur droit"
+],
+"◟": [
+"arc de cercle dans le quadrant inférieur gauche"
+],
+"◠": [
+"demi-cercle supérieur"
+],
+"◡": [
+"demi-cercle inférieur"
+],
+"◢": [
+"triangle rectangle inférieur droit plein"
+],
+"◣": [
+"triangle rectangle inférieur gauche plein"
+],
+"◤": [
+"triangle rectangle supérieur gauche plein"
+],
+"◥": [
+"triangle rectangle supérieur droit plein"
+],
+"◦": [
+"puce creuse"
+],
+"◯": [
+"anneau",
+"cercle",
+"grand cercle vide"
+],
+"◳": [
+"carré creux avec quartier supérieur droit"
+],
+"◷": [
+"cercle creux avec quadrant supérieur droit"
+],
+"◿": [
+"triangle rectangle inférieur droit"
+],
+"♪": [
+"croche",
+"note",
+"musique"
+],
+"⨧": [
+"signe plus avec indice deux"
+],
+"⨯": [
+"produit vectoriel"
+],
+"⨼": [
+"produit intérieur"
+],
+"⩣": [
+"ou logique à deux barres souscrites"
+],
+"⩽": [
+"inférieur à ou égal à incliné"
+],
+"⪍": [
+"inférieur à sur similaire ou égal à"
+],
+"⪚": [
+"inégalité",
+"égal en deux lignes ou supérieur à",
+"mathématiques"
+],
+"⪺": [
+"suit sur non presque égal à"
+],
+"♭": [
+"bémol",
+"note",
+"musique"
+],
+"♯": [
+"note",
+"musique",
+"dièse"
+],
+"😀": [
+"sourire",
+"visage rieur"
+],
+"😃": [
+"sourire",
+"visage souriant avec de grands yeux"
+],
+"😄": [
+"sourire",
+"visage très souriant aux yeux rieurs"
+],
+"😁": [
+"sourire",
+"visage souriant aux yeux rieurs",
+"dents"
+],
+"😆": [
+"sourire",
+"rire",
+"bouche",
+"visage souriant avec yeux plissés",
+"visage"
+],
+"😅": [
+"sourire",
+"visage souriant avec une goutte de sueur"
+],
+"🤣": [
+"visage",
+"se rouler par terre",
+"rire",
+"se rouler par terre de rire"
+],
+"😂": [
+"larmes",
+"sourire",
+"visage riant aux larmes"
+],
+"🙂": [
+"sourire",
+"visage avec un léger sourire"
+],
+"🙃": [
+"renversée",
+"tête",
+"tête à l’envers"
+],
+"🫠": [
+"fondre",
+"liquéfié",
+"se dissoudre",
+"disparaître",
+"liquide",
+"visage qui fond"
+],
+"😉": [
+"visage",
+"clin d’œil",
+"visage faisant un clin d’œil"
+],
+"😊": [
+"sourire",
+"œil",
+"rougir",
+"visage souriant avec yeux rieurs",
+"visage"
+],
+"😇": [
+"ange",
+"visage souriant avec auréole"
+],
+"🥰": [
+"adorer",
+"aimer",
+"amour",
+"béguin",
+"visage souriant avec cœurs",
+"amoureux",
+"cœurs"
+],
+"😍": [
+"amour",
+"œil",
+"visage souriant avec yeux en forme de cœur",
+"cœur",
+"visage"
+],
+"🤩": [
+"grand sourire",
+"étoile",
+"visage avec des étoiles à la place des yeux",
+"yeux",
+"visage"
+],
+"😘": [
+"bisou",
+"visage envoyant un bisou",
+"cœur"
+],
+"😗": [
+"bisou",
+"visage faisant un bisou"
+],
+"☺": [
+"sourire",
+"visage souriant"
+],
+"😚": [
+"bisou",
+"visage faisant un bisou avec les yeux fermés"
+],
+"😙": [
+"bisou",
+"visage aux yeux rieurs faisant un bisou"
+],
+"🥲": [
+"ému",
+"larme",
+"fier",
+"souriant",
+"soulagé",
+"visage souriant avec une larme",
+"touché"
+],
+"😋": [
+"miam",
+"langue"
+],
+"😛": [
+"visage",
+"visage qui tire la langue",
+"langue"
+],
+"😜": [
+"langue",
+"visage qui tire la langue et fait un clin d’œil",
+"œil",
+"visage",
+"clin d’œil"
+],
+"🤪": [
+"petit",
+"grand",
+"œil",
+"tête de fou"
+],
+"😝": [
+"horrible",
+"langue",
+"œil",
+"visage qui tire la langue les yeux plissés",
+"goût"
+],
+"🤑": [
+"argent",
+"yeux",
+"argent dans les yeux et la bouche",
+"bouche"
+],
+"🤗": [
+"visage",
+"câlin",
+"visage qui fait un câlin",
+"gentil"
+],
+"🤭": [
+"oups",
+"visage avec une main sur la bouche"
+],
+"🫢": [
+"visage avec yeux ouverts et main sur la bouche",
+"stupéfait",
+"gêné",
+"étonné",
+"embarrassé",
+"surpris",
+"impressionné"
+],
+"🫣": [
+"jeter un coup d’œil",
+"visage qui regarde entre ses doigts",
+"fasciné",
+"captivé",
+"regarder fixement"
+],
+"🤫": [
+"chut",
+"silence",
+"visage avec un doigt sur la bouche"
+],
+"🤔": [
+"réflexion",
+"visage en pleine réflexion",
+"visage"
+],
+"🫡": [
+"armée",
+"compris",
+"OK",
+"visage qui fait un salut militaire",
+"oui",
+"salut"
+],
+"🤐": [
+"visage",
+"bouche",
+"fermeture éclair",
+"visage avec bouche fermeture éclair"
+],
+"🤨": [
+"visage avec les sourcils relevés",
+"méfiant",
+"sceptique"
+],
+"😐": [
+"neutre",
+"visage neutre"
+],
+"😑": [
+"visage sans expression",
+"inexpressif",
+"neutre",
+"sans expression",
+"visage"
+],
+"😶": [
+"muet",
+"visage sans bouche"
+],
+"🫥": [
+"invisible",
+"introverti",
+"se cacher",
+"disparaître",
+"déprimé",
+"visage en pointillés"
+],
+"😶‍🌫": [
+"brouillard",
+"distrait",
+"visage dans les nuages",
+"visage dans le brouillard",
+"dans les nuages"
+],
+"😏": [
+"sourire",
+"malin",
+"visage avec un sourire malin"
+],
+"😒": [
+"visage",
+"blasé",
+"visage blasé",
+"pas content"
+],
+"🙄": [
+"roulement",
+"yeux",
+"visage roulant des yeux"
+],
+"😬": [
+"visage",
+"grimace",
+"visage grimaçant"
+],
+"😮‍💨": [
+"soulagement",
+"visage expirant",
+"siffler",
+"sursaut",
+"chuchoter",
+"expiration"
+],
+"🤥": [
+"visage",
+"pinocchio",
+"visage de menteur",
+"mensonge",
+"menteur"
+],
+"🫨": [
+"tremblement de terre",
+"visage secoué",
+"vibration",
+"choc",
+"secoué"
+],
+"🙂‍↔": [
+"secouer",
+"non",
+"tête secouée horizontalement"
+],
+"🙂‍↕": [
+"hochement de tête",
+"tête secouée verticalement",
+"oui"
+],
+"😌": [
+"soulagement",
+"visage soulagé",
+"visage"
+],
+"😔": [
+"visage",
+"visage pensif",
+"déçu",
+"pensif"
+],
+"😪": [
+"sommeil",
+"visage",
+"visage endormi"
+],
+"🤤": [
+"visage",
+"baver",
+"visage qui bave"
+],
+"😴": [
+"sommeil",
+"zzz",
+"visage somnolent",
+"visage"
+],
+"😷": [
+"masque",
+"visage avec masque"
+],
+"🤒": [
+"visage avec thermomètre",
+"thermomètre",
+"malade",
+"visage",
+"indisposé"
+],
+"🤕": [
+"tête",
+"bandage",
+"visage avec bandage autour de la tête"
+],
+"🤢": [
+"visage",
+"nausée",
+"visage nauséeux",
+"écœuré"
+],
+"🤮": [
+"visage qui vomit",
+"vomissure",
+"malade",
+"vomi"
+],
+"🤧": [
+"rhume",
+"visage qui éternue",
+"éternuement",
+"éternuer",
+"atchoum",
+"visage"
+],
+"🥵": [
+"fièvre",
+"coup de chaleur",
+"visage rouge et chaud",
+"chaud",
+"transpiration"
+],
+"🥶": [
+"visage bleu et froid",
+"gelure",
+"glacial",
+"glaçon",
+"froid"
+],
+"🥴": [
+"hébété",
+"visage éméché",
+"rond",
+"bouche ondulée",
+"pompette",
+"dans les vapes"
+],
+"😵": [
+"visage",
+"visage étourdi",
+"tournis"
+],
+"😵‍💫": [
+"hagard",
+"tête qui tourne",
+"étourdi",
+"visage aux yeux en spirales",
+"confusion"
+],
+"🤯": [
+"choqué",
+"tête qui explose"
+],
+"🤠": [
+"visage",
+"visage avec chapeau de cowboy",
+"chapeau",
+"cowboy"
+],
+"🥳": [
+"visage festif",
+"sifflet",
+"fête",
+"célébration",
+"chapeau"
+],
+"🥸": [
+"postiche",
+"déguisement",
+"incognito",
+"faux nez",
+"lunettes",
+"visage déguisé"
+],
+"😎": [
+"visage avec lunettes de soleil",
+"lunettes de soleil"
+],
+"🤓": [
+"visage",
+"geek",
+"lunettes",
+"visage de geek"
+],
+"🧐": [
+"collet monté",
+"vieux jeu",
+"visage avec un monocle"
+],
+"😕": [
+"confus",
+"visage confus",
+"visage"
+],
+"🫤": [
+"incertain",
+"euh",
+"visage avec bouche en diagonale",
+"bof",
+"déçu",
+"sceptique"
+],
+"😟": [
+"visage",
+"inquiet",
+"visage inquiet"
+],
+"🙁": [
+"visage",
+"mécontent",
+"visage légèrement mécontent"
+],
+"☹": [
+"visage",
+"mécontent",
+"visage mécontent"
+],
+"😮": [
+"surpris",
+"visage avec bouche ouverte"
+],
+"😯": [
+"stupéfait",
+"sans voix",
+"visage ébahi",
+"surpris",
+"visage"
+],
+"😲": [
+"visage",
+"visage stupéfait",
+"stupéfait",
+"choc"
+],
+"😳": [
+"visage",
+"rougissant",
+"rouge",
+"visage qui rougit"
+],
+"🥺": [
+"visage implorant",
+"yeux de chiens battus",
+"supplication",
+"pitié"
+],
+"🥹": [
+"gratitude",
+"ému",
+"triste",
+"retenir ses larmes",
+"pleurs",
+"visage retenant ses larmes"
+],
+"😦": [
+"ouverte",
+"bouche",
+"visage mécontent avec bouche ouverte",
+"visage",
+"déçu"
+],
+"😧": [
+"visage",
+"angoisse",
+"visage angoissé"
+],
+"😨": [
+"visage effrayé",
+"effrayé",
+"apeuré",
+"peur",
+"visage"
+],
+"😰": [
+"visage anxieux avec goutte de sueur",
+"bouche",
+"froid",
+"sueur",
+"visage"
+],
+"😥": [
+"visage triste mais soulagé",
+"pfiou"
+],
+"😢": [
+"larmes",
+"visage qui pleure"
+],
+"😭": [
+"larme",
+"triste",
+"pleurs",
+"visage qui pleure à chaudes larmes",
+"visage"
+],
+"😱": [
+"effrayé",
+"cri",
+"peur",
+"visage",
+"visage qui hurle de peur"
+],
+"😖": [
+"visage",
+"visage déconcerté",
+"déconcerté"
+],
+"😣": [
+"visage",
+"visage persévérant",
+"persévérant"
+],
+"😞": [
+"visage",
+"déçu",
+"visage déçu"
+],
+"😓": [
+"visage",
+"froide",
+"visage démoralisé avec goutte de sueur",
+"sueur"
+],
+"😩": [
+"visage",
+"visage épuisé",
+"fatigué",
+"épuisé"
+],
+"😫": [
+"visage",
+"visage fatigué",
+"fatigue"
+],
+"🥱": [
+"bâiller",
+"ennui",
+"fatigue",
+"visage bâillant"
+],
+"😤": [
+"triomphe",
+"visage",
+"visage avec fumée sortant des narines",
+"victoire"
+],
+"😡": [
+"colère",
+"furieux",
+"visage boudeur",
+"visage",
+"énervé"
+],
+"😠": [
+"colère",
+"visage en colère"
+],
+"🤬": [
+"visage avec des symboles dans la bouche",
+"juron"
+],
+"😈": [
+"sourire",
+"fantastique",
+"cornes",
+"visage",
+"visage souriant avec des cornes"
+],
+"👿": [
+"diablotin",
+"mauvais",
+"visage en colère avec des cornes"
+],
+"💀": [
+"corps",
+"fantastique",
+"mort",
+"crâne",
+"visage"
+],
+"☠": [
+"os",
+"mort",
+"crâne",
+"tête",
+"tête de mort"
+],
+"💩": [
+"visage",
+"dessin",
+"tas de crotte",
+"crotte",
+"caca"
+],
+"🤡": [
+"clown",
+"visage de clown",
+"visage"
+],
+"👹": [
+"ogre",
+"japonais"
+],
+"👺": [
+"monstre",
+"japonais",
+"monstre japonais"
+],
+"👻": [
+"visage",
+"fantastique",
+"fantôme",
+"monstre",
+"créature"
+],
+"👽": [
+"extraterrestre",
+"ovni",
+"alien",
+"visage",
+"créature"
+],
+"👾": [
+"monstre",
+"extraterrestre",
+"espace",
+"monstre de l’espace"
+],
+"🤖": [
+"machine",
+"visage",
+"androïde",
+"automate",
+"monstre",
+"robot"
+],
+"😺": [
+"sourire",
+"visage",
+"chat qui sourit"
+],
+"😸": [
+"sourire",
+"yeux rieurs",
+"chat qui sourit avec des yeux rieurs",
+"visage"
+],
+"😹": [
+"sourire",
+"chat qui pleure de joie",
+"joie",
+"pleurer de rire",
+"visage"
+],
+"😻": [
+"sourire",
+"amoureux",
+"yeux",
+"cœur",
+"chat souriant aux yeux en cœurs",
+"visage"
+],
+"😼": [
+"narquois",
+"ironique",
+"visage",
+"chat avec sourire en coin",
+"sourire en coin"
+],
+"😽": [
+"bisou",
+"embrasser",
+"chat qui fait un bisou",
+"visage"
+],
+"🙀": [
+"inquiet",
+"oh",
+"chat fatigué",
+"surpris",
+"fatigue",
+"visage"
+],
+"😿": [
+"pleurer",
+"larme",
+"chat qui pleure",
+"triste",
+"visage"
+],
+"😾": [
+"colère",
+"désaccord",
+"chat qui boude",
+"bouder",
+"visage",
+"ennui"
+],
+"🙈": [
+"aveugle",
+"singe",
+"singe ne rien voir"
+],
+"🙉": [
+"singe ne rien entendre",
+"singe",
+"sourd"
+],
+"🙊": [
+"singe ne rien dire",
+"muet",
+"singe"
+],
+"💌": [
+"amour",
+"lettre",
+"lettre d’amour"
+],
+"💘": [
+"Cupidon",
+"cœur",
+"cœur et flèche",
+"flèche"
+],
+"💝": [
+"ruban",
+"Saint-Valentin",
+"cœur avec ruban",
+"cœur"
+],
+"💖": [
+"cœur étincelant",
+"cœur"
+],
+"💗": [
+"cœur",
+"cœur grandissant"
+],
+"💓": [
+"cœur",
+"cœur battant"
+],
+"💞": [
+"cœurs qui tournent",
+"cœurs"
+],
+"💕": [
+"deux cœurs",
+"amour",
+"cœurs"
+],
+"💟": [
+"cœur",
+"décoration avec cœur"
+],
+"❣": [
+"cœur point d’exclamation",
+"cœur",
+"ponctuation",
+"exclamation"
+],
+"💔": [
+"cœur brisé",
+"cœur"
+],
+"❤‍🔥": [
+"feu",
+"amour",
+"cœur enflammé",
+"désir",
+"passion"
+],
+"❤‍🩹": [
+"réconforter",
+"cœur avec bandages",
+"réparer",
+"soigner"
+],
+"❤": [
+"cœur",
+"cœur rouge"
+],
+"🩷": [
+"cœur rose",
+"aimer",
+"amour",
+"rose",
+"mignon"
+],
+"🧡": [
+"cœur orange",
+"orange"
+],
+"💛": [
+"cœur",
+"cœur jaune"
+],
+"💚": [
+"cœur",
+"cœur vert"
+],
+"💙": [
+"cœur bleu",
+"cœur"
+],
+"🩵": [
+"cœur bleu clair",
+"cyan",
+"bleu clair",
+"bleu sarcelle"
+],
+"💜": [
+"cœur",
+"cœur violet"
+],
+"🤎": [
+"marron",
+"brun",
+"cœur marron"
+],
+"🖤": [
+"noir",
+"cœur noir"
+],
+"🩶": [
+"argent",
+"gris",
+"cœur gris",
+"ardoise"
+],
+"🤍": [
+"cœur blanc",
+"blanc"
+],
+"💋": [
+"lèvres",
+"trace de rouge à lèvres",
+"rouge",
+"baiser"
+],
+"💯": [
+"cent",
+"cent points"
+],
+"💢": [
+"colère",
+"dessin",
+"furieux",
+"symbole de colère"
+],
+"💥": [
+"collision",
+"explosion"
+],
+"💫": [
+"étourdissement",
+"tournis"
+],
+"💦": [
+"éclaboussures",
+"gouttes de sueur",
+"sueur"
+],
+"💨": [
+"décamper",
+"filer"
+],
+"🕳": [
+"trou"
+],
+"💬": [
+"bulle",
+"bulle de parole",
+"dialogue"
+],
+"👁‍🗨": [
+"œil",
+"témoin",
+"bulle de BD",
+"œil dans une bulle de BD"
+],
+"🗨": [
+"bulle",
+"dialogue",
+"bulle de parole gauche"
+],
+"🗯": [
+"bulle",
+"colère",
+"bulle colère droite",
+"droite"
+],
+"💭": [
+"bulle",
+"bulle de pensée",
+"pensée"
+],
+"💤": [
+"endormi",
+"ronfler",
+"dormir"
+],
+"👋": [
+"signe de la main",
+"coucou",
+"main"
+],
+"🤚": [
+"dos de main levée",
+"levée",
+"main"
+],
+"🖐": [
+"main levée doigts écartés",
+"main"
+],
+"✋": [
+"feuille",
+"main levée",
+"main"
+],
+"🖖": [
+"vulcain",
+"salut vulcain",
+"main"
+],
+"🫱": [
+"main vers la droite",
+"vers la droite",
+"droite"
+],
+"🫲": [
+"vers la gauche",
+"main vers la gauche",
+"gauche"
+],
+"🫳": [
+"faire partir",
+"laisser tomber",
+"ouste",
+"main paume vers le bas",
+"chasser",
+"rejeter"
+],
+"🫴": [
+"appeler de la main",
+"main paume vers le haut",
+"offre",
+"faire venir",
+"attirer"
+],
+"🫷": [
+"arrêter",
+"pousser",
+"refuser",
+"attendre",
+"main qui pousse vers la gauche",
+"gauche",
+"high five"
+],
+"🫸": [
+"main qui pousse vers la droite",
+"arrêter",
+"pousser",
+"refuser",
+"attendre",
+"droite",
+"high five"
+],
+"👌": [
+"ok",
+"geste",
+"main"
+],
+"🤌": [
+"bout des doigts joints",
+"parler avec les mains",
+"doigts",
+"geste",
+"main",
+"argumentation"
+],
+"🤏": [
+"pouce et index rapprochés",
+"petite quantité",
+"petite somme",
+"peu",
+"un peu"
+],
+"✌": [
+"ciseaux",
+"V de la victoire",
+"victoire",
+"main"
+],
+"🤞": [
+"croisés",
+"doigts",
+"doigts croisés",
+"main"
+],
+"🫰": [
+"main avec index et pouce croisés",
+"amour",
+"argent",
+"cher",
+"cœur",
+"claquer des doigts"
+],
+"🤟": [
+"amour",
+"signe je t’aime",
+"main"
+],
+"🤘": [
+"cornes avec les doigts",
+"cornes",
+"main"
+],
+"🤙": [
+"téléphone",
+"signe",
+"appel",
+"signe appel téléphonique avec les doigts",
+"main"
+],
+"👈": [
+"index",
+"doigt",
+"main avec index pointant à gauche",
+"main",
+"gauche"
+],
+"👉": [
+"index",
+"doigt",
+"main avec index pointant à droite",
+"main",
+"droite"
+],
+"👆": [
+"index",
+"doigt",
+"main avec index pointant vers le haut",
+"main"
+],
+"🖕": [
+"doigt d’honneur",
+"majeur",
+"doigt",
+"main"
+],
+"👇": [
+"index",
+"doigt",
+"main avec index pointant vers le bas",
+"bas",
+"main"
+],
+"☝": [
+"index",
+"index pointant vers le haut",
+"doigt",
+"main"
+],
+"🫵": [
+"toi",
+"pointer",
+"index pointant vers l’utilisateur"
+],
+"👍": [
+"pouce vers le haut",
+"super",
+"main"
+],
+"👎": [
+"pouce vers le bas",
+"nul",
+"main"
+],
+"✊": [
+"poing",
+"pierre",
+"poing levé",
+"main"
+],
+"👊": [
+"poing",
+"coup de poing",
+"poing de face",
+"main"
+],
+"🤛": [
+"poing",
+"poing à gauche",
+"gauche",
+"main"
+],
+"🤜": [
+"poing",
+"poing à droite",
+"droite",
+"main"
+],
+"👏": [
+"bravo",
+"applaudissements",
+"mains"
+],
+"🙌": [
+"air",
+"mains levées",
+"mains"
+],
+"🫶": [
+"amour",
+"cœur",
+"mains qui forment un cœur"
+],
+"👐": [
+"ouvert",
+"mains ouvertes",
+"main"
+],
+"🤲": [
+"paume contre paume doigts vers le haut",
+"prière",
+"mains"
+],
+"🤝": [
+"poignée de main",
+"rencontre",
+"présentation",
+"mains",
+"poignée"
+],
+"🙏": [
+"prière",
+"mains",
+"mains en prière"
+],
+"✍": [
+"main qui écrit",
+"écrire",
+"main"
+],
+"💅": [
+"vernis à ongles",
+"maquillage"
+],
+"🤳": [
+"téléphone",
+"selfie",
+"appareil photo"
+],
+"💪": [
+"corps",
+"biceps contracté",
+"contracté",
+"muscle",
+"biceps"
+],
+"🦾": [
+"accessibilité",
+"bras robot",
+"prothèse",
+"bras mécanique"
+],
+"🦿": [
+"accessibilité",
+"jambe mécanique",
+"prothèse",
+"jambe robot"
+],
+"🦵": [
+"membre",
+"jambe",
+"coup de pied"
+],
+"🦶": [
+"pied",
+"pas lourd",
+"coup de pied"
+],
+"👂": [
+"corps",
+"oreille"
+],
+"🦻": [
+"accessibilité",
+"prothèse auditive",
+"malentendant",
+"oreille appareillée"
+],
+"👃": [
+"corps",
+"nez"
+],
+"🧠": [
+"cerveau",
+"intelligent"
+],
+"🫀": [
+"battements",
+"organe",
+"pulsation",
+"pouls",
+"cœur",
+"cardiologie"
+],
+"🫁": [
+"organe",
+"poumons",
+"souffle",
+"respiration",
+"inspiration",
+"expiration"
+],
+"🦷": [
+"dent",
+"dentiste"
+],
+"🦴": [
+"squelette",
+"os"
+],
+"👀": [
+"corps",
+"yeux",
+"œil",
+"visage"
+],
+"👁": [
+"corps",
+"œil"
+],
+"👅": [
+"corps",
+"langue"
+],
+"👄": [
+"corps",
+"bouche",
+"lèvres"
+],
+"🫦": [
+"anxieux",
+"inquiet",
+"flirt",
+"lèvres qui se mordent",
+"nerveux",
+"mal à l’aise"
+],
+"👶": [
+"bébé"
+],
+"🧒": [
+"enfant",
+"jeune",
+"genre neutre"
+],
+"👦": [
+"garçon",
+"jeune"
+],
+"👧": [
+"fille",
+"zodiaque",
+"vierge",
+"jeune"
+],
+"🧑": [
+"adulte",
+"genre neutre"
+],
+"👱": [
+"cheveux",
+"blond",
+"personne blonde"
+],
+"👨": [
+"homme"
+],
+"🧔": [
+"personne barbue",
+"barbe"
+],
+"🧔‍♂": [
+"homme barbu",
+"barbe"
+],
+"👱‍♂": [
+"cheveux",
+"blond",
+"homme blond"
+],
+"👩": [
+"femme"
+],
+"🧔‍♀": [
+"femme barbue",
+"barbe"
+],
+"👱‍♀": [
+"cheveux",
+"blonde",
+"femme blonde"
+],
+"🧓": [
+"personne âgée",
+"adulte",
+"âgé",
+"genre neutre"
+],
+"👴": [
+"homme",
+"âgé",
+"homme âgé"
+],
+"👵": [
+"âgée",
+"femme",
+"femme âgée"
+],
+"🙍": [
+"froncer",
+"personne fronçant les sourcils",
+"sourcils"
+],
+"🙍‍♂": [
+"froncement",
+"homme fronçant les sourcils",
+"homme",
+"geste"
+],
+"🙍‍♀": [
+"froncement",
+"femme fronçant les sourcils",
+"femme",
+"geste"
+],
+"🙎": [
+"moue",
+"personne qui boude",
+"bouder",
+"geste"
+],
+"🙎‍♂": [
+"homme qui boude",
+"homme",
+"boude",
+"geste"
+],
+"🙎‍♀": [
+"femme qui boude",
+"femme",
+"boude",
+"geste"
+],
+"🙅": [
+"personne faisant un geste d’interdiction",
+"interdit",
+"geste",
+"main"
+],
+"🙅‍♂": [
+"interdit",
+"geste",
+"homme",
+"main",
+"homme faisant un geste d’interdiction"
+],
+"🙅‍♀": [
+"interdit",
+"femme faisant un geste d’interdiction",
+"geste",
+"femme",
+"main"
+],
+"🙆": [
+"OK",
+"personne faisant un geste d’acceptation",
+"geste",
+"main"
+],
+"🙆‍♂": [
+"geste d’accord",
+"ok",
+"homme",
+"homme faisant un geste d’acceptation",
+"main"
+],
+"🙆‍♀": [
+"geste d’accord",
+"ok",
+"femme faisant un geste d’acceptation",
+"femme",
+"main"
+],
+"💁": [
+"personne paume vers le haut",
+"information",
+"main",
+"aide"
+],
+"💁‍♂": [
+"homme",
+"homme paume vers le haut",
+"paume vers le haut"
+],
+"💁‍♀": [
+"femme paume vers le haut",
+"femme",
+"paume vers le haut"
+],
+"🙋": [
+"personne qui lève la main",
+"levée",
+"geste",
+"main",
+"content"
+],
+"🙋‍♂": [
+"main levée",
+"homme",
+"homme qui lève la main",
+"geste"
+],
+"🙋‍♀": [
+"femme qui lève la main",
+"main levée",
+"femme",
+"geste"
+],
+"🧏": [
+"personne sourde",
+"malentendant",
+"oreille",
+"sourd",
+"accessibilité",
+"entendre"
+],
+"🧏‍♂": [
+"malentendant",
+"oreille",
+"sourd",
+"homme sourd",
+"accessibilité",
+"entendre"
+],
+"🧏‍♀": [
+"malentendant",
+"femme sourde",
+"oreille",
+"sourd",
+"accessibilité",
+"entendre"
+],
+"🙇": [
+"désolé",
+"incliné",
+"personne qui s’incline",
+"geste"
+],
+"🙇‍♂": [
+"désolé",
+"homme qui s’incline",
+"geste",
+"incliné",
+"homme"
+],
+"🙇‍♀": [
+"geste",
+"désolée",
+"femme qui s’incline",
+"femme",
+"inclinée"
+],
+"🤦": [
+"exaspération",
+"paume de main",
+"personne avec la paume sur le visage",
+"visage",
+"incrédulité"
+],
+"🤦‍♂": [
+"paume",
+"homme avec la paume sur le visage",
+"exaspération",
+"homme",
+"incrédulité"
+],
+"🤦‍♀": [
+"paume",
+"exaspération",
+"femme avec la paume sur le visage",
+"femme",
+"incrédulité"
+],
+"🤷": [
+"personne qui hausse les épaules",
+"doute",
+"ignorance",
+"haussement d’épaules",
+"indifférence"
+],
+"🤷‍♂": [
+"homme qui hausse les épaules",
+"ignorance",
+"homme",
+"indifférence",
+"haussement"
+],
+"🤷‍♀": [
+"femme qui hausse les épaules",
+"femme",
+"ignorance",
+"indifférence",
+"haussement"
+],
+"🧑‍⚕": [
+"thérapeute",
+"professionnel de la santé (tous genres)",
+"docteur",
+"infirmier",
+"médecin",
+"santé"
+],
+"👨‍⚕": [
+"docteur",
+"homme",
+"professionnel de la santé",
+"infirmier",
+"santé"
+],
+"👩‍⚕": [
+"professionnelle de la santé",
+"docteur",
+"femme",
+"infirmière",
+"santé"
+],
+"🧑‍🎓": [
+"étudiant",
+"étudiante",
+"étudiant (tous genres)",
+"diplôme"
+],
+"👨‍🎓": [
+"homme",
+"étudiant",
+"diplômé"
+],
+"👩‍🎓": [
+"femme",
+"diplômée",
+"étudiante"
+],
+"🧑‍🏫": [
+"enseignante",
+"professeur",
+"enseignant",
+"formatrice",
+"personnel enseignant",
+"formateur"
+],
+"👨‍🏫": [
+"instructeur",
+"professeur",
+"enseignant",
+"instituteur",
+"homme"
+],
+"👩‍🏫": [
+"enseignante",
+"professeure",
+"femme",
+"institutrice",
+"instructrice"
+],
+"🧑‍⚖": [
+"balance",
+"juge"
+],
+"👨‍⚖": [
+"balance",
+"homme",
+"justice",
+"juge homme"
+],
+"👩‍⚖": [
+"balance",
+"femme",
+"juge",
+"juge femme"
+],
+"🧑‍🌾": [
+"jardinière",
+"fermier (tous genres)",
+"fermière",
+"fermier",
+"jardinier"
+],
+"👨‍🌾": [
+"jardinier",
+"fermier",
+"homme",
+"agriculteur"
+],
+"👩‍🌾": [
+"fermière",
+"femme",
+"jardinière",
+"agricultrice"
+],
+"🧑‍🍳": [
+"chef",
+"cuisinière",
+"cuisinier (tous genres)",
+"cuisinier"
+],
+"👨‍🍳": [
+"chef",
+"homme",
+"cuisinier"
+],
+"👩‍🍳": [
+"chef",
+"cuisinière",
+"femme"
+],
+"🧑‍🔧": [
+"mécanicien (tous genres)",
+"plombier",
+"mécanicienne",
+"électricien",
+"électricienne",
+"artisan",
+"mécanicien"
+],
+"👨‍🔧": [
+"plombier",
+"homme",
+"électricien",
+"mécanique",
+"mécanicien"
+],
+"👩‍🔧": [
+"plombier",
+"mécanicienne",
+"femme",
+"mécanique",
+"électricienne"
+],
+"🧑‍🏭": [
+"industrie",
+"ouvrier",
+"usine",
+"ouvrière",
+"ouvrier (tous genres)",
+"assemblage"
+],
+"👨‍🏭": [
+"industrie",
+"ouvrier",
+"usine",
+"assemblage"
+],
+"👩‍🏭": [
+"industrie",
+"usine",
+"ouvrière",
+"assemblage"
+],
+"🧑‍💼": [
+"employé de bureau (tous genres)",
+"employé de bureau",
+"affaires",
+"bureau",
+"architecte",
+"employée de bureau"
+],
+"👨‍💼": [
+"employé de bureau",
+"homme",
+"affaires",
+"bureau",
+"architecte"
+],
+"👩‍💼": [
+"femme",
+"affaires",
+"bureau",
+"architecte",
+"employée de bureau"
+],
+"🧑‍🔬": [
+"chimiste",
+"scientifique"
+],
+"👨‍🔬": [
+"chimiste",
+"scientifique",
+"homme",
+"scientifique homme"
+],
+"👩‍🔬": [
+"chimiste",
+"femme",
+"scientifique",
+"scientifique femme"
+],
+"🧑‍💻": [
+"informaticien (tous genres)",
+"informaticienne",
+"développeuse",
+"développeur",
+"logiciels",
+"technologie",
+"informaticien"
+],
+"👨‍💻": [
+"développeur",
+"homme",
+"logiciels",
+"technologie",
+"informaticien"
+],
+"👩‍💻": [
+"informaticienne",
+"développeuse",
+"femme",
+"logiciels",
+"technologie"
+],
+"🧑‍🎤": [
+"chanteur (tous genres)",
+"artiste",
+"chanteuse",
+"rock",
+"star",
+"chanteur"
+],
+"👨‍🎤": [
+"star",
+"artiste",
+"rock",
+"chanteur"
+],
+"👩‍🎤": [
+"star",
+"chanteuse",
+"artiste",
+"rock"
+],
+"🧑‍🎨": [
+"artiste",
+"palette"
+],
+"👨‍🎨": [
+"artiste homme",
+"homme",
+"artiste",
+"palette"
+],
+"👩‍🎨": [
+"artiste femme",
+"femme",
+"artiste",
+"palette"
+],
+"🧑‍✈": [
+"avion",
+"pilote"
+],
+"👨‍✈": [
+"homme",
+"avion",
+"pilote homme",
+"pilote"
+],
+"👩‍✈": [
+"pilote femme",
+"femme",
+"avion",
+"pilote"
+],
+"🧑‍🚀": [
+"fusée",
+"astronaute"
+],
+"👨‍🚀": [
+"fusée",
+"espace",
+"astronaute",
+"homme",
+"astronaute homme"
+],
+"👩‍🚀": [
+"fusée",
+"espace",
+"astronaute",
+"femme",
+"astronaute femme"
+],
+"🧑‍🚒": [
+"camion de pompiers",
+"pompier"
+],
+"👨‍🚒": [
+"camion de pompiers",
+"homme",
+"pompier",
+"pompier homme"
+],
+"👩‍🚒": [
+"pompier femme",
+"camion de pompiers",
+"femme",
+"pompier"
+],
+"👮": [
+"flic",
+"officier",
+"police",
+"officier de police"
+],
+"👮‍♂": [
+"policier",
+"homme",
+"flic",
+"officier",
+"police"
+],
+"👮‍♀": [
+"police",
+"femme",
+"flic",
+"officier",
+"policière"
+],
+"🕵": [
+"espion",
+"détective",
+"enquêteur"
+],
+"🕵‍♂": [
+"détective homme",
+"espion",
+"enquêteur",
+"homme",
+"détective"
+],
+"🕵‍♀": [
+"détective femme",
+"femme",
+"espionne",
+"enquêteuse",
+"détective"
+],
+"💂": [
+"garde"
+],
+"💂‍♂": [
+"garde homme",
+"homme",
+"garde"
+],
+"💂‍♀": [
+"femme",
+"garde femme",
+"garde"
+],
+"🥷": [
+"guerrier",
+"ninja",
+"masqué",
+"furtif"
+],
+"👷": [
+"casque",
+"ouvrier",
+"bâtiment",
+"personnel du bâtiment"
+],
+"👷‍♂": [
+"ouvrier",
+"homme",
+"bâtiment",
+"ouvrier du bâtiment"
+],
+"👷‍♀": [
+"femme",
+"bâtiment",
+"ouvrière",
+"ouvrière du bâtiment"
+],
+"🫅": [
+"noble",
+"monarque",
+"royal",
+"personne avec une couronne",
+"royauté"
+],
+"🤴": [
+"prince"
+],
+"👸": [
+"princesse",
+"fantastique"
+],
+"👳": [
+"personne en turban",
+"turban"
+],
+"👳‍♂": [
+"homme",
+"homme en turban",
+"turban"
+],
+"👳‍♀": [
+"femme en turban",
+"femme",
+"turban"
+],
+"👲": [
+"homme avec casquette chinoise",
+"homme",
+"chapeau",
+"casquette mao"
+],
+"🧕": [
+"femme avec foulard",
+"mantilla",
+"hijab",
+"foulard",
+"tichel"
+],
+"🤵": [
+"personne en smoking",
+"smoking",
+"personne mariée",
+"marié"
+],
+"🤵‍♂": [
+"smoking",
+"homme",
+"homme en smoking"
+],
+"🤵‍♀": [
+"femme",
+"smoking",
+"femme en smoking"
+],
+"👰": [
+"mariée avec voile",
+"voile",
+"mariée",
+"personne mariée avec voile",
+"mariage"
+],
+"👰‍♂": [
+"homme avec voile",
+"homme",
+"voile"
+],
+"👰‍♀": [
+"femme",
+"voile",
+"femme avec voile"
+],
+"🤰": [
+"femme enceinte",
+"femme",
+"enceinte"
+],
+"🫃": [
+"ventre",
+"grossesse",
+"enceinte",
+"homme enceint",
+"homme enceinte"
+],
+"🫄": [
+"ventre",
+"grossesse",
+"enceinte",
+"personne enceinte"
+],
+"🤱": [
+"allaitement",
+"bébé",
+"sein",
+"soins"
+],
+"👩‍🍼": [
+"allaitement",
+"femme allaitant un bébé",
+"biberon",
+"bébé",
+"femme"
+],
+"👨‍🍼": [
+"allaitement",
+"biberon",
+"homme allaitant un bébé",
+"bébé",
+"homme"
+],
+"🧑‍🍼": [
+"allaitement",
+"biberon",
+"personne allaitant un bébé",
+"bébé",
+"personne"
+],
+"👼": [
+"fantastique",
+"bébé ange",
+"bébé",
+"ange",
+"visage"
+],
+"🎅": [
+"père Noël",
+"père",
+"noël"
+],
+"🤶": [
+"Noël",
+"mère Noël",
+"mère"
+],
+"🧑‍🎄": [
+"santa",
+"noël",
+"Santa"
+],
+"🦸": [
+"heroïne",
+"bien",
+"super-héros",
+"héros",
+"super-pouvoir"
+],
+"🦸‍♂": [
+"bien",
+"super-héros homme",
+"héros",
+"super-pouvoir",
+"homme"
+],
+"🦸‍♀": [
+"bien",
+"héroïne",
+"héros",
+"super-pouvoir",
+"femme",
+"super-héroïne"
+],
+"🦹": [
+"méchant",
+"criminel",
+"mal",
+"super-pouvoir",
+"super-vilain"
+],
+"🦹‍♂": [
+"méchant",
+"criminel",
+"mal",
+"super-pouvoir",
+"homme",
+"super-vilain homme"
+],
+"🦹‍♀": [
+"méchante",
+"criminelle",
+"mal",
+"femme",
+"super-pouvoir",
+"super-vilain femme"
+],
+"🧙": [
+"sorcière",
+"magicien",
+"ensorceleur",
+"sorcier",
+"mage"
+],
+"🧙‍♂": [
+"magicien",
+"sorcier",
+"mage homme"
+],
+"🧙‍♀": [
+"sorcière",
+"ensorceleuse",
+"mage femme"
+],
+"🧚": [
+"Puck",
+"Titania",
+"Obéron",
+"personnage féérique"
+],
+"🧚‍♂": [
+"Puck",
+"féetaud",
+"Obéron"
+],
+"🧚‍♀": [
+"Titania",
+"fée"
+],
+"🧛": [
+"mort-vivant",
+"Dracula",
+"vampire"
+],
+"🧛‍♂": [
+"mort-vivant",
+"vampire homme",
+"Dracula"
+],
+"🧛‍♀": [
+"vampire femme",
+"morte-vivante"
+],
+"🧜": [
+"sirène",
+"triton",
+"créature aquatique"
+],
+"🧜‍♂": [
+"triton",
+"Triton"
+],
+"🧜‍♀": [
+"sirène"
+],
+"🧝": [
+"magique",
+"elfe"
+],
+"🧝‍♂": [
+"magique",
+"elfe homme"
+],
+"🧝‍♀": [
+"elfe femme",
+"magique"
+],
+"🧞": [
+"djinn",
+"génie"
+],
+"🧞‍♂": [
+"djinn",
+"génie homme"
+],
+"🧞‍♀": [
+"djinn",
+"génie femme"
+],
+"🧟": [
+"mort-vivant",
+"zombie"
+],
+"🧟‍♂": [
+"mort-vivant",
+"zombie homme"
+],
+"🧟‍♀": [
+"zombie femme",
+"morte-vivante"
+],
+"🧌": [
+"légende",
+"mythe",
+"troll",
+"conte de fées",
+"monstre"
+],
+"💆": [
+"personne qui se fait masser",
+"massage",
+"visage",
+"salon"
+],
+"💆‍♂": [
+"visage",
+"massage",
+"homme",
+"homme qui se fait masser"
+],
+"💆‍♀": [
+"visage",
+"massage",
+"femme",
+"femme qui se fait masser"
+],
+"💇": [
+"salon",
+"barbier",
+"beauté",
+"coiffure",
+"personne qui se fait couper les cheveux"
+],
+"💇‍♂": [
+"homme qui se fait couper les cheveux",
+"coiffure",
+"homme"
+],
+"💇‍♀": [
+"coiffure",
+"femme",
+"femme qui se fait couper les cheveux"
+],
+"🚶": [
+"personne qui marche",
+"marche",
+"piéton"
+],
+"🚶‍♂": [
+"homme qui marche",
+"homme",
+"marche",
+"piéton"
+],
+"🚶‍♀": [
+"femme",
+"femme qui marche",
+"marche",
+"piétonne"
+],
+"🧍": [
+"personne debout",
+"debout"
+],
+"🧍‍♂": [
+"homme",
+"debout",
+"homme debout"
+],
+"🧍‍♀": [
+"femme debout",
+"femme",
+"debout"
+],
+"🧎": [
+"à genoux",
+"personne à genoux"
+],
+"🧎‍♂": [
+"à genoux",
+"homme",
+"homme à genoux"
+],
+"🧎‍♀": [
+"à genoux",
+"femme",
+"femme à genoux"
+],
+"🧑‍🦯": [
+"accessibilité",
+"aveugle",
+"personne avec une canne blanche"
+],
+"👨‍🦯": [
+"malvoyant",
+"aveugle",
+"déficient visuel",
+"homme",
+"accessibilité",
+"homme avec canne blanche"
+],
+"👩‍🦯": [
+"déficiente visuelle",
+"malvoyante",
+"aveugle",
+"femme",
+"femme avec canne blanche",
+"accessibilité"
+],
+"🧑‍🦼": [
+"accessibilité",
+"fauteuil roulant",
+"personne en fauteuil motorisé"
+],
+"👨‍🦼": [
+"accessibilité",
+"fauteuil roulant",
+"homme",
+"homme en fauteuil motorisé"
+],
+"👩‍🦼": [
+"accessibilité",
+"fauteuil roulant",
+"femme en fauteuil motorisé",
+"femme"
+],
+"🧑‍🦽": [
+"accessibilité",
+"personne en fauteuil roulant manuel",
+"fauteuil roulant"
+],
+"👨‍🦽": [
+"accessibilité",
+"fauteuil roulant",
+"homme",
+"homme en fauteuil roulant manuel"
+],
+"👩‍🦽": [
+"accessibilité",
+"fauteuil roulant",
+"femme",
+"femme en fauteuil roulant manuel"
+],
+"🏃": [
+"marathon",
+"coureur",
+"jogging",
+"personne qui court",
+"course à pied"
+],
+"🏃‍♂": [
+"homme qui court",
+"marathon",
+"jogging",
+"homme",
+"course à pied"
+],
+"🏃‍♀": [
+"marathon",
+"jogging",
+"femme qui court",
+"femme",
+"course à pied"
+],
+"💃": [
+"danse",
+"femme",
+"danseuse"
+],
+"🕺": [
+"danse",
+"homme",
+"danseur"
+],
+"🕴": [
+"homme",
+"affaires",
+"homme d’affaires en lévitation"
+],
+"👯": [
+"fille",
+"personnes avec des oreilles de lapin",
+"oreilles de lapin",
+"danseuse",
+"femme"
+],
+"👯‍♂": [
+"danseur",
+"fête",
+"oreilles de lapin",
+"homme",
+"hommes avec des oreilles de lapin"
+],
+"👯‍♀": [
+"fête",
+"oreilles de lapin",
+"danseuse",
+"femme",
+"femmes avec des oreilles de lapin"
+],
+"🧖": [
+"hammam",
+"personne au hammam",
+"sauna"
+],
+"🧖‍♂": [
+"hammam",
+"homme au hammam",
+"sauna"
+],
+"🧖‍♀": [
+"hammam",
+"femme au hammam",
+"sauna"
+],
+"🧗": [
+"grimpeur",
+"personne qui grimpe",
+"alpiniste"
+],
+"🧗‍♂": [
+"grimpeur",
+"homme qui grimpe",
+"alpiniste"
+],
+"🧗‍♀": [
+"grimpeuse",
+"femme qui grimpe",
+"alpiniste"
+],
+"🤺": [
+"sport",
+"épée",
+"escrimeur",
+"personne",
+"escrime"
+],
+"🏇": [
+"jockey",
+"cheval",
+"sport",
+"course hippique"
+],
+"⛷": [
+"skieur",
+"sport",
+"neige"
+],
+"🏂": [
+"snowboardeur",
+"sport",
+"neige"
+],
+"🏌": [
+"golf",
+"balle",
+"joueur de golf"
+],
+"🏌‍♂": [
+"golf",
+"golfeur",
+"homme"
+],
+"🏌‍♀": [
+"golf",
+"femme",
+"golfeuse"
+],
+"🏄": [
+"personne faisant du surf",
+"sport"
+],
+"🏄‍♂": [
+"surf",
+"homme",
+"surfeur"
+],
+"🏄‍♀": [
+"surf",
+"femme",
+"surfeuse"
+],
+"🚣": [
+"bateau",
+"barque",
+"personne ramant dans une barque"
+],
+"🚣‍♂": [
+"rameur dans une barque",
+"bateau",
+"barque",
+"homme"
+],
+"🚣‍♀": [
+"bateau",
+"barque",
+"rameuse dans une barque",
+"femme"
+],
+"🏊": [
+"personne nageant",
+"sport"
+],
+"🏊‍♂": [
+"nage",
+"homme",
+"nageur"
+],
+"🏊‍♀": [
+"nage",
+"femme",
+"nageuse"
+],
+"⛹": [
+"sport",
+"personne avec ballon"
+],
+"⛹‍♂": [
+"homme",
+"ballon",
+"homme avec ballon"
+],
+"⛹‍♀": [
+"femme",
+"femme avec ballon",
+"ballon"
+],
+"🏋": [
+"sport",
+"haltérophile"
+],
+"🏋‍♂": [
+"homme",
+"homme haltérophile",
+"haltérophile"
+],
+"🏋‍♀": [
+"femme",
+"femme haltérophile",
+"haltérophile"
+],
+"🚴": [
+"cycliste",
+"vélo"
+],
+"🚴‍♂": [
+"cyclisme",
+"vélo",
+"homme",
+"cycliste",
+"cycliste homme"
+],
+"🚴‍♀": [
+"cyclisme",
+"cycliste femme",
+"vélo",
+"femme",
+"cycliste"
+],
+"🚵": [
+"personne en VTT",
+"montagne",
+"vélo"
+],
+"🚵‍♂": [
+"VTT",
+"vélo",
+"homme",
+"cycliste",
+"homme en VTT"
+],
+"🚵‍♀": [
+"VTT",
+"femme en VTT",
+"vélo",
+"femme",
+"cycliste"
+],
+"🤸": [
+"roue",
+"sport",
+"gymnastique",
+"personne",
+"personne faisant la roue"
+],
+"🤸‍♂": [
+"roue",
+"homme",
+"homme faisant la roue",
+"gymnastique"
+],
+"🤸‍♀": [
+"roue",
+"femme",
+"femme faisant la roue",
+"gymnastique"
+],
+"🤼": [
+"sport",
+"lutteur",
+"personnes",
+"lutte",
+"personnes faisant de la lutte"
+],
+"🤼‍♂": [
+"sport",
+"hommes",
+"lutte",
+"personne",
+"lutteurs"
+],
+"🤼‍♀": [
+"lutte",
+"lutteuses",
+"sport",
+"femmes"
+],
+"🤽": [
+"water-polo",
+"personne jouant au water-polo",
+"sport"
+],
+"🤽‍♂": [
+"joueur de water-polo",
+"homme",
+"sport",
+"water-polo"
+],
+"🤽‍♀": [
+"joueuse de water-polo",
+"femme",
+"water-polo",
+"sport"
+],
+"🤾": [
+"handball",
+"personne",
+"personne jouant au handball",
+"sport"
+],
+"🤾‍♂": [
+"handballeur",
+"handball",
+"homme",
+"sport"
+],
+"🤾‍♀": [
+"handball",
+"femme",
+"handballeuse",
+"sport"
+],
+"🤹": [
+"multitâche",
+"jongleur",
+"jongler",
+"personne qui jongle"
+],
+"🤹‍♂": [
+"multitâche",
+"jonglage",
+"jongleur",
+"homme"
+],
+"🤹‍♀": [
+"multitâche",
+"jonglage",
+"femme",
+"jongleuse"
+],
+"🧘": [
+"position du lotus",
+"personne dans la posture du lotus",
+"méditation",
+"yoga"
+],
+"🧘‍♂": [
+"position du lotus",
+"homme dans la posture du lotus",
+"méditation",
+"yoga"
+],
+"🧘‍♀": [
+"position du lotus",
+"femme dans la posture du lotus",
+"méditation",
+"yoga"
+],
+"🛀": [
+"baignoire",
+"personne prenant un bain",
+"bain"
+],
+"🛌": [
+"personne au lit",
+"lit"
+],
+"🧑‍🤝‍🧑": [
+"poignée de main",
+"couple",
+"main",
+"personne",
+"deux personnes se tenant la main",
+"tenir la main"
+],
+"👭": [
+"jumelles",
+"femmes",
+"couple",
+"main dans la main",
+"deux femmes se tenant la main"
+],
+"👫": [
+"femme et homme se tenant la main",
+"couple",
+"femme",
+"homme",
+"main dans la main"
+],
+"👬": [
+"deux hommes se tenant la main",
+"hommes",
+"jumeaux",
+"couple",
+"Gémeaux",
+"main dans la main",
+"zodiaque"
+],
+"💏": [
+"bisou",
+"couple",
+"baiser"
+],
+"💑": [
+"amour",
+"cœur",
+"couple avec cœur",
+"couple"
+],
+"🗣": [
+"tête qui parle",
+"parler",
+"silhouette"
+],
+"👤": [
+"silhouette de buste",
+"buste"
+],
+"👥": [
+"bustes",
+"silhouettes de bustes"
+],
+"🫂": [
+"au revoir",
+"étreinte",
+"gratitude",
+"bonjour",
+"câlin"
+],
+"👪": [
+"père",
+"famille",
+"enfant",
+"mère"
+],
+"🧑‍🧑‍🧒": [
+"famille : adulte",
+"enfant",
+"adulte",
+"famille : adulte, adulte, enfant"
+],
+"🧑‍🧑‍🧒‍🧒": [
+"famille : adulte",
+"enfant",
+"adulte",
+"famille : adulte, adulte, enfant, enfant"
+],
+"🧑‍🧒": [
+"famille : adulte",
+"enfant",
+"famille monoparentale",
+"famille : adulte, enfant"
+],
+"🧑‍🧒‍🧒": [
+"famille : adulte, enfant, enfant",
+"famille : adulte",
+"enfant",
+"famille monoparentale"
+],
+"👣": [
+"pied",
+"traces de pas"
+],
+"🦰": [
+"cheveux roux",
+"rouquine",
+"rouquin"
+],
+"🦱": [
+"boucles",
+"cheveux bouclés",
+"afro",
+"bouclés"
+],
+"🦳": [
+"blancs",
+"cheveux blancs",
+"gris",
+"vieux",
+"cheveux"
+],
+"🦲": [
+"chimiothérapie",
+"rasé",
+"imberbe",
+"sans cheveux",
+"chauve"
+],
+"🐵": [
+"singe",
+"tête de singe",
+"animal"
+],
+"🐒": [
+"singe",
+"animal"
+],
+"🦍": [
+"gorille",
+"animal"
+],
+"🦧": [
+"orang-outan",
+"primate",
+"singe",
+"animal"
+],
+"🐶": [
+"chien",
+"tête de chien",
+"animal"
+],
+"🐕": [
+"chien",
+"animal"
+],
+"🦮": [
+"guide",
+"aveugle",
+"accessibilité",
+"non-voyant",
+"chien guide",
+"animal"
+],
+"🐕‍🦺": [
+"chien d’assistance",
+"assistance",
+"aide",
+"accessibilité",
+"animal"
+],
+"🐩": [
+"chien",
+"caniche",
+"animal"
+],
+"🐺": [
+"loup",
+"tête",
+"animal"
+],
+"🦊": [
+"renard",
+"tête",
+"animal"
+],
+"🦝": [
+"curieux",
+"raton laveur",
+"sournois",
+"animal"
+],
+"🐱": [
+"chat",
+"tête de chat",
+"animal"
+],
+"🐈": [
+"chat",
+"animal"
+],
+"🐈‍⬛": [
+"noir",
+"chat",
+"malchanceux",
+"chat noir"
+],
+"🦁": [
+"lion",
+"zodiaque",
+"animal",
+"tête de lion"
+],
+"🐯": [
+"tigre",
+"tête de tigre",
+"animal"
+],
+"🐅": [
+"tigre",
+"animal"
+],
+"🐆": [
+"léopard",
+"animal"
+],
+"🐴": [
+"cheval",
+"tête de cheval",
+"animal"
+],
+"🫎": [
+"cervidé",
+"mammifère",
+"élan",
+"bois",
+"orignal",
+"ramure",
+"animal"
+],
+"🫏": [
+"âne",
+"têtu",
+"mammifère",
+"bourricot",
+"mule",
+"animal"
+],
+"🐎": [
+"cheval",
+"animal"
+],
+"🦄": [
+"tête",
+"licorne",
+"animal"
+],
+"🦓": [
+"zébrure",
+"rayure",
+"zèbre",
+"animal"
+],
+"🦌": [
+"cerf",
+"animal"
+],
+"🦬": [
+"buffle",
+"bison",
+"herbivore",
+"cornes",
+"troupeau"
+],
+"🐮": [
+"vache",
+"tête de vache",
+"animal"
+],
+"🐂": [
+"bœuf",
+"animal"
+],
+"🐃": [
+"buffle",
+"animal"
+],
+"🐄": [
+"vache",
+"animal"
+],
+"🐷": [
+"cochon",
+"animal",
+"tête de cochon"
+],
+"🐖": [
+"cochon",
+"animal"
+],
+"🐗": [
+"sanglier",
+"animal"
+],
+"🐽": [
+"cochon",
+"groin",
+"animal"
+],
+"🐏": [
+"bélier",
+"animal"
+],
+"🐑": [
+"mouton",
+"animal"
+],
+"🐐": [
+"animal",
+"chèvre"
+],
+"🐪": [
+"dromadaire",
+"animal"
+],
+"🐫": [
+"chameau",
+"animal"
+],
+"🦙": [
+"guanaco",
+"laine",
+"lama",
+"vigogne",
+"alpaga"
+],
+"🦒": [
+"girafe",
+"animal",
+"taches"
+],
+"🐘": [
+"éléphant",
+"animal"
+],
+"🦣": [
+"mammouth",
+"grand",
+"extinction",
+"laineux",
+"défenses"
+],
+"🦏": [
+"rhinocéros",
+"animal"
+],
+"🦛": [
+"hippopotame",
+"animal"
+],
+"🐭": [
+"souris",
+"tête de souris",
+"animal"
+],
+"🐁": [
+"souris",
+"animal"
+],
+"🐀": [
+"rat",
+"animal"
+],
+"🐹": [
+"hamster",
+"tête",
+"animal"
+],
+"🐰": [
+"tête de lapin",
+"animal",
+"lapin"
+],
+"🐇": [
+"animal",
+"lapin"
+],
+"🐿": [
+"écureuil",
+"animal"
+],
+"🦫": [
+"castor",
+"barrage"
+],
+"🦔": [
+"hérisson",
+"animal",
+"épineux"
+],
+"🦇": [
+"vampire",
+"animal",
+"chauve-souris"
+],
+"🐻": [
+"ours",
+"tête",
+"animal"
+],
+"🐻‍❄": [
+"arctique",
+"ours",
+"blanc",
+"ours polaire"
+],
+"🐨": [
+"koala",
+"animal"
+],
+"🐼": [
+"panda",
+"tête",
+"animal"
+],
+"🦥": [
+"aï",
+"lent",
+"endormi",
+"paresseux",
+"animal"
+],
+"🦦": [
+"pêcheur",
+"loutre",
+"animal",
+"joueur"
+],
+"🦨": [
+"mouffette",
+"puer",
+"odeur",
+"putois",
+"animal"
+],
+"🦘": [
+"kangourou",
+"marsupial",
+"saut",
+"joey"
+],
+"🦡": [
+"ratel",
+"animal",
+"blaireau"
+],
+"🐾": [
+"pattes",
+"empreintes d’animaux",
+"empreintes"
+],
+"🦃": [
+"oiseau",
+"dindon",
+"animal"
+],
+"🐔": [
+"oiseau",
+"poule",
+"animal"
+],
+"🐓": [
+"oiseau",
+"coq",
+"animal"
+],
+"🐣": [
+"oiseau",
+"poussin",
+"poussin qui éclôt",
+"animal"
+],
+"🐤": [
+"oiseau",
+"poussin",
+"animal"
+],
+"🐥": [
+"oiseau",
+"poussin de face",
+"animal"
+],
+"🐦": [
+"oiseau",
+"animal"
+],
+"🐧": [
+"oiseau",
+"pingouin",
+"animal"
+],
+"🕊": [
+"oiseau",
+"colombe",
+"animal"
+],
+"🦅": [
+"aigle",
+"oiseau",
+"animal",
+"rapace"
+],
+"🦆": [
+"oiseau",
+"animal",
+"canard"
+],
+"🦢": [
+"cygne",
+"oiseau",
+"animal",
+"vilain petit canard",
+"jeune cygne"
+],
+"🦉": [
+"chouette",
+"oiseau",
+"animal"
+],
+"🦤": [
+"grand",
+"dodo",
+"Maurice",
+"extinction"
+],
+"🪶": [
+"oiseau",
+"voler",
+"plume",
+"léger",
+"plumage"
+],
+"🦩": [
+"oiseau",
+"tropical",
+"rose",
+"flamant",
+"animal"
+],
+"🦚": [
+"oiseau",
+"paonne",
+"prétentieux",
+"fier",
+"paon",
+"animal"
+],
+"🦜": [
+"oiseau",
+"parle",
+"pirate",
+"perroquet",
+"animal"
+],
+"🪽": [
+"aviation",
+"oiseau",
+"angélique",
+"voler",
+"aile",
+"mythologie"
+],
+"🐦‍⬛": [
+"oiseau",
+"oiseau noir",
+"merle",
+"corbeau",
+"corneille"
+],
+"🪿": [
+"oiseau",
+"oie",
+"cacarder",
+"volaille",
+"bête"
+],
+"🐦‍🔥": [
+"renaître",
+"phénix",
+"mythologie",
+"cendres",
+"renaissance"
+],
+"🐸": [
+"tête",
+"animal",
+"grenouille"
+],
+"🐊": [
+"crocodile",
+"animal",
+"reptile"
+],
+"🐢": [
+"tortue",
+"animal",
+"reptile"
+],
+"🦎": [
+"lézard",
+"animal",
+"reptile"
+],
+"🐍": [
+"serpent",
+"animal",
+"reptile"
+],
+"🐲": [
+"dragon",
+"tête de dragon",
+"animal"
+],
+"🐉": [
+"dragon",
+"animal"
+],
+"🦕": [
+"sauropode",
+"diplodocus",
+"brachiosaure",
+"animal",
+"brontosaure"
+],
+"🦖": [
+"Tyrannosaurus Rex",
+"tyrannosaure",
+"T-Rex"
+],
+"🐳": [
+"baleine",
+"baleine soufflant par son évent",
+"animal"
+],
+"🐋": [
+"baleine",
+"animal"
+],
+"🐬": [
+"dauphin",
+"animal"
+],
+"🦭": [
+"otarie",
+"lion de mer",
+"phoque"
+],
+"🐟": [
+"poissons",
+"poisson",
+"zodiaque",
+"animal"
+],
+"🐠": [
+"poisson",
+"poisson tropical",
+"animal"
+],
+"🐡": [
+"poisson",
+"poisson-lune",
+"animal"
+],
+"🦈": [
+"requin",
+"poisson",
+"animal"
+],
+"🐙": [
+"mollusque",
+"pieuvre",
+"animal"
+],
+"🐚": [
+"coquille en spirale",
+"coquille",
+"spirale"
+],
+"🪸": [
+"récif",
+"corail",
+"océan"
+],
+"🪼": [
+"invertébré",
+"mou",
+"brûlure",
+"méduse",
+"aïe",
+"piqûre",
+"marin"
+],
+"🐌": [
+"escargot",
+"animal"
+],
+"🦋": [
+"insecte",
+"mignon",
+"papillon"
+],
+"🐛": [
+"insecte",
+"animal",
+"chenille"
+],
+"🐜": [
+"fourmi",
+"animal",
+"insecte"
+],
+"🐝": [
+"abeille",
+"insecte",
+"animal"
+],
+"🪲": [
+"insecte",
+"scarabée"
+],
+"🐞": [
+"insecte",
+"coccinelle",
+"animal"
+],
+"🦗": [
+"criquet",
+"sauterelle",
+"animal",
+"insecte"
+],
+"🪳": [
+"insecte",
+"nuisible",
+"blatte",
+"cafard"
+],
+"🕷": [
+"insecte",
+"araignée",
+"animal"
+],
+"🕸": [
+"toile",
+"toile d’araignée",
+"araignée"
+],
+"🦂": [
+"scorpion",
+"animal"
+],
+"🦟": [
+"fièvre",
+"insecte",
+"virus",
+"maladie",
+"malaria",
+"moustique"
+],
+"🪰": [
+"mouche",
+"putréfaction",
+"maladie",
+"asticot",
+"nuisible"
+],
+"🪱": [
+"ver",
+"parasite",
+"annélide",
+"lombric",
+"ver de terre"
+],
+"🦠": [
+"bactérie",
+"virus",
+"amibe",
+"microbe"
+],
+"💐": [
+"plante",
+"bouquet",
+"fleur"
+],
+"🌸": [
+"fleur",
+"fleur de cerisier"
+],
+"💮": [
+"fleur",
+"fleur blanche"
+],
+"🪷": [
+"pureté",
+"lotus",
+"bouddhisme",
+"hindouisme",
+"fleur"
+],
+"🏵": [
+"plante",
+"rosette"
+],
+"🌹": [
+"rose",
+"fleur"
+],
+"🥀": [
+"fanée",
+"fleur",
+"fleur fanée"
+],
+"🌺": [
+"hibiscus",
+"fleur"
+],
+"🌻": [
+"fleur",
+"tournesol"
+],
+"🌼": [
+"bourgeon",
+"fleur"
+],
+"🌷": [
+"tulipe",
+"fleur"
+],
+"🪻": [
+"lupin",
+"muflier",
+"lavande",
+"jacinthe",
+"fleur"
+],
+"🌱": [
+"plantule",
+"jeune plant",
+"jeune pousse"
+],
+"🪴": [
+"prendre soin",
+"pousser",
+"plante en pot",
+"décoration",
+"intérieur",
+"ennuyeux"
+],
+"🌲": [
+"conifère",
+"arbre"
+],
+"🌳": [
+"feuilles caduques",
+"feuillu",
+"arbre à feuilles caduques",
+"arbre"
+],
+"🌴": [
+"palmier",
+"arbre"
+],
+"🌵": [
+"plante",
+"cactus"
+],
+"🌾": [
+"plant de riz",
+"riz"
+],
+"🌿": [
+"feuille",
+"plante"
+],
+"☘": [
+"trèfle",
+"plante"
+],
+"🍀": [
+"chance",
+"trèfle",
+"trèfle à quatre feuilles"
+],
+"🍁": [
+"feuille",
+"feuille d’érable"
+],
+"🍂": [
+"feuille",
+"feuille morte"
+],
+"🍃": [
+"souffle",
+"feuille",
+"feuille virevoltante",
+"vent"
+],
+"🪹": [
+"nid vide",
+"faire son nid"
+],
+"🪺": [
+"faire son nid",
+"nid avec œufs"
+],
+"🍄": [
+"plante",
+"champignon"
+],
+"🍇": [
+"fruit",
+"raisin"
+],
+"🍈": [
+"fruit",
+"melon"
+],
+"🍉": [
+"fruit",
+"pastèque"
+],
+"🍊": [
+"fruit",
+"mandarine",
+"orange"
+],
+"🍋": [
+"fruit",
+"citron"
+],
+"🍋‍🟩": [
+"citron vert",
+"lime",
+"tropical",
+"citron",
+"agrume",
+"fruit"
+],
+"🍌": [
+"fruit",
+"banane"
+],
+"🍍": [
+"fruit",
+"ananas"
+],
+"🥭": [
+"fruit",
+"mangue",
+"tropical"
+],
+"🍎": [
+"fruit",
+"pomme rouge",
+"pomme"
+],
+"🍏": [
+"fruit",
+"pomme verte",
+"pomme"
+],
+"🍐": [
+"fruit",
+"poire"
+],
+"🍑": [
+"fruit",
+"pêche"
+],
+"🍒": [
+"fruit",
+"cerises"
+],
+"🍓": [
+"fraise",
+"fruit"
+],
+"🫐": [
+"baies",
+"violet",
+"bleuets",
+"bleu",
+"myrtilles"
+],
+"🥝": [
+"fruit",
+"kiwi"
+],
+"🍅": [
+"légume",
+"tomate",
+"plante"
+],
+"🫒": [
+"nourriture",
+"aliment",
+"olive",
+"apéro"
+],
+"🥥": [
+"fruit",
+"palmier",
+"piña colada",
+"noix de coco"
+],
+"🥑": [
+"fruit",
+"avocat"
+],
+"🍆": [
+"légume",
+"aubergine"
+],
+"🥔": [
+"légume",
+"pomme de terre",
+"patate"
+],
+"🥕": [
+"légume",
+"carotte"
+],
+"🌽": [
+"épi",
+"épi de maïs",
+"maïs"
+],
+"🌶": [
+"piment",
+"piment rouge"
+],
+"🫑": [
+"légume",
+"poivron",
+"piment"
+],
+"🥒": [
+"légume",
+"concombre"
+],
+"🥬": [
+"chou",
+"chou chinois",
+"chou pommé",
+"légume à feuilles vertes",
+"laitue",
+"chou frisé"
+],
+"🥦": [
+"chou sauvage",
+"légume",
+"brocoli"
+],
+"🧄": [
+"légume",
+"ail",
+"condiment",
+"assaisonnement"
+],
+"🧅": [
+"légume",
+"assaisonnement",
+"oignon",
+"condiment"
+],
+"🥜": [
+"noisette",
+"arachide",
+"cacahuètes",
+"cacahuète"
+],
+"🫘": [
+"légume",
+"rognon",
+"haricots",
+"nourriture"
+],
+"🌰": [
+"plante",
+"châtaigne"
+],
+"🫚": [
+"bière",
+"épice",
+"racine de gingembre"
+],
+"🫛": [
+"légume",
+"fève",
+"haricot",
+"cosse de petits pois",
+"edamame",
+"légumineuse",
+"pois"
+],
+"🍄‍🟫": [
+"fongus",
+"champignon",
+"champignon marron",
+"nature",
+"nourriture"
+],
+"🍞": [
+"pain",
+"miche"
+],
+"🥐": [
+"pain",
+"viennoiserie",
+"croissant"
+],
+"🥖": [
+"pain",
+"baguette"
+],
+"🫓": [
+"lavash",
+"galette",
+"naan",
+"pita",
+"arepa"
+],
+"🥨": [
+"bretzel",
+"torsade"
+],
+"🥯": [
+"bagel",
+"schmear",
+"petit-déjeuner",
+"boulangerie"
+],
+"🥞": [
+"pancakes",
+"pancake",
+"crêpe"
+],
+"🧇": [
+"pâtisserie",
+"gaufre",
+"gourmandise",
+"moule",
+"petit-déjeuner"
+],
+"🧀": [
+"fromage",
+"part de fromage"
+],
+"🍖": [
+"viande sur un os",
+"viande"
+],
+"🍗": [
+"cuisse de poulet",
+"poulet"
+],
+"🥩": [
+"steak",
+"côtelette de porc",
+"côtelette d’agneau",
+"morceau de viande",
+"côtelette"
+],
+"🥓": [
+"bacon",
+"lard",
+"viande"
+],
+"🍔": [
+"burger",
+"hamburger"
+],
+"🍟": [
+"frites",
+"potatœs"
+],
+"🍕": [
+"fromage",
+"pizza",
+"part"
+],
+"🌭": [
+"saucisse",
+"saucisse de Francfort",
+"hot dog"
+],
+"🥪": [
+"pain",
+"sandwich"
+],
+"🌮": [
+"taco",
+"mexicain"
+],
+"🌯": [
+"burrito",
+"mexicain"
+],
+"🫔": [
+"tamal",
+"mexicain",
+"papillote"
+],
+"🥙": [
+"kebab",
+"falafel"
+],
+"🧆": [
+"boulettes",
+"viande",
+"soja",
+"seitan",
+"pois chiches",
+"falafels"
+],
+"🥚": [
+"œuf"
+],
+"🍳": [
+"friture",
+"œuf au plat",
+"œuf",
+"poêle"
+],
+"🥘": [
+"plat",
+"poêle",
+"paella",
+"casserole",
+"plat mitonné"
+],
+"🍲": [
+"marmite",
+"ragoût"
+],
+"🫕": [
+"poêlon",
+"Suisse",
+"bourguignonne",
+"chocolat",
+"fondue",
+"fromage",
+"savoyarde"
+],
+"🥣": [
+"déjeuner",
+"congee",
+"bol avec cuillère",
+"céréales"
+],
+"🥗": [
+"salade verte",
+"verte",
+"salade"
+],
+"🍿": [
+"pop-corn"
+],
+"🧈": [
+"produit laitier",
+"gras",
+"beurre"
+],
+"🧂": [
+"salière",
+"sel",
+"condiment"
+],
+"🥫": [
+"aliments en conserve",
+"conserve"
+],
+"🍱": [
+"déjeuner",
+"boîte",
+"boîte déjeuner"
+],
+"🍘": [
+"galette de riz",
+"riz",
+"cracker"
+],
+"🍙": [
+"plat",
+"onigiri",
+"riz",
+"boulette de riz",
+"japonais"
+],
+"🍚": [
+"riz",
+"bol de riz"
+],
+"🍛": [
+"riz au curry",
+"riz",
+"curry"
+],
+"🍜": [
+"bol fumant",
+"nouilles",
+"ramen",
+"vapeur"
+],
+"🍝": [
+"pâtes",
+"spaghetti"
+],
+"🍠": [
+"patate",
+"patate douce"
+],
+"🍢": [
+"brochette",
+"brochette de poisson"
+],
+"🍣": [
+"poisson",
+"japonais",
+"sushi"
+],
+"🍤": [
+"crevette",
+"beignet de crevette"
+],
+"🍥": [
+"croquette de poisson",
+"poisson"
+],
+"🥮": [
+"gâteau de lune",
+"festival",
+"automne",
+"yuèbǐng"
+],
+"🍡": [
+"brochette de bonbons",
+"bonbons"
+],
+"🥟": [
+"empanada",
+"boulette de pâte",
+"jiaozi",
+"potsticker",
+"gyōza",
+"pierogi"
+],
+"🥠": [
+"prophétie",
+"biscuit chinois"
+],
+"🥡": [
+"boîte à emporter",
+"nourriture à emporter",
+"carton",
+"chinois"
+],
+"🦀": [
+"crabe",
+"animal"
+],
+"🦞": [
+"fruits de mer",
+"bisque",
+"pinces",
+"homard"
+],
+"🦐": [
+"crustacé",
+"crevette"
+],
+"🦑": [
+"mollusque",
+"calamar"
+],
+"🦪": [
+"mollusque",
+"coquille",
+"huître",
+"perle"
+],
+"🍦": [
+"glace italienne",
+"glace"
+],
+"🍧": [
+"glace",
+"granité"
+],
+"🍨": [
+"crème",
+"dessert",
+"sucré",
+"glace"
+],
+"🍩": [
+"dessert",
+"sucré",
+"doughnut"
+],
+"🍪": [
+"dessert",
+"sucré",
+"cookie"
+],
+"🎂": [
+"gâteau d’anniversaire",
+"anniversaire"
+],
+"🍰": [
+"pâtisserie",
+"dessert",
+"sucré",
+"gâteau sablé",
+"gâteau"
+],
+"🧁": [
+"cupcake",
+"sucrerie",
+"pâtisserie"
+],
+"🥧": [
+"pâtisserie",
+"décoration",
+"gâteau",
+"garniture",
+"tarte"
+],
+"🍫": [
+"barre",
+"dessert",
+"sucré",
+"barre chocolatée",
+"chocolat"
+],
+"🍬": [
+"dessert",
+"sucré",
+"bonbon"
+],
+"🍭": [
+"dessert",
+"sucré",
+"sucette",
+"sucrerie"
+],
+"🍮": [
+"dessert",
+"sucré",
+"pudding",
+"crème renversée"
+],
+"🍯": [
+"sucré",
+"pot de miel",
+"pot",
+"miel"
+],
+"🍼": [
+"biberon",
+"bébé",
+"boisson",
+"lait"
+],
+"🥛": [
+"verre de lait",
+"lait",
+"verre",
+"boisson"
+],
+"☕": [
+"boisson chaude",
+"boisson"
+],
+"🫖": [
+"thé",
+"théière",
+"boisson"
+],
+"🍵": [
+"thé",
+"tasse"
+],
+"🍶": [
+"saké",
+"bouteille"
+],
+"🍾": [
+"bouteille de champagne",
+"bouteille",
+"bouchon",
+"boisson",
+"pop"
+],
+"🍷": [
+"verre de vin",
+"verre",
+"vin"
+],
+"🍸": [
+"cocktail",
+"verre"
+],
+"🍹": [
+"verre",
+"cocktail tropical"
+],
+"🍺": [
+"bière",
+"chope"
+],
+"🍻": [
+"bière",
+"trinquer",
+"chopes de bière"
+],
+"🥂": [
+"célébrer",
+"fêter",
+"verre",
+"trinquer"
+],
+"🥃": [
+"liqueur",
+"verre",
+"tumbler",
+"whisky",
+"verre tumbler"
+],
+"🫗": [
+"verser un liquide",
+"verre",
+"renverser",
+"boisson",
+"vider"
+],
+"🥤": [
+"jus de fruits",
+"soda",
+"gobelet avec paille"
+],
+"🧋": [
+"bulle",
+"perle",
+"thé aux perles",
+"lait"
+],
+"🧃": [
+"jus de fruits",
+"carton",
+"briquette de jus"
+],
+"🧉": [
+"maté",
+"boisson"
+],
+"🧊": [
+"glace",
+"froid",
+"glaçon",
+"iceberg"
+],
+"🥢": [
+"hashi",
+"baguettes"
+],
+"🍽": [
+"couteau",
+"assiette et couverts",
+"fourchette et couteau avec assiette",
+"cuisine",
+"fourchette",
+"assiette"
+],
+"🍴": [
+"fourchette et couteau",
+"restaurant",
+"couteau et fourchette"
+],
+"🥄": [
+"couvert",
+"cuillère"
+],
+"🔪": [
+"couteau",
+"couteau de cuisine",
+"arme",
+"outil",
+"cuisine"
+],
+"🫙": [
+"conserver",
+"bocal",
+"sauce",
+"vide",
+"condiments",
+"récipient"
+],
+"🏺": [
+"vase",
+"amphore",
+"cuisine"
+],
+"🌍": [
+"afrique",
+"globe tourné sur l’Afrique et l’Europe",
+"europe"
+],
+"🌎": [
+"amérique",
+"globe tourné sur les Amériques"
+],
+"🌏": [
+"globe tourné sur l’Asie et l’Australie",
+"asie",
+"australie"
+],
+"🌐": [
+"globe terrestre",
+"globe avec méridiens"
+],
+"🗺": [
+"carte du monde",
+"carte"
+],
+"🗾": [
+"japon",
+"carte",
+"carte du Japon"
+],
+"🧭": [
+"orientation",
+"magnétique",
+"navigation",
+"boussole"
+],
+"🏔": [
+"montagne enneigée",
+"montagne"
+],
+"⛰": [
+"montagne"
+],
+"🌋": [
+"volcan",
+"éruption"
+],
+"🗻": [
+"mont Fuji",
+"montagne"
+],
+"🏕": [
+"camping"
+],
+"🏖": [
+"plage",
+"plage avec parasol",
+"parasol"
+],
+"🏜": [
+"désert"
+],
+"🏝": [
+"île",
+"île déserte"
+],
+"🏞": [
+"nature",
+"parc national"
+],
+"🏟": [
+"stade"
+],
+"🏛": [
+"monument classique",
+"monument"
+],
+"🏗": [
+"construction d’un bâtiment",
+"construction"
+],
+"🧱": [
+"mortier",
+"brique",
+"briques",
+"mur",
+"argile"
+],
+"🪨": [
+"roc",
+"solide",
+"lourd",
+"pierre",
+"rocher"
+],
+"🪵": [
+"rondins",
+"tronc",
+"bûche",
+"bois"
+],
+"🛖": [
+"case",
+"hutte",
+"yourte",
+"maison"
+],
+"🏘": [
+"bâtiments",
+"maisons"
+],
+"🏚": [
+"maison abandonnée",
+"maison"
+],
+"🏠": [
+"bâtiment",
+"maison",
+"pavillon"
+],
+"🏡": [
+"jardin",
+"maison avec jardin",
+"maison"
+],
+"🏢": [
+"immeuble",
+"immeuble de bureaux"
+],
+"🏣": [
+"Japon",
+"bâtiment",
+"poste",
+"bureau de poste japonais"
+],
+"🏤": [
+"bureau de poste",
+"poste"
+],
+"🏥": [
+"hôpital",
+"bâtiment"
+],
+"🏦": [
+"bâtiment",
+"banque"
+],
+"🏨": [
+"hôtel",
+"bâtiment"
+],
+"🏩": [
+"love hotel",
+"bâtiment"
+],
+"🏪": [
+"magasin",
+"épicerie",
+"supérette"
+],
+"🏫": [
+"école",
+"bâtiment"
+],
+"🏬": [
+"grand magasin",
+"magasin"
+],
+"🏭": [
+"usine",
+"bâtiment"
+],
+"🏯": [
+"bâtiment",
+"château japonais"
+],
+"🏰": [
+"européen",
+"bâtiment",
+"château"
+],
+"💒": [
+"amour",
+"chapelle",
+"mariage",
+"église"
+],
+"🗼": [
+"tour de Tokyo",
+"Tokyo",
+"tour"
+],
+"🗽": [
+"statue",
+"statue de la Liberté"
+],
+"⛪": [
+"religion",
+"chrétien",
+"église",
+"croix",
+"bâtiment"
+],
+"🕌": [
+"islam",
+"religion",
+"mosquée",
+"musulman"
+],
+"🛕": [
+"religion",
+"temple hindou",
+"stūpa",
+"hindou",
+"temple"
+],
+"🕍": [
+"religion",
+"juif",
+"juive",
+"synagogue",
+"temple"
+],
+"⛩": [
+"shinto",
+"sanctuaire shinto"
+],
+"🕋": [
+"islam",
+"religion",
+"musulman",
+"kaaba"
+],
+"⛲": [
+"fontaine"
+],
+"⛺": [
+"tente",
+"camping"
+],
+"🌁": [
+"brouillard",
+"brume"
+],
+"🌃": [
+"nuit",
+"nuit étoilée",
+"étoiles"
+],
+"🏙": [
+"ville",
+"bâtiment"
+],
+"🌄": [
+"soleil levant derrière les montagnes",
+"soleil"
+],
+"🌅": [
+"soleil levant",
+"soleil"
+],
+"🌆": [
+"immeubles",
+"crépuscule",
+"ville au crépuscule",
+"soir",
+"coucher de soleil"
+],
+"🌇": [
+"coucher de soleil",
+"soleil"
+],
+"🌉": [
+"pont de nuit",
+"pont"
+],
+"♨": [
+"sources chaudes",
+"source"
+],
+"🎠": [
+"cheval",
+"manège",
+"cheval de manège"
+],
+"🛝": [
+"toboggan",
+"jouer",
+"aire de jeu"
+],
+"🎡": [
+"roue",
+"grande roue"
+],
+"🎢": [
+"montagnes russes",
+"montagnes",
+"russes"
+],
+"💈": [
+"coiffure",
+"enseigne de barbier",
+"enseigne",
+"barbier"
+],
+"🎪": [
+"cirque",
+"chapiteau"
+],
+"🚂": [
+"train",
+"locomotive"
+],
+"🚃": [
+"wagon",
+"voiture",
+"train",
+"chemin de fer"
+],
+"🚄": [
+"train",
+"TGV"
+],
+"🚅": [
+"train à grande vitesse",
+"train"
+],
+"🚆": [
+"train",
+"chemin de fer"
+],
+"🚇": [
+"métro"
+],
+"🚈": [
+"métro",
+"métro léger"
+],
+"🚉": [
+"train",
+"gare"
+],
+"🚊": [
+"trolleybus",
+"tramway",
+"tram",
+"transport",
+"trolley"
+],
+"🚝": [
+"monorail",
+"véhicule"
+],
+"🚞": [
+"train de montagne",
+"train"
+],
+"🚋": [
+"tram",
+"trolleybus",
+"voiture",
+"wagon de tramway"
+],
+"🚌": [
+"véhicule",
+"bus"
+],
+"🚍": [
+"bus de face",
+"bus"
+],
+"🚎": [
+"trolleybus",
+"bus",
+"trolley"
+],
+"🚐": [
+"bus",
+"minibus"
+],
+"🚑": [
+"ambulance",
+"véhicule"
+],
+"🚒": [
+"camion de pompier",
+"pompier"
+],
+"🚓": [
+"voiture de police",
+"police"
+],
+"🚔": [
+"voiture de police de face",
+"police"
+],
+"🚕": [
+"taxi",
+"véhicule"
+],
+"🚖": [
+"taxi",
+"taxi de face"
+],
+"🚗": [
+"voiture",
+"automobile"
+],
+"🚘": [
+"voiture de face",
+"automobile"
+],
+"🚙": [
+"véhicule utilitaire sport",
+"voiture",
+"loisirs"
+],
+"🛻": [
+"pick-up",
+"véhicule",
+"pickup"
+],
+"🚚": [
+"camion de livraison",
+"camion"
+],
+"🚛": [
+"semi",
+"poids lourd",
+"semi-remorque",
+"camion"
+],
+"🚜": [
+"véhicule",
+"tracteur"
+],
+"🏎": [
+"voiture",
+"voiture de course",
+"course"
+],
+"🏍": [
+"moto",
+"course"
+],
+"🛵": [
+"scooter"
+],
+"🦽": [
+"accessibilité",
+"fauteuil roulant manuel"
+],
+"🦼": [
+"accessibilité",
+"fauteuil roulant",
+"fauteuil motorisé"
+],
+"🛺": [
+"rickshaw",
+"tuk tuk",
+"tricycle",
+"taxi"
+],
+"🚲": [
+"vélo"
+],
+"🛴": [
+"trottinette"
+],
+"🛹": [
+"glisse",
+"roulettes",
+"skateboard",
+"longboard",
+"planche à roulettes",
+"skate"
+],
+"🛼": [
+"roulette",
+"derby",
+"roller",
+"patin à roulettes"
+],
+"🚏": [
+"arrêt de bus",
+"bus"
+],
+"🛣": [
+"autoroute",
+"route"
+],
+"🛤": [
+"voie ferrée",
+"train"
+],
+"🛢": [
+"pétrole",
+"baril de pétrole"
+],
+"⛽": [
+"pompe à essence",
+"station",
+"essence"
+],
+"🛞": [
+"roue",
+"tourner",
+"cercle",
+"pneu"
+],
+"🚨": [
+"voiture",
+"gyrophare",
+"lumière",
+"police"
+],
+"🚥": [
+"tricolore",
+"feu tricolore horizontal",
+"feu"
+],
+"🚦": [
+"tricolore",
+"feu tricolore vertical",
+"feu"
+],
+"🛑": [
+"stop",
+"signe"
+],
+"🚧": [
+"barrière",
+"travaux"
+],
+"⚓": [
+"ancre",
+"outil",
+"bateau"
+],
+"🛟": [
+"sauver",
+"flotter",
+"sauveteur",
+"bouée de sauvetage",
+"secours",
+"sécurité"
+],
+"⛵": [
+"yacht",
+"bateau",
+"mer",
+"voilier"
+],
+"🛶": [
+"bateau",
+"canoë"
+],
+"🚤": [
+"bateau",
+"hors-bord"
+],
+"🛳": [
+"bateau",
+"paquebot"
+],
+"⛴": [
+"bateau",
+"ferry"
+],
+"🛥": [
+"bateau",
+"bateau à moteur"
+],
+"🚢": [
+"bateau",
+"navire"
+],
+"✈": [
+"véhicule",
+"avion"
+],
+"🛩": [
+"avion",
+"petit avion"
+],
+"🛫": [
+"avion",
+"avion au décollage"
+],
+"🛬": [
+"avion",
+"avion à l’atterrissage"
+],
+"🪂": [
+"parachute ascensionnel",
+"parapente",
+"parachute"
+],
+"💺": [
+"siège",
+"fauteuil"
+],
+"🚁": [
+"véhicule",
+"hélicoptère"
+],
+"🚟": [
+"train suspendu",
+"train"
+],
+"🚠": [
+"télécabine",
+"montagne",
+"téléphérique"
+],
+"🚡": [
+"tramway",
+"télécabine",
+"tramway aérien"
+],
+"🛰": [
+"satellite",
+"espace"
+],
+"🚀": [
+"fusée",
+"espace"
+],
+"🛸": [
+"soucoupe volante",
+"OVNI"
+],
+"🛎": [
+"cloche de comptoir",
+"hôtel",
+"cloche"
+],
+"🧳": [
+"voyage",
+"bagage",
+"valise"
+],
+"⌛": [
+"sablier",
+"minuteur",
+"sable"
+],
+"⏳": [
+"sablier",
+"sablier avec sable qui coule"
+],
+"⌚": [
+"heure",
+"montre"
+],
+"⏰": [
+"heure",
+"alarme",
+"réveil"
+],
+"⏱": [
+"chronomètre",
+"heure"
+],
+"⏲": [
+"heure",
+"horloge",
+"minuteur"
+],
+"🕰": [
+"pendule",
+"horloge"
+],
+"🕛": [
+"midi/minuit",
+"12 h",
+"0 h"
+],
+"🕧": [
+"00 h 30",
+"12 h 30",
+"midi/minuit et demie"
+],
+"🕐": [
+"1 h",
+"une heure",
+"13 h"
+],
+"🕜": [
+"une heure et demie",
+"13 h 30",
+"1 h 30"
+],
+"🕑": [
+"14 h",
+"2 h",
+"deux heures"
+],
+"🕝": [
+"2 h 30",
+"deux heures et demie",
+"14 h 30"
+],
+"🕒": [
+"3 h",
+"trois heures",
+"15 h"
+],
+"🕞": [
+"trois heures et demie",
+"15 h 30",
+"3 h 30"
+],
+"🕓": [
+"4 h",
+"quatre heures",
+"16 h"
+],
+"🕟": [
+"quatre heures et demie",
+"16 h 30",
+"4 h 30"
+],
+"🕔": [
+"5 h",
+"cinq heures",
+"17 h"
+],
+"🕠": [
+"cinq heures et demie",
+"17 h 30",
+"5 h 30"
+],
+"🕕": [
+"six heures",
+"18 h",
+"6 h"
+],
+"🕡": [
+"six heures et demie",
+"18 h 30",
+"6 h 30"
+],
+"🕖": [
+"19 h",
+"sept heures",
+"7 h"
+],
+"🕢": [
+"7 h 30",
+"19 h 30",
+"sept heures et demie"
+],
+"🕗": [
+"huit heures",
+"8 h",
+"20 h"
+],
+"🕣": [
+"huit heures et demie",
+"20 h 30",
+"8 h 30"
+],
+"🕘": [
+"neuf heures",
+"21 h",
+"9 h"
+],
+"🕤": [
+"9 h 30",
+"neuf heures et demie",
+"21 h 30"
+],
+"🕙": [
+"22 h",
+"dix heures",
+"10 h"
+],
+"🕥": [
+"dix heures et demie",
+"10 h 30",
+"22 h 30"
+],
+"🕚": [
+"onze heures",
+"11 h",
+"23 h"
+],
+"🕦": [
+"11 h 30",
+"23 h 30",
+"onze heures et demie"
+],
+"🌑": [
+"lune",
+"nouvelle lune"
+],
+"🌒": [
+"lune",
+"lune croissante"
+],
+"🌓": [
+"lune",
+"premier quartier de lune"
+],
+"🌔": [
+"lune",
+"lune gibbeuse croissante"
+],
+"🌕": [
+"lune",
+"pleine lune"
+],
+"🌖": [
+"lune",
+"lune gibbeuse décroissante"
+],
+"🌗": [
+"dernier quartier de lune",
+"dernier quartier",
+"lune"
+],
+"🌘": [
+"lune",
+"lune décroissante"
+],
+"🌙": [
+"lune",
+"croissant de lune"
+],
+"🌚": [
+"lune",
+"nouvelle lune avec visage"
+],
+"🌛": [
+"lune",
+"premier quartier de lune avec visage"
+],
+"🌜": [
+"lune",
+"dernier quartier de lune avec visage"
+],
+"🌡": [
+"thermomètre",
+"météo"
+],
+"☀": [
+"brillant",
+"soleil",
+"rayons",
+"météo"
+],
+"🌝": [
+"pleine lune avec visage",
+"lune"
+],
+"🌞": [
+"soleil",
+"soleil avec visage"
+],
+"🪐": [
+"saturne",
+"planète à anneaux",
+"saturnien"
+],
+"⭐": [
+"étoile"
+],
+"🌟": [
+"étoile",
+"étoile brillante"
+],
+"🌠": [
+"étoile",
+"étoile filante"
+],
+"🌌": [
+"voie lactée",
+"espace"
+],
+"☁": [
+"nuage",
+"météo"
+],
+"⛅": [
+"soleil derrière les nuages",
+"nuageux",
+"soleil"
+],
+"⛈": [
+"nuage avec éclair et pluie",
+"éclair",
+"orage",
+"météo",
+"pluie"
+],
+"🌤": [
+"nuage",
+"soleil derrière un petit nuage"
+],
+"🌥": [
+"nuage",
+"soleil derrière un gros nuage"
+],
+"🌦": [
+"nuage",
+"soleil derrière un nuage de pluie"
+],
+"🌧": [
+"nuage avec pluie",
+"averse",
+"météo",
+"pluie",
+"mauvais temps"
+],
+"🌨": [
+"nuage avec neige",
+"flocons",
+"neige",
+"hiver",
+"météo"
+],
+"🌩": [
+"nuage",
+"nuage avec éclair"
+],
+"🌪": [
+"nuage",
+"tornade",
+"tourbillon",
+"météo"
+],
+"🌫": [
+"nuage",
+"brouillard",
+"météo"
+],
+"🌬": [
+"souffle",
+"vent",
+"météo",
+"visage",
+"vent avec visage"
+],
+"🌀": [
+"cyclone",
+"tourbillon"
+],
+"🌈": [
+"arc-en-ciel",
+"pluie",
+"météo"
+],
+"🌂": [
+"pluie",
+"parapluie fermé"
+],
+"☂": [
+"pluie",
+"parapluie ouvert"
+],
+"☔": [
+"pluie",
+"parapluie avec gouttes de pluie",
+"gouttes",
+"météo"
+],
+"⛱": [
+"soleil",
+"parasol sur le sol",
+"plage"
+],
+"⚡": [
+"éclair",
+"électricité",
+"tension",
+"danger",
+"haute tension",
+"courant"
+],
+"❄": [
+"flocon",
+"neige"
+],
+"☃": [
+"bonhomme de neige",
+"neige"
+],
+"⛄": [
+"bonhomme de neige sans neige",
+"neige"
+],
+"☄": [
+"espace",
+"comète"
+],
+"🔥": [
+"flamme",
+"feu"
+],
+"💧": [
+"goutte d’eau",
+"sueur"
+],
+"🌊": [
+"vague",
+"mer",
+"océan"
+],
+"🎃": [
+"citrouille",
+"citrouille lanterne",
+"halloween"
+],
+"🎄": [
+"fête",
+"sapin de Noël",
+"arbre",
+"Noël"
+],
+"🎆": [
+"feu d’artifice",
+"artifice"
+],
+"🎇": [
+"cierge magique",
+"fête",
+"feu d’artifice",
+"étincelle"
+],
+"🧨": [
+"feu d’artifice",
+"pétard",
+"explosif",
+"dynamite"
+],
+"✨": [
+"*",
+"étincelles",
+"étoile",
+"scintiller"
+],
+"🎈": [
+"fête",
+"ballon gonflable"
+],
+"🎉": [
+"fête",
+"cotillons"
+],
+"🎊": [
+"fête",
+"confettis"
+],
+"🎋": [
+"vœux",
+"arbre à vœux",
+"arbre"
+],
+"🎍": [
+"bambou",
+"fête",
+"bambou décoratif",
+"plante",
+"japonais"
+],
+"🎎": [
+"poupées",
+"poupées japonaises"
+],
+"🎏": [
+"fête",
+"koinobori",
+"carpe"
+],
+"🎐": [
+"fête",
+"vent",
+"clochette",
+"carillon éolien",
+"carillon"
+],
+"🎑": [
+"cérémonie",
+"lune",
+"cérémonie de la lune"
+],
+"🧧": [
+"bonne chance",
+"cadeau",
+"argent",
+"lai see",
+"enveloppe rouge",
+"hóngbāo"
+],
+"🎀": [
+"fête",
+"ruban"
+],
+"🎁": [
+"cadeau",
+"anniversaire",
+"fête"
+],
+"🎗": [
+"ruban",
+"ruban de mémoire"
+],
+"🎟": [
+"billet d’entrée",
+"spectacle"
+],
+"🎫": [
+"billet",
+"spectacle"
+],
+"🎖": [
+"médaille",
+"médaille militaire"
+],
+"🏆": [
+"trophée",
+"prix"
+],
+"🏅": [
+"médaille",
+"médaille sportive"
+],
+"🥇": [
+"1er",
+"or",
+"médaille d’or",
+"médaille"
+],
+"🥈": [
+"2e",
+"argent",
+"médaille d’argent",
+"médaille"
+],
+"🥉": [
+"médaille",
+"3e",
+"bronze",
+"médaille de bronze"
+],
+"⚽": [
+"football",
+"balle",
+"ballon de football",
+"sport"
+],
+"⚾": [
+"balle",
+"baseball",
+"sport"
+],
+"🥎": [
+"gant",
+"balle",
+"softball"
+],
+"🏀": [
+"sport",
+"basket",
+"panier",
+"ballon"
+],
+"🏐": [
+"sport",
+"volley-ball",
+"match",
+"ballon"
+],
+"🏈": [
+"sport",
+"football américain",
+"ballon"
+],
+"🏉": [
+"sport",
+"rugby",
+"ballon"
+],
+"🎾": [
+"tennis",
+"balle",
+"sport"
+],
+"🥏": [
+"ultime-passe",
+"sport",
+"ultimate",
+"disque volant",
+"frisbee"
+],
+"🎳": [
+"partie",
+"boule",
+"jeu",
+"bowling"
+],
+"🏏": [
+"cricket",
+"sport",
+"balle",
+"match",
+"batte"
+],
+"🏑": [
+"sport",
+"hockey sur gazon",
+"hockey",
+"balle",
+"crosse"
+],
+"🏒": [
+"sport",
+"hockey",
+"crosse",
+"palet",
+"hockey sur glace"
+],
+"🥍": [
+"balle",
+"crosse",
+"but",
+"sport"
+],
+"🏓": [
+"raquette",
+"sport",
+"tennis de table",
+"ping-pong",
+"partie"
+],
+"🏸": [
+"volant",
+"raquette",
+"sport",
+"match",
+"badminton"
+],
+"🥊": [
+"gant",
+"boxe",
+"gant de boxe",
+"sport"
+],
+"🥋": [
+"sport",
+"judo",
+"arts martiaux",
+"taekwondo",
+"karaté",
+"tenue",
+"tenue d’arts martiaux"
+],
+"🥅": [
+"cage",
+"filet",
+"sport"
+],
+"⛳": [
+"trou",
+"golf",
+"drapeau de golf",
+"sport"
+],
+"⛸": [
+"patin",
+"patin à glace",
+"glace",
+"sport"
+],
+"🎣": [
+"pêche",
+"pêche à la ligne"
+],
+"🤿": [
+"masque de plongée",
+"apnée",
+"tuba",
+"plonger",
+"snorkeling"
+],
+"🎽": [
+"sport",
+"maillot de course"
+],
+"🎿": [
+"ski",
+"sport"
+],
+"🛷": [
+"traîneau",
+"luge"
+],
+"🥌": [
+"sport",
+"pierre de curling",
+"match",
+"partie",
+"granit"
+],
+"🎯": [
+"dans le mille",
+"cible"
+],
+"🪀": [
+"jouet",
+"monter",
+"osciller",
+"yoyo",
+"descendre"
+],
+"🪁": [
+"voler",
+"planer",
+"cerf-volant"
+],
+"🔫": [
+"revolver",
+"arme",
+"arme à feu",
+"pistolet à eau",
+"pistolet"
+],
+"🎱": [
+"boule magique",
+"billard",
+"boule de billard",
+"jeu",
+"pool"
+],
+"🔮": [
+"boule de cristal",
+"cristal"
+],
+"🪄": [
+"sorcière",
+"magicien",
+"magie",
+"baguette magique",
+"sorcier"
+],
+"🎮": [
+"manette",
+"jeu vidéo"
+],
+"🕹": [
+"manette de jeu",
+"jeu",
+"jeu vidéo",
+"joystick"
+],
+"🎰": [
+"machine à sous",
+"jeu"
+],
+"🎲": [
+"jeu",
+"dés"
+],
+"🧩": [
+"puzzle",
+"pièce de puzzle",
+"assemblage",
+"indice"
+],
+"🧸": [
+"peluche",
+"jeu",
+"jouet",
+"ours en peluche"
+],
+"🪅": [
+"fête",
+"confiseries",
+"piñata",
+"bonbons"
+],
+"🪩": [
+"fête",
+"disco",
+"danse",
+"boule à facettes",
+"briller"
+],
+"🪆": [
+"matriochka",
+"russe",
+"emboîté",
+"poupées russes"
+],
+"♠": [
+"pique",
+"jeu",
+"carte",
+"couleur"
+],
+"♥": [
+"jeu",
+"couleur",
+"cœur",
+"cœur cartes"
+],
+"♦": [
+"carte",
+"couleur",
+"carreau",
+"jeu",
+"carreaux"
+],
+"♣": [
+"trèfle",
+"trèfle cartes",
+"jeu",
+"couleur"
+],
+"♟": [
+"échec",
+"duper",
+"pion d’échec",
+"sacrifiable"
+],
+"🃏": [
+"jeu",
+"Joker",
+"carte Joker"
+],
+"🀄": [
+"mahjong",
+"dragon rouge mahjong",
+"jeu",
+"rouge"
+],
+"🎴": [
+"carte",
+"jeu",
+"jeu des fleurs",
+"fleur",
+"japonais"
+],
+"🎭": [
+"spectacle",
+"masque",
+"art",
+"théâtre",
+"spectacle vivant"
+],
+"🖼": [
+"cadre avec image",
+"peinture",
+"musée",
+"art",
+"image"
+],
+"🎨": [
+"musée de peinture",
+"art",
+"palette de peinture",
+"peinture"
+],
+"🧵": [
+"ficelle",
+"aiguille",
+"bobine",
+"bobine de fil",
+"couture"
+],
+"🪡": [
+"tailleur",
+"suture",
+"points",
+"aiguille à coudre",
+"couture",
+"broderie"
+],
+"🧶": [
+"crochet",
+"fil",
+"tricot",
+"pelote",
+"boule"
+],
+"🪢": [
+"tordre",
+"corde",
+"nœud",
+"noué",
+"attacher",
+"entrelacer"
+],
+"👓": [
+"lunettes",
+"vêtements",
+"lunettes de vue",
+"œil"
+],
+"🕶": [
+"lunettes",
+"soleil",
+"lunettes de soleil"
+],
+"🥽": [
+"lunettes",
+"protection des yeux",
+"soudage",
+"natation"
+],
+"🥼": [
+"blouse blanche",
+"scientifique",
+"expérience",
+"docteur"
+],
+"🦺": [
+"sûreté",
+"fluo",
+"gilet jaune",
+"gilet de sécurité",
+"visibilité",
+"sécurité"
+],
+"👔": [
+"cravate",
+"vêtements"
+],
+"👕": [
+"tee-shirt",
+"vêtements",
+"T-shirt"
+],
+"👖": [
+"jean",
+"vêtements",
+"pantalon"
+],
+"🧣": [
+"vêtements",
+"foulard",
+"cou"
+],
+"🧤": [
+"vêtements",
+"main",
+"gants"
+],
+"🧥": [
+"manteau",
+"vêtements",
+"veste"
+],
+"🧦": [
+"vêtements",
+"pieds",
+"chaussettes"
+],
+"👗": [
+"vêtements",
+"robe"
+],
+"👘": [
+"vêtements",
+"kimono"
+],
+"🥻": [
+"mode",
+"vêtement",
+"robe",
+"sari"
+],
+"🩱": [
+"maillot de bain",
+"maillot de bain une pièce"
+],
+"🩲": [
+"slip",
+"sous-vêtement",
+"maillot de bain"
+],
+"🩳": [
+"caleçon",
+"sous-vêtement",
+"short",
+"maillot de bain"
+],
+"👙": [
+"bikini",
+"maillot de bain"
+],
+"👚": [
+"vêtements",
+"femme",
+"vêtements de femme"
+],
+"🪭": [
+"chaleur",
+"rafraîchir",
+"éventail",
+"timide",
+"danse",
+"éventer"
+],
+"👛": [
+"vêtements",
+"porte-monnaie",
+"monnaie"
+],
+"👜": [
+"vêtements",
+"sac à main",
+"sac"
+],
+"👝": [
+"vêtements",
+"pochette",
+"sac"
+],
+"🛍": [
+"sacs de shopping",
+"shopping",
+"sac"
+],
+"🎒": [
+"école",
+"sac à dos",
+"cartable",
+"sac"
+],
+"🩴": [
+"sandales",
+"claquettes",
+"tong",
+"sandales de plage",
+"tongs",
+"tatanes"
+],
+"👞": [
+"vêtements",
+"homme",
+"chaussure",
+"chaussure d’homme"
+],
+"👟": [
+"chaussure de sport",
+"vêtements",
+"chaussure"
+],
+"🥾": [
+"chaussure de marche",
+"chaussure",
+"marche",
+"randonnée",
+"chaussure de randonnée",
+"camping",
+"vêtements"
+],
+"🥿": [
+"chaussure sans lacets",
+"ballerine",
+"mule",
+"chaussure plate",
+"vêtements"
+],
+"👠": [
+"vêtements",
+"chaussure à talon haut",
+"chaussure"
+],
+"👡": [
+"vêtements",
+"chaussure",
+"sandale de femme"
+],
+"🩰": [
+"chaussures",
+"chaussons de danse",
+"danse",
+"ballet"
+],
+"👢": [
+"vêtements",
+"botte",
+"chaussure",
+"botte de femme"
+],
+"🪮": [
+"cheveux",
+"peigne afro",
+"afro",
+"démêler"
+],
+"👑": [
+"vêtements",
+"couronne",
+"reine",
+"roi"
+],
+"👒": [
+"vêtements",
+"femme",
+"chapeau de femme",
+"chapeau"
+],
+"🎩": [
+"vêtements",
+"haut de forme",
+"chapeau"
+],
+"🎓": [
+"vêtements",
+"toque universitaire",
+"chapeau"
+],
+"🧢": [
+"casquette de baseball",
+"vêtements",
+"casquette américaine"
+],
+"🪖": [
+"casque",
+"guerrier",
+"casque militaire",
+"militaire",
+"armée",
+"soldat"
+],
+"⛑": [
+"casque de secouriste",
+"casque",
+"assistance",
+"croix"
+],
+"📿": [
+"chapelet",
+"prière",
+"vêtements",
+"religion"
+],
+"💄": [
+"maquillage",
+"rouge à lèvres"
+],
+"💍": [
+"amour",
+"bague",
+"diamant"
+],
+"💎": [
+"joyau",
+"pierre précieuse",
+"diamant",
+"bijou"
+],
+"🔇": [
+"silence",
+"muet",
+"son"
+],
+"🔈": [
+"volume des enceintes faible",
+"son"
+],
+"🔉": [
+"volume des enceintes moyen",
+"son"
+],
+"🔊": [
+"volume des enceintes élevé",
+"son"
+],
+"📢": [
+"haut-parleur",
+"son"
+],
+"📣": [
+"mégaphone",
+"porte-voix",
+"manifestation"
+],
+"📯": [
+"facteur",
+"cor postal"
+],
+"🔔": [
+"cloche"
+],
+"🔕": [
+"silence",
+"alarme désactivée",
+"cloche",
+"barrée"
+],
+"🎼": [
+"partition",
+"musique"
+],
+"🎵": [
+"note",
+"note de musique",
+"musique"
+],
+"🎶": [
+"notes",
+"notes de musique",
+"note",
+"musique"
+],
+"🎙": [
+"micro",
+"micro de studio"
+],
+"🎚": [
+"curseur",
+"curseur de niveau",
+"musique",
+"niveau"
+],
+"🎛": [
+"boutons",
+"boutons de réglage",
+"boutons de commande"
+],
+"🎤": [
+"micro",
+"karaoke"
+],
+"🎧": [
+"casque",
+"écouteurs"
+],
+"📻": [
+"radio",
+"vidéo"
+],
+"🎷": [
+"saxophone",
+"musique",
+"instrument"
+],
+"🪗": [
+"concertina",
+"piano à bretelles",
+"accordéon",
+"bandonéon"
+],
+"🎸": [
+"musique",
+"instrument",
+"guitare"
+],
+"🎹": [
+"musique",
+"piano",
+"clavier",
+"instrument"
+],
+"🎺": [
+"musique",
+"trompette",
+"instrument"
+],
+"🎻": [
+"violon",
+"musique",
+"instrument"
+],
+"🪕": [
+"banjo",
+"cordes",
+"musique",
+"instrument à cordes"
+],
+"🥁": [
+"tambour",
+"batterie",
+"musique",
+"baguettes"
+],
+"🪘": [
+"djembé",
+"tambour",
+"rythme",
+"conga",
+"battement"
+],
+"🪇": [
+"maracas",
+"musique",
+"instrument",
+"secouer",
+"percussion"
+],
+"🪈": [
+"flûte",
+"musique",
+"instrument",
+"bois",
+"fifre",
+"flûte à bec"
+],
+"📱": [
+"téléphone portable",
+"téléphone"
+],
+"📲": [
+"appel entrant",
+"appel"
+],
+"☎": [
+"téléphone"
+],
+"📞": [
+"combiné téléphonique",
+"téléphone"
+],
+"📟": [
+"pager",
+"bipeur"
+],
+"📠": [
+"télécopieur",
+"fax"
+],
+"🔋": [
+"pile"
+],
+"🪫": [
+"déchargé",
+"batterie",
+"batterie faible",
+"électronique",
+"énergie faible",
+"pile faible"
+],
+"🔌": [
+"câble avec fiche électrique",
+"prise"
+],
+"💻": [
+"ordinateur portable",
+"ordinateur"
+],
+"🖥": [
+"ordinateur",
+"ordinateur de bureau"
+],
+"🖨": [
+"ordinateur",
+"imprimante"
+],
+"⌨": [
+"ordinateur",
+"clavier"
+],
+"🖱": [
+"souris",
+"souris d’ordinateur"
+],
+"🖲": [
+"ordinateur",
+"boule de commande",
+"souris à boule"
+],
+"💽": [
+"disque d’ordinateur",
+"disque"
+],
+"💾": [
+"disquette",
+"ordinateur",
+"disque"
+],
+"💿": [
+"CD",
+"disque"
+],
+"📀": [
+"DVD",
+"disque"
+],
+"🧮": [
+"abaque",
+"calcul"
+],
+"🎥": [
+"cinéma",
+"caméra",
+"film"
+],
+"🎞": [
+"pellicule",
+"cinéma",
+"bande",
+"film"
+],
+"📽": [
+"projecteur cinématographique",
+"projecteur"
+],
+"🎬": [
+"clap",
+"film"
+],
+"📺": [
+"télévision",
+"TV",
+"téléviseur"
+],
+"📷": [
+"vidéo",
+"appareil photo"
+],
+"📸": [
+"appareil photo avec flash",
+"appareil photo"
+],
+"📹": [
+"caméscope",
+"vidéo",
+"caméra"
+],
+"📼": [
+"vidéocassette",
+"cassette vidéo",
+"vhs"
+],
+"🔍": [
+"loupe",
+"recherche",
+"loupe orientée à gauche"
+],
+"🔎": [
+"loupe",
+"loupe orientée à droite",
+"recherche"
+],
+"🕯": [
+"bougie",
+"lumière"
+],
+"💡": [
+"ampoule",
+"idée",
+"dessin",
+"lumière"
+],
+"🔦": [
+"lumière",
+"torche"
+],
+"🏮": [
+"lanterne",
+"lumière",
+"rouge",
+"japonais",
+"lampion rouge"
+],
+"🪔": [
+"lampe à beurre",
+"Diwali",
+"huile",
+"diya",
+"lampe",
+"ārtī"
+],
+"📔": [
+"carnet",
+"carnet avec couverture"
+],
+"📕": [
+"livre fermé",
+"livre"
+],
+"📖": [
+"livre ouvert",
+"livre"
+],
+"📗": [
+"livre vert",
+"livre"
+],
+"📘": [
+"livre bleu",
+"livre"
+],
+"📙": [
+"livre orange",
+"livre"
+],
+"📚": [
+"livres",
+"livre"
+],
+"📓": [
+"carnet"
+],
+"📒": [
+"grand livre",
+"carnet de compte"
+],
+"📃": [
+"page",
+"page enroulée"
+],
+"📜": [
+"parchemin",
+"papier"
+],
+"📄": [
+"document",
+"page"
+],
+"📰": [
+"journal",
+"actualités"
+],
+"🗞": [
+"journal",
+"journal roulé"
+],
+"📑": [
+"onglets",
+"marque",
+"marqueur",
+"signets",
+"signet"
+],
+"🔖": [
+"marqueur",
+"marque-page"
+],
+"🏷": [
+"étiquette"
+],
+"💰": [
+"sac plein d’argent",
+"argent",
+"dollar",
+"sac",
+"sac d’argent"
+],
+"🪙": [
+"argent",
+"pièce",
+"or",
+"trésor",
+"métal"
+],
+"💴": [
+"billet",
+"billet en yens"
+],
+"💵": [
+"billet",
+"billet en dollars"
+],
+"💶": [
+"billet",
+"billet en euros"
+],
+"💷": [
+"billet",
+"billet en livres"
+],
+"💸": [
+"billet",
+"billet avec des ailes"
+],
+"💳": [
+"carte bancaire",
+"carte",
+"bancaire"
+],
+"🧾": [
+"reçu",
+"justificatif",
+"comptabilité",
+"preuve"
+],
+"💹": [
+"courbe avec yen en hausse",
+"banque",
+"graphique",
+"hausse",
+"monnaie"
+],
+"✉": [
+"courrier électronique",
+"enveloppe",
+"e-mail"
+],
+"📧": [
+"message",
+"courrier électronique",
+"e-mail"
+],
+"📨": [
+"message",
+"courrier électronique",
+"message reçu",
+"e-mail"
+],
+"📩": [
+"message",
+"courrier électronique",
+"e-mail",
+"enveloppe avec flèche"
+],
+"📤": [
+"boîte d’envoi",
+"courrier électronique",
+"e-mail",
+"message"
+],
+"📥": [
+"message",
+"courrier électronique",
+"boîte de réception",
+"e-mail"
+],
+"📦": [
+"paquet",
+"colis"
+],
+"📫": [
+"courrier",
+"boîte aux lettres fermée drapeau levé"
+],
+"📪": [
+"courrier",
+"boîte aux lettres fermée drapeau baissé"
+],
+"📬": [
+"boîte aux lettres ouverte drapeau levé",
+"courrier"
+],
+"📭": [
+"boîte aux lettres ouverte drapeau baissé",
+"courrier"
+],
+"📮": [
+"boîte aux lettres",
+"courrier"
+],
+"🗳": [
+"urne électorale",
+"urne"
+],
+"✏": [
+"crayon"
+],
+"✒": [
+"stylo plume noir",
+"stylo"
+],
+"🖋": [
+"stylo plume",
+"stylo"
+],
+"🖊": [
+"stylo bille",
+"stylo"
+],
+"🖌": [
+"peinture",
+"pinceau"
+],
+"🖍": [
+"pastel",
+"crayon pastel"
+],
+"📝": [
+"crayon",
+"mémo"
+],
+"💼": [
+"porte-documents"
+],
+"📁": [
+"dossier",
+"fichier"
+],
+"📂": [
+"dossier",
+"dossier ouvert"
+],
+"🗂": [
+"classement",
+"intercalaire",
+"index",
+"intercalaires"
+],
+"📅": [
+"calendrier",
+"date"
+],
+"📆": [
+"calendrier",
+"éphéméride",
+"date"
+],
+"🗒": [
+"notes",
+"bloc-notes à spirale"
+],
+"🗓": [
+"calendrier à spirale",
+"calendrier"
+],
+"📇": [
+"index",
+"carnet d’adresses",
+"rolodex",
+"fiche"
+],
+"📈": [
+"graphique",
+"tendance",
+"graphique en hausse",
+"hausse"
+],
+"📉": [
+"baisse",
+"graphique en baisse",
+"graphique",
+"tendance"
+],
+"📊": [
+"graphique",
+"graphiques à barres"
+],
+"📋": [
+"porte-bloc",
+"fournitures"
+],
+"📌": [
+"punaise",
+"fournitures"
+],
+"📍": [
+"épingle",
+"fournitures"
+],
+"📎": [
+"trombone",
+"fournitures"
+],
+"🖇": [
+"trombones",
+"fournitures"
+],
+"📏": [
+"fournitures",
+"règle"
+],
+"📐": [
+"fournitures",
+"équerre"
+],
+"✂": [
+"ciseaux",
+"fournitures"
+],
+"🗃": [
+"dossier",
+"boîte à dossiers"
+],
+"🗄": [
+"dossier",
+"classer",
+"meuble",
+"meuble à dossiers",
+"classement"
+],
+"🗑": [
+"corbeille",
+"corbeille à papiers"
+],
+"🔒": [
+"cadenas",
+"cadenas fermé",
+"verrouillé"
+],
+"🔓": [
+"cadenas",
+"cadenas ouvert"
+],
+"🔏": [
+"verrouillé",
+"cadenas fermé avec stylo"
+],
+"🔐": [
+"cadenas fermé avec clé",
+"sécurisé"
+],
+"🔑": [
+"serrure",
+"clé",
+"mot de passe"
+],
+"🗝": [
+"clé ancienne",
+"serrure",
+"clé"
+],
+"🔨": [
+"outil",
+"marteau"
+],
+"🪓": [
+"fendre",
+"hachette",
+"hache",
+"bois"
+],
+"⛏": [
+"pioche",
+"outil",
+"mine"
+],
+"⚒": [
+"pioche",
+"outil",
+"marteau",
+"marteau et pioche"
+],
+"🛠": [
+"marteau",
+"clé",
+"clé à molette",
+"outil",
+"marteau et clé à molette"
+],
+"🗡": [
+"arme",
+"couteau",
+"poignard",
+"dague"
+],
+"⚔": [
+"arme",
+"croisées",
+"épées",
+"épées croisées"
+],
+"💣": [
+"dessin",
+"bombe"
+],
+"🪃": [
+"répercussion",
+"boomerang"
+],
+"🏹": [
+"arc et flèche",
+"arc",
+"Sagittaire",
+"archer",
+"flèche"
+],
+"🛡": [
+"arme",
+"bouclier"
+],
+"🪚": [
+"scie égoïne",
+"outil",
+"scie",
+"bois"
+],
+"🔧": [
+"clé à molette",
+"outil",
+"clé"
+],
+"🪛": [
+"outil",
+"tournevis",
+"vis"
+],
+"🔩": [
+"vis et écrou",
+"écrou",
+"outil",
+"vis"
+],
+"⚙": [
+"engrenage",
+"outil",
+"roue dentée"
+],
+"🗜": [
+"outil",
+"serre-joint"
+],
+"⚖": [
+"balance",
+"justice",
+"balance à poids"
+],
+"🦯": [
+"canne blanche",
+"malvoyant",
+"aveugle",
+"déficient visuel",
+"accessibilité"
+],
+"🔗": [
+"chaînons",
+"maillons"
+],
+"⛓‍💥": [
+"liberté",
+"chaîne cassée",
+"chaîne rompue",
+"chaîne brisée",
+"chaîne"
+],
+"⛓": [
+"chaîne",
+"chaînes"
+],
+"🪝": [
+"accrocher",
+"crochet",
+"attraper",
+"ferrer",
+"hameçonner",
+"appâter"
+],
+"🧰": [
+"coffre",
+"outil",
+"mécanique",
+"boîte à outils"
+],
+"🧲": [
+"attraction",
+"magnétique",
+"fer à cheval",
+"aimant"
+],
+"🪜": [
+"échelon",
+"monter",
+"échelle",
+"barreau",
+"escabeau"
+],
+"⚗": [
+"outil",
+"alambic",
+"chimie"
+],
+"🧪": [
+"tube à essai",
+"labo",
+"sciences",
+"expérience",
+"chimiste",
+"chimie"
+],
+"🧫": [
+"bactérie",
+"culture",
+"labo",
+"boîte de pétri",
+"biologiste",
+"biologie"
+],
+"🧬": [
+"génétique",
+"vie",
+"adn",
+"évolution",
+"biologiste",
+"gène"
+],
+"🔬": [
+"microscope",
+"outil",
+"science"
+],
+"🔭": [
+"outil",
+"télescope",
+"science"
+],
+"📡": [
+"antenne",
+"antenne satellite",
+"antenne parabolique",
+"parabole"
+],
+"💉": [
+"seringue",
+"docteur",
+"aiguille",
+"malade",
+"médecine"
+],
+"🩸": [
+"règles",
+"don du sang",
+"médecine",
+"goutte de sang",
+"menstruation"
+],
+"💊": [
+"pilule",
+"médecine",
+"malade",
+"docteur"
+],
+"🩹": [
+"pansement",
+"premiers secours",
+"sparadrap",
+"bandage",
+"médecine"
+],
+"🩼": [
+"accident",
+"blessé",
+"béquille",
+"boiter",
+"canne",
+"handicap"
+],
+"🩺": [
+"poumons",
+"docteur",
+"cœur",
+"médecine",
+"stéthoscope"
+],
+"🩻": [
+"squelette",
+"os",
+"radiographie",
+"rayons X",
+"docteur",
+"cage thoracique",
+"médical"
+],
+"🚪": [
+"porte"
+],
+"🛗": [
+"accessibilité",
+"monte-personnes",
+"ascenseur"
+],
+"🪞": [
+"miroir",
+"psyché",
+"glace",
+"reflet"
+],
+"🪟": [
+"vue",
+"ouverture",
+"cadre",
+"fenêtre",
+"transparent",
+"air frais"
+],
+"🛏": [
+"hôtel",
+"lit",
+"dormir"
+],
+"🛋": [
+"lampe",
+"canapé",
+"canapé et lampe"
+],
+"🪑": [
+"chaise",
+"siège",
+"assis"
+],
+"🚽": [
+"toilettes"
+],
+"🪠": [
+"déboucheur",
+"ventouse",
+"succion",
+"plombier",
+"toilettes"
+],
+"🚿": [
+"douche",
+"eau"
+],
+"🛁": [
+"baignoire",
+"bain"
+],
+"🪤": [
+"piège à souris",
+"appât",
+"piège",
+"tapette à souris",
+"tapette"
+],
+"🪒": [
+"coupant",
+"tranchant",
+"rasoir",
+"raser",
+"lame"
+],
+"🧴": [
+"shampooing",
+"lotion",
+"flacon",
+"crème hydratante",
+"bouteille de lotion",
+"crème solaire"
+],
+"🧷": [
+"couche",
+"lange",
+"épingle de sûreté",
+"punk rock"
+],
+"🧹": [
+"sorcière",
+"balai",
+"balayage",
+"nettoyage"
+],
+"🧺": [
+"linge",
+"panier",
+"agriculture",
+"pique-nique"
+],
+"🧻": [
+"papier toilette",
+"rouleau de papier",
+"essuie-tout",
+"papier hygiénique"
+],
+"🪣": [
+"seau",
+"conteneur"
+],
+"🧼": [
+"lavage",
+"mousse",
+"pain de savon",
+"bain",
+"porte-savon",
+"savon"
+],
+"🫧": [
+"sous l’eau",
+"bulles",
+"savon",
+"propre"
+],
+"🪥": [
+"dentaire",
+"brosse à dents",
+"laver",
+"hygiène",
+"dents",
+"brosse",
+"salle de bain"
+],
+"🧽": [
+"absorbante",
+"poreuse",
+"nettoyage",
+"éponge"
+],
+"🧯": [
+"feu",
+"extincteur",
+"éteindre",
+"incendie"
+],
+"🛒": [
+"shopping",
+"panier",
+"chariot"
+],
+"🚬": [
+"cigarette",
+"fumeur"
+],
+"⚰": [
+"cercueil",
+"mort"
+],
+"🪦": [
+"tombe",
+"pierre tombale",
+"cimetière",
+"stèle"
+],
+"⚱": [
+"urne funéraire",
+"urne"
+],
+"🧿": [
+"nazar",
+"amulette",
+"talisman",
+"mauvais œil",
+"perle"
+],
+"🪬": [
+"protection",
+"amulette",
+"Myriam",
+"hamsa",
+"khamsa",
+"main de Fatma",
+"Fatma"
+],
+"🗿": [
+"moai",
+"statue"
+],
+"🪧": [
+"manifestation",
+"panneau",
+"pancarte",
+"grève",
+"protestation"
+],
+"🪪": [
+"sécurité",
+"papiers",
+"permis de conduire",
+"carte d’identité",
+"pièce d’identité",
+"justificatif"
+],
+"🏧": [
+"argent",
+"dab",
+"distributeur de billets"
+],
+"🚮": [
+"poubelle",
+"icône Poubelle"
+],
+"🚰": [
+"eau potable",
+"eau"
+],
+"♿": [
+"symbole Accès handicapés",
+"accès handicapés"
+],
+"🚹": [
+"WC",
+"homme",
+"symbole Toilettes hommes",
+"toilettes"
+],
+"🚺": [
+"femme",
+"WC",
+"symbole Toilettes femmes",
+"toilettes"
+],
+"🚻": [
+"WC",
+"toilettes",
+"panneau Toilettes"
+],
+"🚼": [
+"bébé",
+"symbole Bébé",
+"espace de change"
+],
+"🚾": [
+"WC",
+"toilettes"
+],
+"🛂": [
+"contrôle",
+"contrôle des passeports",
+"passeport"
+],
+"🛃": [
+"douane"
+],
+"🛄": [
+"bagages",
+"retrait des bagages"
+],
+"🛅": [
+"bagages",
+"consigne"
+],
+"⚠": [
+"symbole d’avertissement",
+"avertissement"
+],
+"🚸": [
+"piétons",
+"traversée d’enfants",
+"école",
+"enfants"
+],
+"⛔": [
+"sens interdit",
+"interdiction",
+"entrée interdite",
+"interdit"
+],
+"🚫": [
+"interdiction",
+"symbole d’interdiction",
+"interdit"
+],
+"🚳": [
+"interdiction",
+"vélos interdits",
+"vélo",
+"interdit"
+],
+"🚭": [
+"interdiction de fumer",
+"interdiction",
+"fumer",
+"interdit"
+],
+"🚯": [
+"déchets",
+"interdiction",
+"interdit",
+"dépôt d’ordures interdit"
+],
+"🚱": [
+"eau",
+"eau non potable"
+],
+"🚷": [
+"interdiction",
+"interdit aux piétons",
+"interdit"
+],
+"📵": [
+"téléphone",
+"interdit",
+"téléphones portables interdits",
+"interdiction",
+"portable"
+],
+"🔞": [
+"dix-huit",
+"interdit",
+"mineur",
+"18 ans et plus",
+"interdiction"
+],
+"☢": [
+"symbole",
+"radioactif"
+],
+"☣": [
+"symbole",
+"danger biologique",
+"danger"
+],
+"⬆": [
+"direction",
+"flèche haut",
+"nord",
+"flèche"
+],
+"↗": [
+"direction",
+"flèche haut droite",
+"nord-est",
+"flèche"
+],
+"➡": [
+"direction",
+"flèche droite",
+"est",
+"flèche"
+],
+"↘": [
+"direction",
+"sud-est",
+"flèche bas droite",
+"flèche"
+],
+"⬇": [
+"direction",
+"sud",
+"flèche bas",
+"flèche"
+],
+"↙": [
+"direction",
+"flèche bas gauche",
+"sud-ouest",
+"flèche"
+],
+"⬅": [
+"direction",
+"flèche gauche",
+"ouest",
+"flèche"
+],
+"↖": [
+"direction",
+"nord-ouest",
+"flèche haut gauche",
+"flèche"
+],
+"↕": [
+"flèche haut bas",
+"flèche"
+],
+"↔": [
+"flèche gauche droite",
+"flèche"
+],
+"↮": [
+"flèche gauche-droite barrée"
+],
+"↩": [
+"flèche courbe gauche",
+"flèche"
+],
+"↪": [
+"flèche courbe droite",
+"flèche"
+],
+"⤴": [
+"flèche courbe haut",
+"flèche"
+],
+"⤵": [
+"flèche courbe bas",
+"flèche"
+],
+"🔃": [
+"sens horaire",
+"symbole Recharger",
+"flèches dans le sens horaire",
+"flèche"
+],
+"🔄": [
+"sens antihoraire",
+"flèches dans le sens antihoraire",
+"flèche"
+],
+"🔙": [
+"flèche Retour",
+"flèche"
+],
+"🔚": [
+"flèche Fin",
+"flèche"
+],
+"🔛": [
+"flèche Activé",
+"flèche"
+],
+"🔜": [
+"flèche Bientôt",
+"flèche"
+],
+"🔝": [
+"flèche En haut",
+"flèche"
+],
+"🛐": [
+"religion",
+"culte",
+"lieu de culte"
+],
+"⚛": [
+"athée",
+"symbole de l’atome",
+"atome"
+],
+"🕉": [
+"religion",
+"om",
+"hindou"
+],
+"✡": [
+"religion",
+"étoile",
+"étoile de David",
+"Juif",
+"David"
+],
+"☸": [
+"religion",
+"roue",
+"bouddhiste",
+"roue du Dharma",
+"dharma"
+],
+"☯": [
+"religion",
+"yin",
+"yin yang",
+"tao",
+"yang"
+],
+"✝": [
+"croix",
+"religion",
+"croix latine",
+"chrétien"
+],
+"☦": [
+"croix",
+"croix orthodoxe",
+"religion",
+"chrétien"
+],
+"☪": [
+"religion",
+"lune",
+"étoile",
+"musulman",
+"lune et étoile"
+],
+"☮": [
+"paix",
+"symbole de paix"
+],
+"🕎": [
+"religion",
+"chandelier à sept branches",
+"menora",
+"chandelier"
+],
+"🔯": [
+"chance",
+"étoile",
+"étoile à 6 branches"
+],
+"🪯": [
+"khanda",
+"religion",
+"sikh"
+],
+"♈": [
+"zodiaque",
+"bélier zodiaque"
+],
+"♉": [
+"taureau",
+"zodiaque"
+],
+"♊": [
+"gémeaux",
+"zodiaque"
+],
+"♋": [
+"cancer",
+"zodiaque"
+],
+"♌": [
+"lion",
+"zodiaque"
+],
+"♍": [
+"zodiaque",
+"vierge"
+],
+"♎": [
+"balance",
+"zodiaque"
+],
+"♏": [
+"scorpion zodiaque",
+"zodiaque"
+],
+"♐": [
+"sagittaire",
+"zodiaque"
+],
+"♑": [
+"capricorne",
+"zodiaque"
+],
+"♒": [
+"zodiaque",
+"verseau"
+],
+"♓": [
+"poissons",
+"zodiaque"
+],
+"⛎": [
+"zodiaque",
+"serpentaire",
+"ophiuchus"
+],
+"🔀": [
+"flèches croisées",
+"bouton lecture aléatoire",
+"flèche"
+],
+"🔁": [
+"sens horaire",
+"bouton répétition",
+"flèches en cercle",
+"flèche"
+],
+"🔂": [
+"flèches en cercle avec n°1",
+"flèche",
+"sens horaire",
+"bouton répétition de la piste"
+],
+"▶": [
+"bouton lecture",
+"lecture",
+"triangle",
+"flèche"
+],
+"⏩": [
+"bouton avance rapide",
+"avance",
+"avance rapide",
+"double flèche"
+],
+"⏭": [
+"piste suivante",
+"scène suivante",
+"suivant",
+"triangle",
+"bouton piste suivante"
+],
+"⏯": [
+"pause",
+"flèche",
+"triangle",
+"lecture",
+"bouton lecture/pause"
+],
+"◀": [
+"retour",
+"bouton retour",
+"triangle",
+"flèche",
+"gauche"
+],
+"⏪": [
+"retour",
+"retour rapide",
+"bouton retour rapide",
+"flèche"
+],
+"⏮": [
+"piste précédente",
+"précédent",
+"scène précédente",
+"triangle",
+"bouton piste précédente"
+],
+"🔼": [
+"petit triangle haut",
+"flèche"
+],
+"⏫": [
+"double flèche vers le haut",
+"flèche vers le haut"
+],
+"🔽": [
+"petit triangle bas",
+"flèche"
+],
+"⏬": [
+"flèche vers le bas",
+"bas",
+"double flèche vers le bas"
+],
+"⏸": [
+"pause",
+"bouton pause"
+],
+"⏹": [
+"stop",
+"bouton stop",
+"carré"
+],
+"⏺": [
+"bouton enregistrer",
+"cercle",
+"enregistrer"
+],
+"⏏": [
+"bouton éjecter",
+"éjecter"
+],
+"🎦": [
+"cinéma",
+"caméra",
+"film"
+],
+"🔅": [
+"luminosité faible",
+"luminosité"
+],
+"🔆": [
+"luminosité",
+"luminosité élevée"
+],
+"📶": [
+"réseau",
+"barres de réseau",
+"téléphone",
+"portable"
+],
+"🛜": [
+"ordinateur",
+"sans fil",
+"internet",
+"réseau",
+"Wi-Fi"
+],
+"📳": [
+"portable",
+"téléphone",
+"vibreur",
+"mode vibreur"
+],
+"📴": [
+"téléphone",
+"téléphone éteint",
+"portable"
+],
+"♀": [
+"femme",
+"symbole de la femme"
+],
+"♂": [
+"symbole de l’homme",
+"homme"
+],
+"⚧": [
+"symbole de la communauté transgenre",
+"transgenre"
+],
+"✖": [
+"non",
+"annuler",
+"x",
+"multiplier",
+"×",
+"*",
+"signe multiplier"
+],
+"➕": [
+"addition",
+"mathématiques",
+"signe plus",
+"+",
+"arithmétique",
+"plus"
+],
+"➖": [
+"moins",
+"mathématiques",
+"-",
+"signe moins",
+"soustraction",
+"arithmétique",
+"−"
+],
+"➗": [
+"÷",
+"mathématiques",
+"signe diviser",
+"signe",
+"diviser",
+"division"
+],
+"🟰": [
+"mathématiques",
+"signe égal gras",
+"égalité"
+],
+"♾": [
+"illimité",
+"infini",
+"éternité",
+"universel"
+],
+"‼": [
+"exclamation",
+"!",
+"double point d’exclamation",
+"point",
+"!!"
+],
+"⁉": [
+"?",
+"exclamation",
+"ponctuation",
+"!",
+"!?",
+"points d’exclamation et d’interrogation",
+"question"
+],
+"❓": [
+"?",
+"interrogation",
+"ponctuation",
+"point d’interrogation",
+"question",
+"point d’interrogation rouge"
+],
+"❔": [
+"?",
+"interrogation",
+"ponctuation",
+"question",
+"point d’interrogation blanc"
+],
+"❕": [
+"exclamation",
+"point d’exclamation blanc",
+"!",
+"ponctuation"
+],
+"❗": [
+"point d’exclamation rouge",
+"exclamation",
+"ponctuation",
+"!",
+"point d’exclamation"
+],
+"〰": [
+"vague",
+"ligne ondulée",
+"trait d’union ondulé",
+"ponctuation"
+],
+"💱": [
+"conversion de devise",
+"argent",
+"conversion",
+"banque",
+"change",
+"devise"
+],
+"💲": [
+"symbole dollar",
+"argent",
+"dollar"
+],
+"⚕": [
+"médecine",
+"personnel",
+"caducée"
+],
+"♻": [
+"recyclage",
+"symbole Recyclage"
+],
+"⚜": [
+"fleur de lys"
+],
+"🔱": [
+"ancre",
+"trident",
+"bateau"
+],
+"📛": [
+"nom",
+"badge",
+"badge nominatif"
+],
+"🔰": [
+"symbole japonais de débutant",
+"débutant"
+],
+"⭕": [
+"o",
+"anneau",
+"0",
+"cercle rouge",
+"cercle",
+"rouge"
+],
+"✅": [
+"bouton coché",
+"carré",
+"marque",
+"sélection",
+"oui",
+"coche",
+"✓"
+],
+"☑": [
+"case cochée",
+"carré",
+"sélection",
+"oui",
+"bouton",
+"coche",
+"✓"
+],
+"✔": [
+"sélection",
+"coche",
+"✓",
+"oui"
+],
+"❌": [
+"annuler",
+"x",
+"multiplier",
+"×",
+"multiplication",
+"croix"
+],
+"❎": [
+"x",
+"bouton croix",
+"croix",
+"×"
+],
+"➰": [
+"boucle",
+"bouclette"
+],
+"➿": [
+"boucle",
+"double boucle"
+],
+"〽": [
+"symbole",
+"alternance"
+],
+"✳": [
+"astérisque huit branches",
+"étoile",
+"huit",
+"*",
+"astérisque"
+],
+"✴": [
+"étoile",
+"huit",
+"étoile huit branches",
+"*",
+"astérisque"
+],
+"❇": [
+"scintiller",
+"étinceler",
+"éclat",
+"*",
+"briller"
+],
+"©": [
+"symbole copyright",
+"copyright",
+"c",
+"©"
+],
+"®": [
+"marque déposée",
+"r",
+"marque commerciale",
+"®"
+],
+"™": [
+"marque commerciale déposée",
+"marque déposée"
+],
+"🔠": [
+"lettres latines",
+"lettres",
+"saisie",
+"majuscules"
+],
+"🔡": [
+"lettres latines",
+"lettres",
+"saisie",
+"minuscules"
+],
+"🔢": [
+"chiffres",
+"saisie de chiffres",
+"saisie",
+"1234"
+],
+"🔣": [
+"symboles",
+"saisie de symboles",
+"saisie"
+],
+"🔤": [
+"alphabet latin",
+"alphabet",
+"lettres",
+"saisie"
+],
+"🅰": [
+"groupe sanguin A",
+"A",
+"groupe sanguin"
+],
+"🆎": [
+"groupe sanguin",
+"AB",
+"groupe sanguin AB"
+],
+"🅱": [
+"groupe sanguin",
+"groupe sanguin B",
+"B"
+],
+"🆑": [
+"effacer",
+"bouton Effacer"
+],
+"🆒": [
+"cool",
+"bouton Cool"
+],
+"🆓": [
+"bouton Gratuit",
+"gratuit"
+],
+"ℹ": [
+"i",
+"source d’informations",
+"informations"
+],
+"🆔": [
+"identifiant",
+"bouton Identifiant"
+],
+"Ⓜ": [
+"m encerclé",
+"cercle",
+"m"
+],
+"🆕": [
+"nouveau",
+"bouton Nouveau"
+],
+"🆖": [
+"bouton Pas bien",
+"mauvais",
+"interdit"
+],
+"🅾": [
+"O",
+"groupe sanguin O",
+"groupe sanguin"
+],
+"🆗": [
+"bouton OK",
+"OK"
+],
+"🅿": [
+"parking",
+"bouton P"
+],
+"🆘": [
+"bouton SOS",
+"SOS"
+],
+"🆙": [
+"bouton Vers le haut",
+"nouveau",
+"nouveauté"
+],
+"🆚": [
+"contre",
+"versus",
+"bouton VS",
+"vs"
+],
+"🈁": [
+"bouton ici en japonais",
+"ici",
+"japonais"
+],
+"🈂": [
+"bouton frais de service en japonais",
+"japonais",
+"frais de service"
+],
+"🈷": [
+"japonais",
+"bouton montant mensuel en japonais",
+"montant mensuel"
+],
+"🈶": [
+"pas gratuit",
+"bouton pas gratuit en japonais",
+"japonais",
+"payant"
+],
+"🈯": [
+"réservé",
+"japonais",
+"bouton réservé en japonais"
+],
+"🉐": [
+"bonne affaire",
+"bouton bonne affaire en japonais",
+"japonais"
+],
+"🈹": [
+"réduction",
+"bouton réduction en japonais",
+"japonais",
+"rabais"
+],
+"🈚": [
+"bouton gratuit en japonais",
+"gratuit",
+"japonais"
+],
+"🈲": [
+"bouton interdit en japonais",
+"japonais"
+],
+"🉑": [
+"accepter",
+"bouton accepter en japonais",
+"japonais"
+],
+"🈸": [
+"bouton application en japonais",
+"application",
+"japonais"
+],
+"🈴": [
+"japonais",
+"bouton note pour réussir en japonais",
+"note pour réussir"
+],
+"🈳": [
+"chambres disponibles",
+"bouton chambres disponibles en japonais",
+"japonais"
+],
+"㊗": [
+"bouton félicitations en japonais",
+"félicitations",
+"japonais"
+],
+"㊙": [
+"secret",
+"japonais",
+"bouton secret en japonais"
+],
+"🈺": [
+"bouton ouvert pour affaires en japonais",
+"japonais",
+"ouvert pour affaires"
+],
+"🈵": [
+"complet",
+"bouton complet en japonais",
+"japonais"
+],
+"🔴": [
+"rond",
+"forme géométrique",
+"cercle",
+"rouge",
+"géométrie",
+"disque rouge"
+],
+"🟠": [
+"disque orange",
+"rond",
+"forme géométrique",
+"cercle",
+"orange",
+"géométrie"
+],
+"🟡": [
+"rond",
+"forme géométrique",
+"cercle",
+"jaune",
+"géométrie",
+"disque jaune"
+],
+"🟢": [
+"vert",
+"rond",
+"disque vert",
+"forme géométrique",
+"cercle",
+"géométrie"
+],
+"🔵": [
+"rond",
+"forme géométrique",
+"bleu",
+"cercle",
+"disque bleu",
+"géométrie"
+],
+"🟣": [
+"rond",
+"violet",
+"forme géométrique",
+"cercle",
+"géométrie",
+"disque violet"
+],
+"🟤": [
+"rond",
+"forme géométrique",
+"cercle",
+"marron",
+"géométrie",
+"disque marron"
+],
+"⚫": [
+"rond",
+"forme géométrique",
+"cercle",
+"disque noir",
+"géométrie",
+"noir"
+],
+"⚪": [
+"disque blanc",
+"rond",
+"forme géométrique",
+"blanc",
+"cercle",
+"géométrie"
+],
+"🟥": [
+"forme géométrique",
+"carré rouge",
+"rouge",
+"géométrie"
+],
+"🟧": [
+"forme géométrique",
+"carré orange",
+"orange",
+"géométrie"
+],
+"🟨": [
+"forme géométrique",
+"jaune",
+"carré jaune",
+"géométrie"
+],
+"🟩": [
+"forme géométrique",
+"vert",
+"carré vert",
+"géométrie"
+],
+"🟦": [
+"forme géométrique",
+"carré bleu",
+"bleu",
+"géométrie"
+],
+"🟪": [
+"forme géométrique",
+"carré violet",
+"violet",
+"géométrie"
+],
+"🟫": [
+"carré marron",
+"marron",
+"forme géométrique",
+"géométrie"
+],
+"⬛": [
+"forme géométrique",
+"grand carré noir",
+"carré"
+],
+"⬜": [
+"forme",
+"grand carré blanc",
+"géométrie"
+],
+"◼": [
+"forme géométrique",
+"carré moyen noir",
+"carré"
+],
+"◻": [
+"forme géométrique",
+"carré moyen blanc",
+"carré"
+],
+"◾": [
+"forme",
+"carré petit moyen noir",
+"géométrie",
+"carré"
+],
+"◽": [
+"carré petit moyen blanc",
+"forme",
+"géométrie",
+"carré"
+],
+"▪": [
+"forme géométrique",
+"petit carré noir",
+"carré"
+],
+"▫": [
+"forme géométrique",
+"petit carré blanc",
+"carré"
+],
+"🔶": [
+"forme géométrique",
+"losange",
+"grand losange orange"
+],
+"🔷": [
+"forme géométrique",
+"losange",
+"grand losange orange",
+"grand losange bleu"
+],
+"🔸": [
+"forme géométrique",
+"losange",
+"petit losange orange"
+],
+"🔹": [
+"forme géométrique",
+"losange",
+"petit losange bleu"
+],
+"🔺": [
+"forme géométrique",
+"triangle rouge pointant vers le haut",
+"rouge"
+],
+"🔻": [
+"forme",
+"géométrie",
+"triangle rouge pointant vers le bas",
+"flèche"
+],
+"💠": [
+"dessin",
+"géométrique",
+"diamant",
+"diamant avec un point",
+"intérieur"
+],
+"🔘": [
+"forme",
+"bouton radio",
+"radio",
+"géométrie",
+"bouton"
+],
+"🔳": [
+"forme",
+"carré blanc",
+"carré",
+"géométrie",
+"bouton"
+],
+"🔲": [
+"forme",
+"carré",
+"géométrie",
+"bouton",
+"carré noir"
+],
+"🏁": [
+"drapeau à damier",
+"drapeau"
+],
+"🚩": [
+"drapeau triangulaire",
+"fanion",
+"drapeau"
+],
+"🎌": [
+"drapeaux",
+"drapeaux croisés"
+],
+"🏴": [
+"drapeau noir",
+"drapeau"
+],
+"🏳": [
+"drapeau blanc",
+"drapeau"
+],
+"🏳‍🌈": [
+"arc-en-ciel",
+"drapeau",
+"drapeau arc-en-ciel"
+],
+"🏳‍⚧": [
+"blanc",
+"rose",
+"transgenre",
+"drapeau transgenre",
+"bleu clair"
+],
+"🏴‍☠": [
+"pillage",
+"pirate",
+"piller",
+"drapeau de pirate",
+"trésor"
+],
+"¢": [
+"cent"
+],
+"£": [
+"livre",
+"devise",
+"EGP",
+"GBP"
+],
+"¥": [
+"yen",
+"CNY",
+"devise",
+"JPY",
+"yuan"
+],
+"₢": [
+"cruzeiro",
+"devise"
+],
+"₣": [
+"franc",
+"devise",
+"franc français"
+],
+"₤": [
+"devise",
+"lire"
+],
+"₥": [
+"mill",
+"mil"
+],
+"₩": [
+"KPW",
+"won",
+"KRW"
+],
+"€": [
+"euro",
+"devise",
+"EUR"
+],
+"₰": [
+"devise",
+"penny allemand"
+],
+"₱": [
+"peso"
+],
+"₳": [
+"austral",
+"devise"
+],
+"₶": [
+"devise",
+"livre tournois"
+],
+"₷": [
+"spesmilo",
+"devise"
+],
+"₹": [
+"roupie",
+"devise",
+"roupie indienne"
+],
+"₽": [
+"rouble",
+"devise"
+],
+"₿": [
+"BTC",
+"bitcoin"
+],
+"₨": [
+"roupie",
+"devise"
+],
+"﷼": [
+"devise",
+"rial"
+],
+"¹": [
+"exposant",
+"exposant un",
+"un"
+],
+"²": [
+"au carré",
+"exposant",
+"deux",
+"exposant deux"
+],
+"³": [
+"trois",
+"au cube",
+"exposant",
+"exposant trois"
+],
+"µ": [
+"mesure",
+"symbole micro"
+]
+}

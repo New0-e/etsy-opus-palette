@@ -11,9 +11,10 @@ import {
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Picker from "@emoji-mart/react";
 import data from "@emoji-mart/data";
+import frKeywords from "@/data/emoji-fr-keywords.json";
 import { toast } from "sonner";
 import { BOTTOM_TABS, type BottomTabId } from "@/lib/bottomTabsConfig";
 
@@ -43,6 +44,18 @@ export function AppSidebar({ onOpenTab, activeTabId }: Props) {
   const { setOpenMobile } = useSidebar();
   const closeOnMobile = () => setOpenMobile(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
+
+  const dataWithFr = useMemo(() => {
+    const frMap = frKeywords as Record<string, string[]>;
+    const emojis = { ...(data as { emojis: Record<string, { keywords: string[]; skins: { native: string }[] }> }).emojis };
+    for (const [id, emoji] of Object.entries(emojis)) {
+      const native = emoji.skins?.[0]?.native;
+      if (native && frMap[native]) {
+        emojis[id] = { ...emoji, keywords: [...emoji.keywords, ...frMap[native]] };
+      }
+    }
+    return { ...(data as object), emojis };
+  }, []);
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -133,7 +146,7 @@ export function AppSidebar({ onOpenTab, activeTabId }: Props) {
             </PopoverTrigger>
             <PopoverContent side="right" align="end" className="p-0 border-0 bg-transparent shadow-none w-auto">
               <Picker
-                data={data}
+                data={dataWithFr}
                 locale="fr"
                 theme="auto"
                 onEmojiSelect={(emoji: { native: string }) => {
