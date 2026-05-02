@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import {
   ChevronRight, Folder, PanelRightClose, PanelRightOpen,
@@ -7,7 +8,6 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { driveStore } from "@/lib/driveStore";
 
 // ── Drive API ─────────────────────────────────────────────────────────────────
@@ -236,6 +236,15 @@ function DriveItemRow({
   const isSheet  = item.mimeType === MIME_SHEET;
   const isDoc    = item.mimeType === MIME_DOC;
   const isPdf    = item.mimeType === MIME_PDF;
+  const rowRef   = useRef<HTMLAnchorElement & HTMLButtonElement>(null);
+  const [previewPos, setPreviewPos] = useState<{ top: number; right: number } | null>(null);
+
+  const showPreview = () => {
+    if (!rowRef.current) return;
+    const rect = rowRef.current.getBoundingClientRect();
+    setPreviewPos({ top: rect.top, right: window.innerWidth - rect.left + 6 });
+  };
+  const hidePreview = () => setPreviewPos(null);
 
   if (isFolder) {
     return (
@@ -270,39 +279,43 @@ function DriveItemRow({
       }
     : undefined;
 
-  const row = (
-    <a
-      href={item.webViewLink ?? "#"}
-      target={(isDoc || isSheet) ? "_self" : "_blank"}
-      rel="noreferrer"
-      onClick={handleClick}
-      draggable={(isImage || isVideo) && !isMobile}
-      onDragStart={((isImage || isVideo) && !isMobile) ? e => {
-        e.dataTransfer.setData("drive-item-id", item.id);
-        e.dataTransfer.setData("drive-item-name", item.name);
-        e.dataTransfer.effectAllowed = "copy";
-      } : undefined}
-      className={`flex items-center gap-2 w-full py-1.5 px-2 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors ${(isImage || isVideo) ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
-    >
-      <span className="w-3 flex-shrink-0" />
-      {isMobile && (isImage || isVideo) && item.thumbnailLink
-        ? <img src={item.thumbnailLink} alt="" className="h-8 w-8 rounded object-cover flex-shrink-0" />
-        : icon}
-      <span className="truncate">{item.name}</span>
-    </a>
-  );
+  const hasThumbnail = !!(isImage || isVideo) && !!item.thumbnailLink && !isMobile;
 
-  if ((isImage || isVideo) && item.thumbnailLink && !isMobile) {
-    return (
-      <HoverCard openDelay={100} closeDelay={50}>
-        <HoverCardTrigger asChild>{row}</HoverCardTrigger>
-        <HoverCardContent side="left" className="w-48 p-1 border-border bg-popover">
-          <img src={item.thumbnailLink} alt={item.name} className="rounded w-full object-cover" />
+  return (
+    <>
+      <a
+        ref={rowRef}
+        href={item.webViewLink ?? "#"}
+        target={(isDoc || isSheet) ? "_self" : "_blank"}
+        rel="noreferrer"
+        onClick={handleClick}
+        draggable={(isImage || isVideo) && !isMobile}
+        onDragStart={((isImage || isVideo) && !isMobile) ? e => {
+          e.dataTransfer.setData("drive-item-id", item.id);
+          e.dataTransfer.setData("drive-item-name", item.name);
+          e.dataTransfer.effectAllowed = "copy";
+        } : undefined}
+        onMouseEnter={hasThumbnail ? showPreview : undefined}
+        onMouseLeave={hasThumbnail ? hidePreview : undefined}
+        className={`flex items-center gap-2 w-full py-1.5 px-2 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors ${(isImage || isVideo) ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
+      >
+        <span className="w-3 flex-shrink-0" />
+        {isMobile && (isImage || isVideo) && item.thumbnailLink
+          ? <img src={item.thumbnailLink} alt="" className="h-8 w-8 rounded object-cover flex-shrink-0" />
+          : icon}
+        <span className="truncate">{item.name}</span>
+      </a>
+
+      {hasThumbnail && previewPos && createPortal(
+        <div
+          className="fixed z-[9999] w-48 p-1 rounded-md border border-border bg-popover shadow-md pointer-events-none"
+          style={{ top: previewPos.top, right: previewPos.right }}
+        >
+          <img src={item.thumbnailLink!} alt={item.name} className="rounded w-full object-cover" />
           <p className="text-xs text-muted-foreground mt-1 truncate px-1">{item.name}</p>
-        </HoverCardContent>
-      </HoverCard>
-    );
-  }
-
-  return row;
+        </div>,
+        document.body
+      )}
+    </>
+  );
 }
