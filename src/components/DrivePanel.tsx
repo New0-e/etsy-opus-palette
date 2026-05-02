@@ -279,7 +279,7 @@ function DriveItemRow({
       }
     : undefined;
 
-  const hasThumbnail = !!(isImage || isVideo) && !!item.thumbnailLink && !isMobile;
+  const hasThumbnail = !!(isImage || isVideo) && !isMobile;
 
   return (
     <>
@@ -311,7 +311,16 @@ function DriveItemRow({
           className="fixed z-[9999] w-48 p-1 rounded-md border border-border bg-popover shadow-md pointer-events-none"
           style={{ top: previewPos.top, right: previewPos.right }}
         >
-          <img src={item.thumbnailLink!} alt={item.name} className="rounded w-full object-cover" />
+          {isVideo ? (
+            <iframe
+              src={`https://drive.google.com/file/d/${item.id}/preview`}
+              className="rounded w-full"
+              style={{ height: "108px", border: "none" }}
+              allow="autoplay"
+            />
+          ) : (
+            <img src={item.thumbnailLink!} alt={item.name} className="rounded w-full object-cover" />
+          )}
           <p className="text-xs text-muted-foreground mt-1 truncate px-1">{item.name}</p>
         </div>,
         document.body

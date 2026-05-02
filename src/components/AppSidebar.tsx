@@ -22,10 +22,10 @@ const mainTools = [
   { title: "Gen Fiches Produits", url: "/creation-fiche", icon: FileText },
   { title: "Téléchargement Images", url: "/download-images", icon: ImageDown },
   { title: "Gen Images", url: "/generation-photos", icon: Camera },
-  { title: "Fond Produit", url: "/fond-produit", icon: ScanSearch },
 ];
 
 const secondaryTools = [
+  { title: "Fond Produit", url: "/fond-produit", icon: ScanSearch },
   { title: "Modèle", url: "/generation-modele", icon: PersonStanding },
   { title: "Analyse Image", url: "/analyse-image", icon: Tags },
   { title: "Analyse Tags", url: "/analyse-tags", icon: BarChart3 },
