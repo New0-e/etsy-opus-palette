@@ -4,8 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Upload, Sparkles, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/TODO";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/TODO";
+const PROXY_URL = "/api/n8n-proxy-background";
 
 export default function FondProduitPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -13,6 +12,7 @@ export default function FondProduitPage() {
   const [dragOver, setDragOver] = useState(false);
   const [testMode, setTestMode] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<string | null>(null);
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -32,15 +32,33 @@ export default function FondProduitPage() {
   const handleGenerer = async () => {
     if (!file) return;
     setLoading(true);
+    setResult(null);
     try {
       const formData = new FormData();
       formData.append("image", file);
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, { method: "POST", body: formData });
+      const res = await fetch(PROXY_URL, {
+        method: "POST",
+        headers: { "X-Test-Mode": testMode ? "1" : "0" },
+        body: formData,
+      });
       if (res.status === 404) {
         toast.error("Webhook introuvable — en mode test, lancez d'abord un test dans n8n");
         return;
       }
-      toast.success("Image envoyée !");
+      if (!res.ok) {
+        toast.error(`Erreur serveur : ${res.status}`);
+        return;
+      }
+      const contentType = res.headers.get("content-type") ?? "";
+      if (contentType.startsWith("image/")) {
+        const blob = await res.blob();
+        setResult(URL.createObjectURL(blob));
+      } else {
+        const data = await res.json();
+        const url = data.url ?? data.image ?? data.imageUrl ?? null;
+        if (url) setResult(url);
+      }
+      toast.success("Fond généré !");
     } catch {
       toast.error("Erreur lors de l'envoi");
     } finally {
@@ -88,6 +106,20 @@ export default function FondProduitPage() {
           {loading ? "Génération en cours..." : "Générer"}
         </Button>
       </div>
+
+      {result && (
+        <div className="tool-card space-y-3 mt-6">
+          <label className="text-sm text-muted-foreground block">Résultat</label>
+          <img src={result} alt="fond généré" className="w-full rounded-lg" />
+          <a
+            href={result}
+            download="fond-produit.png"
+            className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+          >
+            Télécharger
+          </a>
+        </div>
+      )}
     </div>
   );
 }
