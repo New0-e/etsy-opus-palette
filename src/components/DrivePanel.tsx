@@ -236,15 +236,22 @@ function DriveItemRow({
   const isSheet  = item.mimeType === MIME_SHEET;
   const isDoc    = item.mimeType === MIME_DOC;
   const isPdf    = item.mimeType === MIME_PDF;
-  const rowRef   = useRef<HTMLAnchorElement & HTMLButtonElement>(null);
+  const rowRef     = useRef<HTMLAnchorElement & HTMLButtonElement>(null);
+  const hideTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [previewPos, setPreviewPos] = useState<{ top: number; right: number } | null>(null);
 
   const showPreview = () => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
     if (!rowRef.current) return;
     const rect = rowRef.current.getBoundingClientRect();
     setPreviewPos({ top: rect.top, right: window.innerWidth - rect.left + 6 });
   };
-  const hidePreview = () => setPreviewPos(null);
+  const scheduleHide = () => {
+    hideTimer.current = setTimeout(() => setPreviewPos(null), 120);
+  };
+  const cancelHide = () => {
+    if (hideTimer.current) clearTimeout(hideTimer.current);
+  };
 
   if (isFolder) {
     return (
@@ -296,7 +303,7 @@ function DriveItemRow({
           e.dataTransfer.effectAllowed = "copy";
         } : undefined}
         onMouseEnter={hasThumbnail ? showPreview : undefined}
-        onMouseLeave={hasThumbnail ? hidePreview : undefined}
+        onMouseLeave={hasThumbnail ? scheduleHide : undefined}
         className={`flex items-center gap-2 w-full py-1.5 px-2 rounded-md text-sm text-sidebar-foreground hover:bg-drive-hover transition-colors ${(isImage || isVideo) ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
       >
         <span className="w-3 flex-shrink-0" />
@@ -308,8 +315,10 @@ function DriveItemRow({
 
       {hasThumbnail && previewPos && createPortal(
         <div
-          className="fixed z-[9999] w-48 p-1 rounded-md border border-border bg-popover shadow-md pointer-events-none"
+          className="fixed z-[9999] w-48 p-1 rounded-md border border-border bg-popover shadow-md"
           style={{ top: previewPos.top, right: previewPos.right }}
+          onMouseEnter={cancelHide}
+          onMouseLeave={scheduleHide}
         >
           {isVideo ? (
             <div className="relative rounded overflow-hidden w-full bg-muted/50" style={{ aspectRatio: "16/9" }}>
