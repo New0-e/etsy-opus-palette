@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, Sparkles, FlaskConical, Download } from "lucide-react";
 import { toast } from "sonner";
 
@@ -13,6 +14,7 @@ export default function FondProduitPage() {
   const [testMode, setTestMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [instructions, setInstructions] = useState("");
 
   const onDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -36,13 +38,22 @@ export default function FondProduitPage() {
     try {
       const formData = new FormData();
       formData.append("image", file);
+      if (instructions.trim()) formData.append("instructions", instructions.trim());
       const res = await fetch(PROXY_URL, {
         method: "POST",
         headers: { "X-Test-Mode": testMode ? "1" : "0" },
         body: formData,
       });
       if (res.status === 404) {
-        toast.error("Webhook introuvable — en mode test, lancez d'abord un test dans n8n");
+        toast.error(
+          testMode
+            ? "Webhook test introuvable — lancez d'abord un test dans n8n"
+            : "Webhook prod introuvable — vérifiez que le workflow n8n est activé (toggle Active)"
+        );
+        return;
+      }
+      if (res.status === 502) {
+        toast.error("n8n inaccessible — vérifiez que le serveur n8n est démarré et le workflow activé");
         return;
       }
       if (!res.ok) {
@@ -125,6 +136,17 @@ export default function FondProduitPage() {
               {preview ? "Changer l'image" : "Parcourir"}
             </label>
           </div>
+        </div>
+
+        <div>
+          <label className="text-sm text-muted-foreground mb-2 block">Instructions spécifiques <span className="text-xs">(optionnel)</span></label>
+          <Textarea
+            placeholder="Ex : fond blanc épuré, ambiance studio, ombres douces..."
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            rows={3}
+            className="resize-none"
+          />
         </div>
 
         <Button onClick={handleGenerer} disabled={!file || loading} className="w-full gap-2">

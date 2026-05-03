@@ -9,5 +9,10 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/n8n-proxy-background.ts": {
+      "maxDuration": 300
+    }
+  }
 }

@@ -32,11 +32,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const rawBody = await getRawBody(req);
 
-  const upstream = await fetch(target, {
-    method: "POST",
-    headers: { "content-type": contentType },
-    body: rawBody,
-  });
+  let upstream: Response;
+  try {
+    upstream = await fetch(target, {
+      method: "POST",
+      headers: { "content-type": contentType },
+      body: rawBody,
+      signal: AbortSignal.timeout(280_000),
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`[n8n-proxy-background] fetch error (${isTest ? "test" : "prod"}):`, msg);
+    return res.status(502).json({ error: "n8n unreachable", detail: msg });
+  }
 
   const upstreamContentType = upstream.headers.get("content-type") ?? "";
   res.setHeader("Content-Type", upstreamContentType);
@@ -46,6 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(upstream.status).send(buffer);
   } else {
     const text = await upstream.text();
+    console.log(`[n8n-proxy-background] status=${upstream.status} mode=${isTest ? "test" : "prod"} body=${text.slice(0, 200)}`);
     res.status(upstream.status).send(text);
   }
 }
