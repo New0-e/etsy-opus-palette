@@ -146,18 +146,33 @@ function calcBenef(f: Partial<Commande>): string {
 
 const TRACKTAGOS_NON_RETARD = ["Attente 8H", "Numéro de Suivi à changer", "Terminé"];
 
+function localDateISO(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function localDateOffsetISO(days: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function isEnRetard(c: Commande): boolean {
   if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
   if (TRACKTAGOS_NON_RETARD.includes(c.statutTracktagos)) return false;
-  return new Date(c.dateLimiteEnvoi) < new Date(new Date().toDateString());
+  return c.dateLimiteEnvoi < localDateISO();
+}
+
+function isAujourdhuiLimite(c: Commande): boolean {
+  if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
+  if (TRACKTAGOS_NON_RETARD.includes(c.statutTracktagos)) return false;
+  return c.dateLimiteEnvoi === localDateISO();
 }
 
 function isProcheDateLimite(c: Commande): boolean {
   if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
   if (TRACKTAGOS_NON_RETARD.includes(c.statutTracktagos)) return false;
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  return new Date(c.dateLimiteEnvoi).toDateString() === tomorrow.toDateString();
+  return c.dateLimiteEnvoi === localDateOffsetISO(1);
 }
 
 function fmt(n: string) {
@@ -1200,10 +1215,13 @@ export default function SuiviCommandesPage() {
               )}
               {displayed.map(c => {
                 const retard = isEnRetard(c);
-                const proche = !retard && isProcheDateLimite(c);
+                const aujourdhui = !retard && isAujourdhuiLimite(c);
+                const proche = !retard && !aujourdhui && isProcheDateLimite(c);
                 const trackEnCours = c.statutTracktagos === "Attente 8H" || c.statutTracktagos === "Numéro de Suivi à changer";
                 const rowBg = !trackEnCours && retard
                   ? ROW_BG["Litige"] ?? ""
+                  : !trackEnCours && aujourdhui
+                    ? "bg-orange-50/60 dark:bg-orange-950/25"
                   : !trackEnCours && proche
                     ? "bg-violet-50/60 dark:bg-violet-950/25"
                     : ROW_BG[c.statutCommande] ?? "";
@@ -1243,11 +1261,15 @@ export default function SuiviCommandesPage() {
                       const showAlerte = !trackEnCours;
                       return (
                         <td className={`px-2 py-1.5 whitespace-nowrap font-mono text-[10px] ${
-                          showAlerte && retard ? "text-red-500 font-semibold" : showAlerte && proche ? "text-orange-500 font-semibold" : ""
+                          showAlerte && retard ? "text-red-500 font-semibold"
+                          : showAlerte && aujourdhui ? "text-orange-500 font-semibold"
+                          : showAlerte && proche ? "text-violet-500 font-semibold"
+                          : ""
                         }`}>
                           {c.dateLimiteEnvoi || "—"}
                           {showAlerte && retard && <span className="ml-1 text-[9px] text-red-500">⚠ retard</span>}
-                          {showAlerte && proche && <span className="ml-1 text-[9px] text-orange-500">⚠ demain</span>}
+                          {showAlerte && aujourdhui && <span className="ml-1 text-[9px] text-orange-500">⚠ aujourd'hui</span>}
+                          {showAlerte && proche && <span className="ml-1 text-[9px] text-violet-500">⚠ demain</span>}
                         </td>
                       );
                     })()}

@@ -60,29 +60,33 @@ function loadCommandesAChanger(): CommandeAlert[] {
 
 const TRACKTAGOS_NON_RETARD = ["Attente 8H", "Numéro de Suivi à changer", "Terminé"];
 
+function localDateISO(offsetDays = 0): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function loadCommandesDateButoire(): CommandeAlert[] {
   try {
-    const today = new Date().toDateString();
+    const today = localDateISO();
     const all = JSON.parse(localStorage.getItem("suivi-commandes-v1") ?? "[]");
     return all.filter((c: any) => {
       if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
       if (TRACKTAGOS_NON_RETARD.includes(c.statutTracktagos)) return false;
-      return new Date(c.dateLimiteEnvoi) <= new Date(today);
+      return c.dateLimiteEnvoi <= today;
     });
   } catch { return []; }
 }
 
 function loadCommandesBientot(jours = 3): CommandeAlert[] {
   try {
-    const today = new Date(new Date().toDateString());
-    const limite = new Date(today);
-    limite.setDate(today.getDate() + jours);
+    const today = localDateISO();
+    const limite = localDateISO(jours);
     const all = JSON.parse(localStorage.getItem("suivi-commandes-v1") ?? "[]");
     return all.filter((c: any) => {
       if (!c.dateLimiteEnvoi || c.statutCommande === "Livré") return false;
       if (TRACKTAGOS_NON_RETARD.includes(c.statutTracktagos)) return false;
-      const d = new Date(c.dateLimiteEnvoi);
-      return d > today && d <= limite;
+      return c.dateLimiteEnvoi > today && c.dateLimiteEnvoi <= limite;
     }).sort((a: any, b: any) => a.dateLimiteEnvoi.localeCompare(b.dateLimiteEnvoi));
   } catch { return []; }
 }
