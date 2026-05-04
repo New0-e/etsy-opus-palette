@@ -85,11 +85,13 @@ const ROW_BG: Record<string, string> = {
 
 const STORAGE_KEY = "suivi-commandes-v1";
 const TAUX_KEY = "suivi-taux-imposition";
+const LOCAL_SAVED_KEY = "suivi-local-last-saved";
 function loadCommandes(): Commande[] {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "[]"); } catch { return []; }
 }
 function saveCommandes(list: Commande[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+  localStorage.setItem(LOCAL_SAVED_KEY, new Date().toISOString());
 }
 function loadTaux(): string {
   return localStorage.getItem(TAUX_KEY) ?? "";
@@ -699,15 +701,15 @@ export default function SuiviCommandesPage() {
         const localRaw = localStorage.getItem("suivi-commandes-v1");
         const localCommandes: Commande[] = localRaw ? JSON.parse(localRaw) : [];
         // Compare les timestamps : prend la source la plus récente
-        const localLastSaved = localCommandes.length > 0
-          ? Math.max(...localCommandes.map(c => new Date(c.createdAt).getTime()))
-          : 0;
+        const localLastSavedStr = localStorage.getItem(LOCAL_SAVED_KEY);
+        const localLastSaved = localLastSavedStr ? new Date(localLastSavedStr).getTime() : 0;
         const remoteLastSaved = new Date(remote.lastSaved).getTime();
 
         if (remoteLastSaved > localLastSaved || localCommandes.length === 0) {
           // Drive est plus récent → on écrase le localStorage et on met à jour l'UI
           localStorage.setItem("suivi-commandes-v1", JSON.stringify(remote.commandes));
           localStorage.setItem("suivi-linked-sheets", JSON.stringify(remote.linkedSheets));
+          localStorage.setItem(LOCAL_SAVED_KEY, remote.lastSaved);
           if (remote.tauxImposition) localStorage.setItem("suivi-taux-imposition", remote.tauxImposition);
           setCommandes(remote.commandes);
           setLinkedSheets(remote.linkedSheets);
@@ -948,6 +950,7 @@ export default function SuiviCommandesPage() {
       );
       setCommandes(newList);
       saveCommandes(newList);
+      scheduleDriveSync(newList, linkedSheets, loadTaux());
       toast.success(`Document uploadé dans Drive / Stockage / Document Recap Etsy`);
     } finally {
       setUploadingId(null);
