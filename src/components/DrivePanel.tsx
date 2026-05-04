@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   ChevronRight, Folder, PanelRightClose, PanelRightOpen,
   Loader2, ExternalLink, LogOut, FileText, Image, Table2, Home, RefreshCw, FileType2, Film, Play,
+  Search, X,
 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,19 @@ function naturalSort(a: DriveItem, b: DriveItem): number {
     return b.name.localeCompare(a.name, undefined, { numeric: true, sensitivity: "base" });
   }
   return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: "base" });
+}
+
+async function searchDriveFiles(token: string, query: string): Promise<DriveItem[]> {
+  const escaped = query.replace(/'/g, "\\'");
+  const q = `name contains '${escaped}' and trashed=false and (mimeType='${MIME_FOLDER}' or mimeType='${MIME_DOC}' or mimeType='${MIME_SHEET}' or mimeType='${MIME_PDF}' or mimeType contains 'image/' or mimeType contains 'video/')`;
+  const res = await fetch(
+    `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(q)}&fields=files(id,name,mimeType,webViewLink,thumbnailLink)&pageSize=50`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (res.status === 401) throw new Error("token_expired");
+  if (!res.ok) throw new Error(`Drive API error: ${res.status}`);
+  const data = await res.json();
+  return ((data.files ?? []) as DriveItem[]).filter(f => !f.name.startsWith(".")).sort(naturalSort);
 }
 
 async function fetchFolderContents(
@@ -82,6 +96,13 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<DriveItem[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   // ── Shared preview state ───────────────────────────────────────────────────
   const [preview, setPreview] = useState<PreviewState>(null);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -127,6 +148,30 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
     loadCurrent(currentId, isRoot);
   }, [currentId, isRoot, loadCurrent]);
 
+  useEffect(() => {
+    if (!searchOpen) { setSearchQuery(""); setSearchResults([]); return; }
+    setTimeout(() => searchInputRef.current?.focus(), 50);
+  }, [searchOpen]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    if (!searchQuery.trim()) { setSearchResults([]); return; }
+    searchDebounce.current = setTimeout(async () => {
+      const token = driveStore.getToken();
+      if (!token) return;
+      setSearchLoading(true);
+      try {
+        const results = await searchDriveFiles(token, searchQuery.trim());
+        setSearchResults(results);
+      } catch (e) {
+        if ((e as Error).message === "token_expired") driveStore.handleExpiredToken();
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 350);
+  }, [searchQuery, searchOpen]);
+
   const navigateInto = (item: DriveItem) => {
     setPreview(null);
     setNavStack(prev => [...prev, { id: item.id, name: item.name }]);
@@ -164,6 +209,13 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
               <RefreshCw className="h-3 w-3" />
             </button>
             <button
+              onClick={() => setSearchOpen(v => !v)}
+              className={`ml-0.5 flex-shrink-0 transition-colors ${searchOpen ? "text-primary" : "text-muted-foreground hover:text-foreground"}`}
+              title="Rechercher"
+            >
+              <Search className="h-3 w-3" />
+            </button>
+            <button
               onClick={() => driveStore.logout()}
               className="text-muted-foreground hover:text-foreground ml-0.5 flex-shrink-0"
               title="Déconnecter"
@@ -179,8 +231,27 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
 
       {isOpen && (
         <>
+          {/* Search bar */}
+          {searchOpen && (
+            <div className="flex items-center gap-1.5 px-2 py-1.5 border-b border-border flex-shrink-0">
+              <Search className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+              <input
+                ref={searchInputRef}
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Rechercher dans Drive…"
+                className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground min-w-0"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery("")} className="text-muted-foreground hover:text-foreground flex-shrink-0">
+                  <X className="h-3 w-3" />
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Breadcrumb */}
-          {!isRoot && (
+          {!isRoot && !searchOpen && (
             <div className="flex items-center gap-0.5 px-2 py-1 border-b border-border bg-secondary/20 flex-shrink-0 overflow-x-auto">
               <button
                 onClick={() => navigateTo(-1)}
@@ -210,7 +281,27 @@ export function DrivePanel({ mobileOpen = false, onMobileToggle }: { mobileOpen?
 
           {/* File list */}
           <ScrollArea className="flex-1 p-2">
-            {loading ? (
+            {searchOpen ? (
+              searchLoading ? (
+                <div className="flex justify-center py-6">
+                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                </div>
+              ) : !searchQuery.trim() ? (
+                <p className="text-xs text-muted-foreground text-center py-4">Saisissez un terme…</p>
+              ) : searchResults.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-4">Aucun résultat</p>
+              ) : (
+                searchResults.map(item => (
+                  <DriveItemRow
+                    key={item.id}
+                    item={item}
+                    onNavigateInto={item => { setSearchOpen(false); navigateInto(item); }}
+                    onMouseEnterRow={showPreview}
+                    onMouseLeaveRow={scheduleHide}
+                  />
+                ))
+              )
+            ) : loading ? (
               <div className="flex justify-center py-6">
                 <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
               </div>
