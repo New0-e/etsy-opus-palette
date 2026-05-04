@@ -248,6 +248,44 @@ function SelectField({ label, value, options, onChange }: {
   );
 }
 
+function InlineTextInput({ value, onChange, placeholder = "—" }: {
+  value: string; onChange: (v: string) => void; placeholder?: string;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const commit = () => {
+    setEditing(false);
+    if (draft !== value) onChange(draft);
+  };
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        value={draft}
+        onChange={e => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); inputRef.current?.blur(); } if (e.key === "Escape") { setDraft(value); setEditing(false); } }}
+        className="w-full font-mono text-[10px] bg-secondary/60 border border-primary/40 rounded px-1 py-0.5 outline-none focus:border-primary"
+        style={{ minWidth: 60 }}
+        autoFocus
+      />
+    );
+  }
+
+  return (
+    <button
+      onClick={() => { setDraft(value); setEditing(true); }}
+      className="font-mono text-[10px] text-left w-full hover:text-primary transition-colors truncate"
+      title={value || placeholder}
+    >
+      {value || <span className="text-muted-foreground/40">{placeholder}</span>}
+    </button>
+  );
+}
+
 function TextField({ label, value, onChange, placeholder, type = "text" }: {
   label: string; value: string; onChange: (v: string) => void;
   placeholder?: string; type?: string;
@@ -815,6 +853,15 @@ export default function SuiviCommandesPage() {
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
+  const updateFieldInline = (id: string, key: keyof Commande, val: string) => {
+    const newList = commandes.map(c => c.id !== id ? c : { ...c, [key]: val });
+    setCommandes(newList);
+    saveCommandes(newList);
+    scheduleDriveSync(newList, linkedSheets, loadTaux());
+    const monthKey = getMonthKey(commandes.find(c => c.id === id)?.createdAt ?? new Date().toISOString());
+    syncLinkedSheet(monthKey, newList);
+  };
+
   const updateStatutInline = (id: string, key: "statutCommande" | "statutTracktagos", val: string) => {
     const newList = commandes.map(c => {
       if (c.id !== id) return c;
@@ -1279,9 +1326,13 @@ export default function SuiviCommandesPage() {
                     {/* N° ETSY */}
                     <td className="px-2 py-1.5 font-mono text-[10px] whitespace-nowrap">{c.noEtsy || "—"}</td>
                     {/* N° ALIEXPRESS */}
-                    <td className="px-2 py-1.5 font-mono text-[10px] whitespace-nowrap">{c.noAliexpress || "—"}</td>
+                    <td className="px-2 py-1.5 whitespace-nowrap" style={{ minWidth: 80 }}>
+                      <InlineTextInput value={c.noAliexpress} onChange={v => updateFieldInline(c.id, "noAliexpress", v)} />
+                    </td>
                     {/* N° TRACKTAGOS */}
-                    <td className="px-2 py-1.5 font-mono text-[10px] whitespace-nowrap">{c.noTracktagos || "—"}</td>
+                    <td className="px-2 py-1.5 whitespace-nowrap" style={{ minWidth: 80 }}>
+                      <InlineTextInput value={c.noTracktagos} onChange={v => updateFieldInline(c.id, "noTracktagos", v)} />
+                    </td>
                     {/* Boutique */}
                     <td className="px-2 py-1.5 whitespace-nowrap">{c.boutique || "—"}</td>
                     {/* Ref Produit */}
