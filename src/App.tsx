@@ -20,11 +20,23 @@ import FondProduitPage from "@/pages/FondProduitPage";
 import NotFound from "@/pages/NotFound";
 import { Component, type ReactNode } from "react";
 
-class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+class ErrorBoundary extends Component<{ children: ReactNode; page?: boolean }, { error: Error | null }> {
   state = { error: null };
   static getDerivedStateFromError(error: Error) { return { error }; }
   render() {
     if (this.state.error) {
+      if (this.props.page) {
+        return (
+          <div className="flex flex-col items-center justify-center h-full gap-4 py-24">
+            <p className="text-destructive font-medium text-sm">Cette page a planté</p>
+            <p className="text-xs text-muted-foreground font-mono max-w-xs text-center">{(this.state.error as Error).message}</p>
+            <button
+              onClick={() => this.setState({ error: null })}
+              className="text-xs text-primary underline"
+            >Réessayer</button>
+          </div>
+        );
+      }
       return (
         <div className="h-screen flex items-center justify-center bg-background">
           <div className="text-center space-y-4 px-8 max-w-sm">
@@ -42,6 +54,10 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | 
   }
 }
 
+function PageBoundary({ children }: { children: ReactNode }) {
+  return <ErrorBoundary page>{children}</ErrorBoundary>;
+}
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -53,19 +69,19 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route element={<DashboardLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/creation-fiche" element={<CreationFichePage />} />
-            <Route path="/download-images" element={<DownloadImagesPage />} />
-            <Route path="/generation-photos" element={<GenerationPhotosPage />} />
-            <Route path="/generation-modele" element={<GenerationModelePage />} />
-            <Route path="/analyse-image" element={<AnalyseImagePage />} />
-            <Route path="/analyse-tags" element={<AnalyseTagsPage />} />
-            <Route path="/tags-concurrent" element={<TagsConcurrentPage />} />
-            <Route path="/descriptif-image" element={<DescriptifImagePage />} />
-            <Route path="/generation-idee-sous-niche" element={<GenerationIdeeSousNichePage />} />
-            <Route path="/viewer" element={<ViewerPage />} />
-            <Route path="/suivi-commandes" element={<SuiviCommandesPage />} />
-            <Route path="/fond-produit" element={<FondProduitPage />} />
+            <Route path="/" element={<PageBoundary><HomePage /></PageBoundary>} />
+            <Route path="/creation-fiche" element={<PageBoundary><CreationFichePage /></PageBoundary>} />
+            <Route path="/download-images" element={<PageBoundary><DownloadImagesPage /></PageBoundary>} />
+            <Route path="/generation-photos" element={<PageBoundary><GenerationPhotosPage /></PageBoundary>} />
+            <Route path="/generation-modele" element={<PageBoundary><GenerationModelePage /></PageBoundary>} />
+            <Route path="/analyse-image" element={<PageBoundary><AnalyseImagePage /></PageBoundary>} />
+            <Route path="/analyse-tags" element={<PageBoundary><AnalyseTagsPage /></PageBoundary>} />
+            <Route path="/tags-concurrent" element={<PageBoundary><TagsConcurrentPage /></PageBoundary>} />
+            <Route path="/descriptif-image" element={<PageBoundary><DescriptifImagePage /></PageBoundary>} />
+            <Route path="/generation-idee-sous-niche" element={<PageBoundary><GenerationIdeeSousNichePage /></PageBoundary>} />
+            <Route path="/viewer" element={<PageBoundary><ViewerPage /></PageBoundary>} />
+            <Route path="/suivi-commandes" element={<PageBoundary><SuiviCommandesPage /></PageBoundary>} />
+            <Route path="/fond-produit" element={<PageBoundary><FondProduitPage /></PageBoundary>} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

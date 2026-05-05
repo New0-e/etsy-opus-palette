@@ -10,7 +10,7 @@ import {
   Plus, Pencil, Trash2, Upload, Loader2, FileText,
   Package, Clock, CheckCircle2, AlertTriangle, TrendingUp, RefreshCw, X, ExternalLink,
   BarChart2, ArrowUpRight, ArrowDownRight, ShoppingBag, Star, Target, Minus,
-  Link2, ArrowUpDown, Cloud, CloudOff,
+  Link2, ArrowUpDown, Cloud, CloudOff, Download,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -180,6 +180,30 @@ function isProcheDateLimite(c: Commande): boolean {
 function fmt(n: string) {
   const v = parseFloat(n);
   return isNaN(v) ? "" : `${v.toFixed(2)} €`;
+}
+
+function exportCSV(commandes: Commande[]) {
+  const headers = [
+    "Statut commande","Date limite","Statut Tracktagos","N° Etsy","N° Aliexpress","N° Tracktagos",
+    "Boutique","Ref produit","Variante","Quantité","Info client",
+    "Prix produit","Prix livraison","Frais Etsy","Prix payé client","Bénéfice estimé","Créé le",
+  ];
+  const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+  const rows = commandes.map(c => [
+    c.statutCommande, c.dateLimiteEnvoi, c.statutTracktagos,
+    c.noEtsy, c.noAliexpress, c.noTracktagos, c.boutique,
+    c.refProduit, c.variante, c.quantite, c.infoClient,
+    c.prixProduit, c.prixLivraison, c.fraisEtsy, c.prixPayeClient,
+    c.estimationBenefice, c.createdAt,
+  ].map(esc).join(","));
+  const csv = [headers.map(esc).join(","), ...rows].join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `commandes-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function formatCountdown(startedAt: string, now: number): { label: string; expired: boolean } {
@@ -668,6 +692,7 @@ export default function SuiviCommandesPage() {
   const [loadingProduits, setLoadingProduits] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadTargetId = useRef<string | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [syncStatus, setSyncStatus] = useState<"idle" | "syncing" | "ok" | "error">("idle");
   const driveSyncTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -786,6 +811,18 @@ export default function SuiviCommandesPage() {
       toast.info(`Commande ${c.noEtsy || c.id.slice(0, 6)} → Numéro de Suivi à changer`)
     );
   }, [now, commandes]);
+
+  // ── Keyboard shortcuts ─────────────────────────────────────────────────────
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+      if (modalOpen || genOpen || linkOpen || statsOpen || deleteId) return;
+      if (e.key === "n") { e.preventDefault(); openAdd(); }
+      if (e.key === "f") { e.preventDefault(); searchInputRef.current?.focus(); }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [modalOpen, genOpen, linkOpen, statsOpen, deleteId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Computed ───────────────────────────────────────────────────────────────
 
@@ -1087,6 +1124,16 @@ export default function SuiviCommandesPage() {
           <Button
             variant="outline"
             size="sm"
+            className="gap-1.5 text-xs"
+            onClick={() => exportCSV(displayed)}
+            title={`Exporter ${displayed.length} commande${displayed.length !== 1 ? "s" : ""} filtrées en CSV`}
+          >
+            <Download className="h-3.5 w-3.5" />
+            CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             className={`gap-1.5 text-xs ${Object.keys(linkedSheets).length > 0 ? "text-emerald-600 border-emerald-400 dark:text-emerald-400" : ""}`}
             onClick={() => setLinkOpen(true)}
             title="Gérer les feuilles Google Sheets liées par mois"
@@ -1175,10 +1222,11 @@ export default function SuiviCommandesPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
         <Input
-          placeholder="Rechercher N°ETSY, client, ref..."
+          ref={searchInputRef}
+          placeholder="Rechercher N°ETSY, client, ref... (f)"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="h-8 text-xs w-48"
+          className="h-8 text-xs w-52"
         />
         <Select value={filterStatut} onValueChange={setFilterStatut}>
           <SelectTrigger className="h-8 text-xs w-40"><SelectValue /></SelectTrigger>

@@ -7,8 +7,7 @@ import { Loader2, Lightbulb, Copy, Check, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { usePageState } from "@/lib/usePageState";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/749aeccd-3a6d-473d-b31a-756b5d7a702f";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/749aeccd-3a6d-473d-b31a-756b5d7a702f";
+import { webhookUrl } from "@/config/webhooks";
 
 const PAGE_KEY = "generation-idee-sous-niche";
 type PageState = { input: string; result: string; testMode: boolean; loading: boolean };
@@ -190,7 +189,7 @@ export default function GenerationIdeeSousNichePage() {
     try {
       const formData = new FormData();
       formData.append("niche", input);
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, { method: "POST", body: formData });
+      const res = await fetch(webhookUrl("ideeSousNiche", testMode), { method: "POST", body: formData });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const text = await res.text();
       patch({ result: extractText(text) });

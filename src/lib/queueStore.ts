@@ -1,5 +1,4 @@
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/eeea6c70-e494-4b2f-8fbf-0dee3337901b";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/eeea6c70-e494-4b2f-8fbf-0dee3337901b";
+import { WEBHOOKS } from "@/config/webhooks";
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -53,7 +52,7 @@ function _process() {
   _queue = _queue.map(i => i.id === pending.id ? { ...i, status: "processing" as QueueStatus } : i);
   _notify();
 
-  const webhook = pending.testMode ? WEBHOOK_TEST : WEBHOOK_PROD;
+  const webhook = WEBHOOKS.creationFiche[pending.testMode ? "test" : "prod"];
 
   fetch(webhook, {
     method: "POST",

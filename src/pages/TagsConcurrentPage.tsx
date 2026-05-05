@@ -7,8 +7,7 @@ import { Loader2, UserSearch, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
 import { usePageState } from "@/lib/usePageState";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/221b037d-2a18-4def-a350-0cdf5323197f";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/221b037d-2a18-4def-a350-0cdf5323197f";
+import { webhookUrl } from "@/config/webhooks";
 
 const PAGE_KEY = "tags-concurrent";
 type PageState = { lien: string; result: string; testMode: boolean; loading: boolean };
@@ -22,7 +21,7 @@ export default function TagsConcurrentPage() {
     if (!lien.trim()) return;
     patch({ loading: true });
     try {
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
+      const res = await fetch(webhookUrl("tagsConcurrent", testMode), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ etsy_url: lien }),

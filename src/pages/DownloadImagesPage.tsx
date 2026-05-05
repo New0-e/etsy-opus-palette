@@ -10,8 +10,7 @@ import { driveStore } from "@/lib/driveStore";
 
 const SHEET_ID = "1u3_-YtIYqCnO2YEPfLh1cCsjd2CcRiT1cKileCLA0Ig";
 const GID = "0";
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/upload-photos-brutes";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/upload-photos-brutes";
+import { webhookUrl } from "@/config/webhooks";
 
 function parseCSV(text: string): string[][] {
   const rows: string[][] = [];
@@ -210,7 +209,7 @@ export default function DownloadImagesPage() {
     if (!selectedImages.length) { toast.error("Sélectionnez au moins une image"); return; }
     setSending(true);
     try {
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
+      const res = await fetch(webhookUrl("downloadImages", testMode), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

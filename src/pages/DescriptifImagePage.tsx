@@ -7,8 +7,7 @@ import { toast } from "sonner";
 import { driveStore } from "@/lib/driveStore";
 import { usePageState } from "@/lib/usePageState";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/fa1722ae-5d4a-4b96-b50c-2ff5d22f9227";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/fa1722ae-5d4a-4b96-b50c-2ff5d22f9227";
+import { webhookUrl } from "@/config/webhooks";
 
 const PAGE_KEY = "descriptif-image";
 type PageState = { resultEn: string; resultFr: string; loading: boolean; translating: boolean };
@@ -59,7 +58,7 @@ export default function DescriptifImagePage() {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, { method: "POST", body: formData });
+      const res = await fetch(webhookUrl("descriptifImage", testMode), { method: "POST", body: formData });
       if (res.status === 404) { toast.error("Webhook introuvable — en mode test, lancez d'abord un test dans n8n"); return; }
       const text = await res.text();
       let extracted = text;

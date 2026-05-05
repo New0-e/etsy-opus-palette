@@ -7,8 +7,7 @@ import { Loader2, BarChart3, FlaskConical, Copy, Check, ArrowRight, ArrowLeft } 
 import { toast } from "sonner";
 import { usePageState } from "@/lib/usePageState";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/43af0a2f-2584-4327-8527-ac204967a1cc";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/43af0a2f-2584-4327-8527-ac204967a1cc";
+import { webhookUrl } from "@/config/webhooks";
 
 interface TagChange {
   old: string;
@@ -69,7 +68,7 @@ export default function AnalyseTagsPage() {
     if (!tags.trim()) return;
     patch({ loading: true });
     try {
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
+      const res = await fetch(webhookUrl("analyseTags", testMode), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tags }),

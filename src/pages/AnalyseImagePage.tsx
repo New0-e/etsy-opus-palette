@@ -8,8 +8,7 @@ import { toast } from "sonner";
 import { driveStore } from "@/lib/driveStore";
 import { usePageState } from "@/lib/usePageState";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/974dfca9-9cfb-4e18-bf37-58b1fd3cbd72";
+import { webhookUrl } from "@/config/webhooks";
 
 function TagSection({ title, tags, color, copied, onCopy }: {
   title: string;
@@ -85,7 +84,7 @@ export default function AnalyseImagePage() {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
+      const res = await fetch(webhookUrl("analyseImage", testMode), {
         method: "POST",
         body: formData,
       });

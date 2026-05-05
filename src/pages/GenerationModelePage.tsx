@@ -13,8 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Loader2, Sparkles, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, User, Plus, Star, Trash2, Settings } from "lucide-react";
 import { toast } from "sonner";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/0075596e-85d8-4549-bb28-80ba00a727b9";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/0075596e-85d8-4549-bb28-80ba00a727b9";
+import { webhookUrl } from "@/config/webhooks";
 
 const DEFAULT_COULEURS_CHEVEUX = ["Blond", "Brun", "Noir", "Châtain", "Roux", "Gris", "Blanc", "Platine", "Blond vénitien"];
 const DEFAULT_LONGUEUR_CHEVEUX = ["Très court", "Court", "Mi-long", "Long", "Très long", "Bouclé court", "Bouclé long"];
@@ -345,7 +344,7 @@ export default function GenerationModelePage() {
       if (couleurFond) formData.append("couleur_fond", tAll(couleurFond));
       if (instructions) formData.append("instructions", instructions);
 
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
+      const res = await fetch(webhookUrl("generationModele", testMode), {
         method: "POST",
         body: formData,
       });

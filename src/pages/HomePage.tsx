@@ -5,7 +5,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
-const N8N_BASE = "https://n8n.srv1196541.hstgr.cloud";
+import { N8N_BASE } from "@/config/webhooks";
 
 type Tool = {
   title: string;
@@ -212,17 +212,37 @@ export default function HomePage() {
 
   // ── Commandes alerts ────────────────────────────────────────────────────────
   useEffect(() => {
-    const refresh = () => {
-      setCommandesAlert(loadCommandesAChanger());
-      setCommandesButoire(loadCommandesDateButoire());
-      setCommandesBientot(loadCommandesBientot());
+    const notify = (title: string, body: string) => {
+      if (Notification.permission === "granted" && document.visibilityState !== "visible") {
+        new Notification(title, { body, icon: "/favicon.ico" });
+      }
     };
+
+    const refresh = () => {
+      const alerts = loadCommandesAChanger();
+      const butoire = loadCommandesDateButoire();
+      const prev = { alerts: commandesAlert.length, butoire: commandesButoire.length };
+      setCommandesAlert(alerts);
+      setCommandesButoire(butoire);
+      setCommandesBientot(loadCommandesBientot());
+      if (alerts.length > prev.alerts) {
+        notify("Numéros de suivi à changer", `${alerts.length} commande${alerts.length > 1 ? "s" : ""} à traiter`);
+      }
+      if (butoire.length > prev.butoire) {
+        notify("Commandes en retard", `${butoire.length} commande${butoire.length > 1 ? "s" : ""} à envoyer`);
+      }
+    };
+
+    if (Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+
     refresh();
     const interval = setInterval(refresh, 60_000);
     const onVisible = () => { if (document.visibilityState === "visible") refresh(); };
     document.addEventListener("visibilitychange", onVisible);
     return () => { clearInterval(interval); document.removeEventListener("visibilitychange", onVisible); };
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── n8n ping ────────────────────────────────────────────────────────────────
   const pingN8n = useCallback(async () => {

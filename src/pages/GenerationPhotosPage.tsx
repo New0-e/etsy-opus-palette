@@ -14,8 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, Plus, Star, Trash2, Settings, History, RotateCcw, Terminal, Copy, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
-const WEBHOOK_PROD = "https://n8n.srv1196541.hstgr.cloud/webhook/edc44347-0c53-473e-8047-956afd36b4f4";
-const WEBHOOK_TEST = "https://n8n.srv1196541.hstgr.cloud/webhook-test/edc44347-0c53-473e-8047-956afd36b4f4";
+import { webhookUrl } from "@/config/webhooks";
 
 async function compressImage(file: File, maxPx = 1500, quality = 0.82): Promise<File> {
   return new Promise((resolve) => {
@@ -447,7 +446,7 @@ export default function GenerationPhotosPage() {
         if (selectedAcc.length) formData.append("accessoires", selectedAcc.map(tAll).join(", "));
       }
 
-      const res = await fetch(testMode ? WEBHOOK_TEST : WEBHOOK_PROD, {
+      const res = await fetch(webhookUrl("generationPhotos", testMode), {
         method: "POST",
         body: formData,
       });
