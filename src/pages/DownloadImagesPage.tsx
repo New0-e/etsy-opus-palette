@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Download, Check, AlertCircle, LogIn, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
+import TestModeBanner from "@/components/TestModeBanner";
 import { driveStore } from "@/lib/driveStore";
 
 const SHEET_ID = "1u3_-YtIYqCnO2YEPfLh1cCsjd2CcRiT1cKileCLA0Ig";
@@ -264,6 +265,7 @@ export default function DownloadImagesPage() {
 
   return (
     <div className="max-w-4xl mx-auto">
+      <TestModeBanner active={testMode} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Téléchargement Images</h1>
         <div className="flex items-center gap-2">

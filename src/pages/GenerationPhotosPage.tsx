@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Sparkles, Upload, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, Plus, Star, Trash2, Settings, History, RotateCcw, Terminal, Copy, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
+import TestModeBanner from "@/components/TestModeBanner";
 
 import { webhookUrl } from "@/config/webhooks";
 
@@ -514,6 +515,7 @@ export default function GenerationPhotosPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <TestModeBanner active={testMode} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Gen Images</h1>
         <div className="flex items-center gap-3">

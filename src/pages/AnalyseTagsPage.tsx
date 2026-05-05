@@ -5,6 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, BarChart3, FlaskConical, Copy, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import TestModeBanner from "@/components/TestModeBanner";
 import { usePageState } from "@/lib/usePageState";
 
 import { webhookUrl } from "@/config/webhooks";
@@ -123,6 +124,7 @@ export default function AnalyseTagsPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <TestModeBanner active={testMode} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Analyse Tags</h1>
         <div className="flex items-center gap-2">

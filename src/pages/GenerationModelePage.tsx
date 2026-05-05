@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Loader2, Sparkles, X, Check, Download, FlaskConical, ChevronLeft, ChevronRight, ZoomIn, User, Plus, Star, Trash2, Settings } from "lucide-react";
 import { toast } from "sonner";
+import TestModeBanner from "@/components/TestModeBanner";
 
 import { webhookUrl } from "@/config/webhooks";
 
@@ -404,6 +405,7 @@ export default function GenerationModelePage() {
 
   return (
     <div className="max-w-3xl mx-auto">
+      <TestModeBanner active={testMode} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Modèle</h1>
         <div className="flex items-center gap-2">

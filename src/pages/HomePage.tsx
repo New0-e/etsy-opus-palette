@@ -27,6 +27,7 @@ const allTools: Tool[] = [
   { title: "Tags Concurrent", desc: "Espionner les tags des concurrents", icon: UserSearch, url: "/tags-concurrent", color: "text-pink-400", shortcut: "gc" },
   { title: "Descriptif Image", desc: "Générer un descriptif depuis une image", icon: FileImage, url: "/descriptif-image", color: "text-teal-400" },
   { title: "Idées sous Niche", desc: "Générer des idées de sous-niches", icon: Layers, url: "/generation-idee-sous-niche", color: "text-cyan-400" },
+  { title: "Suivi Commandes", desc: "Gérer et suivre vos commandes Etsy", icon: Package, url: "/suivi-commandes", color: "text-emerald-400", shortcut: "gs" },
 ];
 
 const sheets = [
@@ -273,6 +274,7 @@ export default function HomePage() {
       a: "/analyse-image",
       t: "/analyse-tags",
       c: "/tags-concurrent",
+      s: "/suivi-commandes",
     };
 
     let waitingForChord = false;
@@ -358,7 +360,7 @@ export default function HomePage() {
       {chordActive && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-popover border border-border rounded-full px-4 py-2 shadow-lg text-sm font-mono animate-in fade-in slide-in-from-bottom-2">
           <kbd className="bg-primary text-primary-foreground rounded px-1.5 py-0.5 text-xs font-bold">G</kbd>
-          <span className="text-muted-foreground">+ F·D·I·M·A·T·C</span>
+          <span className="text-muted-foreground">+ F·D·I·M·A·T·C·S</span>
         </div>
       )}
 

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Send, FlaskConical, Clock, CheckCheck, AlertCircle, X, RefreshCw, ListOrdered, Pencil, PauseCircle } from "lucide-react";
 import { toast } from "sonner";
+import TestModeBanner from "@/components/TestModeBanner";
 import { driveStore, type DriveFolder } from "@/lib/driveStore";
 import { queueStore, type QueueItem, type FicheFormData } from "@/lib/queueStore";
 import { ficheImportStore, type FicheImportData } from "@/lib/ficheImportStore";
@@ -187,6 +188,7 @@ export default function CreationFichePage() {
   return (
     <div className="max-w-2xl mx-auto">
       {/* Header */}
+      <TestModeBanner active={testMode} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Gen Fiches Produits</h1>
         <div className="flex items-center gap-2">

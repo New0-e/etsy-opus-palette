@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, UserSearch, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
+import TestModeBanner from "@/components/TestModeBanner";
 import { usePageState } from "@/lib/usePageState";
 
 import { webhookUrl } from "@/config/webhooks";
@@ -38,6 +39,7 @@ export default function TagsConcurrentPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <TestModeBanner active={testMode} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Tags Concurrent</h1>
         <div className="flex items-center gap-2">

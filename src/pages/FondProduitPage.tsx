@@ -4,6 +4,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Upload, Sparkles, FlaskConical, Download } from "lucide-react";
 import { toast } from "sonner";
+import TestModeBanner from "@/components/TestModeBanner";
 
 const PROXY_URL = "/api/n8n-proxy-background";
 
@@ -105,6 +106,7 @@ export default function FondProduitPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <TestModeBanner active={testMode} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Fond Produit</h1>
         <div className="flex items-center gap-2">

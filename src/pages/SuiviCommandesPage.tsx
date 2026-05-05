@@ -10,7 +10,7 @@ import {
   Plus, Pencil, Trash2, Upload, Loader2, FileText,
   Package, Clock, CheckCircle2, AlertTriangle, TrendingUp, RefreshCw, X, ExternalLink,
   BarChart2, ArrowUpRight, ArrowDownRight, ShoppingBag, Star, Target, Minus,
-  Link2, ArrowUpDown, Cloud, CloudOff, Download,
+  Link2, ArrowUpDown, Cloud, CloudOff, Download, Copy,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -277,11 +277,22 @@ function InlineTextInput({ value, onChange, placeholder = "—" }: {
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value);
+  const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const commit = () => {
     setEditing(false);
     if (draft !== value) onChange(draft);
+  };
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!value) return;
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
   };
 
   if (editing) {
@@ -300,13 +311,65 @@ function InlineTextInput({ value, onChange, placeholder = "—" }: {
   }
 
   return (
-    <button
-      onClick={() => { setDraft(value); setEditing(true); }}
-      className="font-mono text-[10px] text-left w-full hover:text-primary transition-colors truncate"
-      title={value || placeholder}
+    <div
+      className="flex items-center gap-1"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      {value || <span className="text-muted-foreground/40">{placeholder}</span>}
-    </button>
+      <button
+        onClick={() => { setDraft(value); setEditing(true); }}
+        className="font-mono text-[10px] text-left hover:text-primary transition-colors truncate flex-1"
+        title={value || placeholder}
+      >
+        {value || <span className="text-muted-foreground/40">{placeholder}</span>}
+      </button>
+      {hovered && value && (
+        <button
+          onClick={handleCopy}
+          className="shrink-0 p-0.5 rounded text-muted-foreground hover:text-primary transition-colors"
+          title="Copier"
+        >
+          {copied
+            ? <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500" />
+            : <Copy className="h-2.5 w-2.5" />}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function CopyCell({ value, placeholder = "—" }: { value: string; placeholder?: string }) {
+  const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!value) return;
+    navigator.clipboard.writeText(value).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  };
+
+  return (
+    <div
+      className="relative flex items-center gap-1 group"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span className="font-mono text-[10px] truncate">{value || <span className="text-muted-foreground/40">{placeholder}</span>}</span>
+      {hovered && value && (
+        <button
+          onClick={handleCopy}
+          className="shrink-0 p-0.5 rounded text-muted-foreground hover:text-primary transition-colors"
+          title="Copier"
+        >
+          {copied
+            ? <CheckCircle2 className="h-2.5 w-2.5 text-emerald-500" />
+            : <Copy className="h-2.5 w-2.5" />}
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -1372,7 +1435,7 @@ export default function SuiviCommandesPage() {
                       );
                     })()}
                     {/* N° ETSY */}
-                    <td className="px-2 py-1.5 font-mono text-[10px] whitespace-nowrap">{c.noEtsy || "—"}</td>
+                    <td className="px-2 py-1.5 whitespace-nowrap"><CopyCell value={c.noEtsy} /></td>
                     {/* N° ALIEXPRESS */}
                     <td className="px-2 py-1.5 whitespace-nowrap" style={{ minWidth: 80 }}>
                       <InlineTextInput value={c.noAliexpress} onChange={v => updateFieldInline(c.id, "noAliexpress", v)} />

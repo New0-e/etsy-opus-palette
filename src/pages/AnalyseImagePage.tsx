@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, Upload, Tags, FlaskConical, Copy, Check } from "lucide-react";
 import { toast } from "sonner";
+import TestModeBanner from "@/components/TestModeBanner";
 import { driveStore } from "@/lib/driveStore";
 import { usePageState } from "@/lib/usePageState";
 
@@ -105,6 +106,7 @@ export default function AnalyseImagePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <TestModeBanner active={testMode} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Analyse Image</h1>
         <div className="flex items-center gap-2">

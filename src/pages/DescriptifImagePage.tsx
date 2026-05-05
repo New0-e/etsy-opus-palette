@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Upload, ImageIcon, Copy, Check, FlaskConical } from "lucide-react";
 import { toast } from "sonner";
+import TestModeBanner from "@/components/TestModeBanner";
 import { driveStore } from "@/lib/driveStore";
 import { usePageState } from "@/lib/usePageState";
 
@@ -96,6 +97,7 @@ export default function DescriptifImagePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
+      <TestModeBanner active={testMode} />
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-2xl font-bold">Descriptif Image</h1>
         <div className="flex items-center gap-2">
